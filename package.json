@@ -1,7 +1,7 @@
 {
-	"name": "obsidian-sample-plugin",
+	"name": "wechat-np-previewer",
 	"version": "1.0.0",
-	"description": "This is a sample plugin for Obsidian (https://obsidian.md)",
+	"description": "This is a plugin for Obsidian (https://obsidian.md), which can render note as a WeChat MP article, and send for draft or publish.",
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
@@ -12,13 +12,33 @@
 	"author": "",
 	"license": "MIT",
 	"devDependencies": {
-		"@types/node": "^16.11.6",
-		"@typescript-eslint/eslint-plugin": "5.29.0",
-		"@typescript-eslint/parser": "5.29.0",
+		"@types/node": "16",
+		"@typescript-eslint/eslint-plugin": "^8.15.0",
+		"@typescript-eslint/parser": "^8.15.0",
 		"builtin-modules": "3.3.0",
 		"esbuild": "0.17.3",
+		"eslint": "^9.15.0",
+		"mathjax-full": "^3.2.2",
 		"obsidian": "latest",
 		"tslib": "2.4.0",
-		"typescript": "4.7.4"
+		"typescript": "^5.7.2"
+	},
+	"dependencies": {
+		"@codemirror/state": "^6.4.1",
+		"@codemirror/view": "^6.35.0",
+		"@fortawesome/fontawesome-svg-core": "^6.7.1",
+		"@fortawesome/free-brands-svg-icons": "^6.7.1",
+		"@fortawesome/free-regular-svg-icons": "^6.7.1",
+		"@fortawesome/free-solid-svg-icons": "^6.7.1",
+		"@popperjs/core": "^2.11.8",
+		"@primer/octicons": "^19.12.0",
+		"@types/pouchdb": "^6.4.2",
+		"gray-matter": "^4.0.3",
+		"highlight.js": "^11.10.0",
+		"isomorphic-dompurify": "^2.16.0",
+		"marked": "^15.0.0",
+		"marked-highlight": "^2.2.1",
+		"pouchdb": "^9.0.0",
+		"pouchdb-find": "^9.0.0"
 	}
 }

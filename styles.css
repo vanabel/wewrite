@@ -6,3 +6,211 @@ available in the app when your plugin is enabled.
 If your plugin does not need CSS, delete this file.
 
 */
+
+.wechat-mp-web-image {
+  display: flex;
+  justify-content: center;
+  /* 水平居中 */
+  align-items: center;
+  /* 垂直居中 */
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  /* border-radius: 3px;
+    border: solid 2px #ddd; */
+}
+
+.wechat-mp-web-image img {
+  width: 100%;
+  height: auto;
+}
+
+/* 凸起阴影效果的 CSS 类 */
+.elevated-shadow {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  /* 可选：添加圆角效果 */
+  background-color: white;
+  /* 可选：设置背景颜色 */
+  transition: box-shadow 0.3s ease;
+  /* 可选：添加过渡效果 */
+}
+
+/* 鼠标悬停时增加阴影效果 */
+.elevated-shadow:hover {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+
+.collapsible-container {
+  border: 1px solid #ccc;
+  margin-bottom: 10px;
+}
+
+/********************************* 
+left side view 
+*********************************/
+.collapsible-container {
+  border: 1px solid #ccc;
+  margin-bottom: 5px;
+  vertical-align: middle;
+}
+
+.collapsible-header {
+  background-color: #f1f1f1;
+  padding: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  margin-right: 5px;
+  /* position: relative; */
+}
+
+.toggle-icon {
+  float: right;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  transition: transform 1.8s ease;
+}
+
+.refresh-material-button {
+  float: left;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  margin-left: 5px;
+  margin-right: 10px;
+  color: darkorange;
+}
+
+.collapsible-total {
+  margin-left: 5px;
+  margin-right: 5px;
+  color: green;
+}
+
+.collapsible-content {
+  padding: 5px;
+  /* max-height: 600; */
+  display: none;
+  /* 默认隐藏内容 */
+  transition: transform 1.8s ease;
+}
+
+.collapsible-content.expanded {
+  max-height: 500px;
+  /* 设置一个足够大的值，确保内容完全展开 */
+}
+
+.wechat-mp-account-info-div {
+  padding: 5px;
+  border: 2px solid #ccc;
+  background-color: #fff;
+  border-radius: 5px;
+}
+
+.wechat-mp-account-info-div .wechat-mp-account-info-title {
+  position: absolute;
+  top: -15px;
+  /* 调整标题距离顶部的距离 */
+  left: 20px;
+  /* 调整标题距离左边的距离 */
+  background-color: #fff;
+  /* 背景色与容器背景色相同，以覆盖边框 */
+  padding: 0 10px;
+  /* 内边距 */
+  font-weight: bold;
+  color: #333;
+
+}
+
+.wechat-mp-account-info-div .wechat-mp-account-info-content {
+  padding: 10px;
+}
+
+details {
+  margin: 5px;
+  /* border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 10px; */
+}
+
+summary {
+  font-weight: bold;
+  cursor: pointer;
+  outline: none;
+  padding: 10px 0;
+}
+
+summary::-webkit-details-marker {
+  display: none;
+}
+
+summary::before {
+  content: "";
+  font-weight: normal;
+}
+
+details[open] summary::before {
+  content: "";
+}
+
+.wechat-mp-article-preview-cover {
+  border: 1px dashed #ccc;
+  border-radius: 4px;
+  width: 100%;
+  padding-top: 42.55%;
+  overflow: hidden;
+  position: relative;
+  /* 确保子元素可以相对于此容器定位 */
+}
+
+.wechat-mp-article-preview-cover>* {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.wechat-mp-article-preview-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* 使图片完全覆盖容器，保持宽高比 */
+  aspect-ratio: 1 / 2.35;
+  /* 设置图片的宽高比 */
+}
+
+.image-on-dragover {
+  border: 2px dashed red;
+}
+
+.wechat-mp-article-preview-digest {
+  width: 100%;
+  /* 全宽 */
+  height: auto;
+  /* 自动高度 */
+  min-height: 48px;
+  /* 最小高度，3 行的高度 */
+  max-height: 72px;
+  /* 最大高度，3 行的高度 */
+  resize: none;
+  /* 禁止用户调整大小 */
+  box-sizing: border-box;
+  /* 包含边框和内边距 */
+}
+
+.article-preview-content{
+  padding: 5px;
+  border: 1px solid #ccc;
+  background-color: white;
+  flex-grow: 1; /* 占据剩余的空间 */
+  overflow-y: auto; /* 超出时显示滚动条 */
+}
+
+.previewer-container {
+  display: flex;
+  flex-direction: column;
+  height: 88vh; /* 100% 视口高度 */
+}
