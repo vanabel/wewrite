@@ -39,12 +39,13 @@ export class PreviewPanel extends ItemView implements PreviewRender {
     private plugin: WeWritePlugin
     private themeDropdown: DropdownComponent;
     private tm: ThemeManager
-    
+
     private draftHeader: MPArticleHeader
     editorView: EditorView | null = null;
     lastLeaf: WorkspaceLeaf | undefined;
     renderDiv: any;
     styleEl: any;
+    elementMap: Map<string, Node>;
     getViewType(): string {
         return VIEW_TYPE_NP_PREVIEW;
     }
@@ -57,8 +58,9 @@ export class PreviewPanel extends ItemView implements PreviewRender {
     constructor(leaf: WorkspaceLeaf, plugin: WeWritePlugin) {
         super(leaf);
         this.plugin = plugin
-        this.wechatClient = WechatClient.getInstance( this.plugin)
+        this.wechatClient = WechatClient.getInstance(this.plugin)
         this.tm = ThemeManager.getInstance(this.plugin)
+
     }
 
 
@@ -192,18 +194,18 @@ export class PreviewPanel extends ItemView implements PreviewRender {
                             console.log(`view1==view2?`, view1 === view2);
                             console.log(`view1=>`, view1);
                             console.log(`view2=>`, view2);
-                            
-                            
+
+
 
                         })
                 }
             )
 
-        this.renderDiv = mainDiv.createDiv({cls: 'render-div'});
+        this.renderDiv = mainDiv.createDiv({ cls: 'render-div' });
         this.renderDiv.id = 'render-div';
         this.renderDiv.setAttribute('style', '-webkit-user-select: text; user-select: text;');
         let shadowDom = this.renderDiv //.shawdowRoot;
-        if (shadowDom === undefined || shadowDom === null){
+        if (shadowDom === undefined || shadowDom === null) {
 
             shadowDom = this.renderDiv.attachShadow({ mode: 'open' });
         }
@@ -296,23 +298,37 @@ export class PreviewPanel extends ItemView implements PreviewRender {
 
     async parseActiveMarkdown() {
         this.articleDiv.empty();
+        this.elementMap = new Map<string, HTMLElement>()
         const activeFile = this.app.workspace.getActiveFile();
         const md = await this.app.vault.adapter.read(activeFile!.path)
         
         this.setStyle(await this.getCSS())
         let html = await WechatRender.getInstance(this.plugin, this).parse(md)
-        
+
 
         html = `<section class="wewrite-mp" id="article-section">${html}</section>`;
-        
+
         const doc = sanitizeHTMLToDom(html);
         if (doc.firstChild) {
             this.articleDiv.appendChild(doc.firstChild);
         }
 
 
-        console.log('-----------------------------------\n',this.articleDiv.innerHTML);
+        console.log(`this.elementMap=>`, this.elementMap);
         
+        this.elementMap.forEach((node: HTMLElement,id:string) => {
+            const item = this.articleDiv.querySelector('#' + id) as HTMLElement;
+            console.log(`id=${id}, item=>`, item);
+            console.log(`node`);
+            
+            if (!item) return;
+            // const newNode = node.cloneNode(true)
+            // item.replaceWith(node)
+            item.appendChild(node)
+
+        })
+        // console.log('-----------------------------------\n', this.articleDiv.innerHTML);
+
         return this.articleDiv.innerHTML
     }
     getMarkdownViewDOM() {
@@ -336,7 +352,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
     getItemViewDOM() {
         // 获取当前活动的 MarkdownView
         const activeView = this.app.workspace.getActiveViewOfType(ItemView);
-            console.log(activeView)
+        console.log(activeView)
         if (activeView) {
             // 获取 MarkdownView 的内容 DOM 元素
             const contentEl = activeView.contentEl;
@@ -355,7 +371,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
         console.log(`activeFile=>`, activeFile?.path);
 
         await this.parseActiveMarkdown();
-        
+
         const view = this.app.workspace.getActiveViewOfType(MarkdownView);
 
         // @ts-expect-error, not typed
@@ -386,7 +402,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
 
         // const el = this.app.workspace.on('active-leaf-change', () => this.update())
         const el = this.app.workspace.on('active-leaf-change', async () => {
-            if (await this.draftHeader.updateLocalDraft()){
+            if (await this.draftHeader.updateLocalDraft()) {
                 this.update()
             }
         })
@@ -452,7 +468,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
     }
 
     onEditorChange(editor: Editor, info: MarkdownView) {
-       
+
         // console.log(`onEditorChange:`, editor);
         // const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
         // const view       = this.app.workspace.getActiveViewOfType(MarkdownView);
@@ -463,10 +479,10 @@ export class PreviewPanel extends ItemView implements PreviewRender {
         // // @ts-expect-error, not typed
         // const v = activeView?.editor.cm as EditorView
         // console.log(`v:${v}`);
-       
+
     }
-    updateElementByID(id:string, html:string):void {
-        const item = this.articleDiv.querySelector('#'+id) as HTMLElement;
+    updateElementByID(id: string, html: string): void {
+        const item = this.articleDiv.querySelector('#' + id) as HTMLElement;
         if (!item) return;
         const doc = sanitizeHTMLToDom(html);
         item.empty();
@@ -477,9 +493,15 @@ export class PreviewPanel extends ItemView implements PreviewRender {
         }
         else {
             item.innerText = '渲染失败';
-        } 
+        }
     }
-    
+    addElementByID(id: string, node: HTMLElement): void {
+        
+        console.log(`id=${id}, before add this.elementMap=>`, this.elementMap)
+        this.elementMap.set(id, node.cloneNode(true));
+        console.log(`after add this.elementMap=>`, this.elementMap)
+    }
+
 
 
 }

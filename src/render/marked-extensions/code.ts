@@ -197,7 +197,8 @@ export class CodeRenderer extends WeWriteMarkedExtension {
 		if (editDiv){
 			root.removeChild(editDiv);
 		}
-		return `<section id="${containerId}" class="admonition-parent admonition-${type}-parent">${root.outerHTML}</section>`;
+		this.previewRender.addElementByID(containerId, root)
+		return `<section id="${containerId}" class="admonition-parent admonition-${type}-parent wewrite "></section>`;
 	}
 
 	renderMermaid(token:Tokens.Generic) {
@@ -208,7 +209,9 @@ export class CodeRenderer extends WeWriteMarkedExtension {
 		const containerId = `meraid-img-${this.mermaidIndex}`;
 		this.admonitionIndex++
 		// return `<section id="${containerId}" class="admonition-parent admonition-${type}-parent">${root.outerHTML}</section>`;
-		return `<section id="${containerId}" class="${MermaidSectionClassName}">${root.outerHTML}</section>`;
+		console.log(`meraid root:`, root);
+		this.previewRender.addElementByID(containerId, root)
+		return `<section id="${containerId}" class="wewrite mermaid" ></section>`;
 	}
 	markedExtension() {
 		return {

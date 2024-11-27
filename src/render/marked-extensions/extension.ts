@@ -22,6 +22,8 @@ import { Marked, MarkedExtension } from "marked"
 
 export interface PreviewRender {
     updateElementByID(id:string, html:string):void;
+    addElementByID(id:string, node:HTMLElement):void;
+
 }
 
 export abstract class WeWriteMarkedExtension {
