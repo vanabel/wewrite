@@ -43,6 +43,9 @@ interface ImageInfo {
 }
 
 function getEmbedType(link: string) {
+    //![[成方金信-爱赢管理沙盘a.pdf#page=2&rect=19,63,994,743|成方金信-爱赢管理沙盘a, p.2]]
+    const reg_pdf_crop = /^pdf#page=(\d+)(&rect=.*?)$/
+
     const sep = link.lastIndexOf('|')
     if (sep > 0){
         link = link.substring(0, sep)
@@ -52,6 +55,9 @@ function getEmbedType(link: string) {
         return 'note'
     }
     const ext = link.substring(index + 1);
+    if (reg_pdf_crop.test(ext)) {
+        return 'pdf-crop'
+    }
     switch (ext.toLocaleLowerCase()) {
         case 'md':
             return 'note'
@@ -152,12 +158,16 @@ export class LocalImageManager {
 export class Embed extends WeWriteMarkedExtension {
     index: number = 0;
     public static fileCache: Map<string, string> = new Map<string, string>();
+    pdfCropIndex: number = 0;
 
     generateId() {
         this.index += 1;
         return `fid-${this.index}`;
     }
 
+    async prepare() {
+		this.pdfCropIndex = 0;
+	}
     searchFile(originPath: string): TAbstractFile | null {
         const resolvedPath = this.resolvePath(originPath);
         const vault= this.plugin.app.vault;
@@ -609,6 +619,8 @@ export class Embed extends WeWriteMarkedExtension {
                             }
                             return `<span class="${info.classname}"><span class="note-embed-excalidraw" id="${id}" ${info.style}>${svg}</span></span>`
                         }
+                    }else if (embedType == 'pdf-crop') {
+                        return this.renderPdfCrop(token.href);
                     }
 
 
@@ -634,5 +646,17 @@ export class Embed extends WeWriteMarkedExtension {
                 }
             }]
         };
+    }
+    renderPdfCrop(href: string): string | false | undefined {
+        const root = this.plugin.resourceManager.getMarkdownRenderedElement(this.pdfCropIndex, '.pdf-cropped-embed')
+		if (!root){
+			return '<span>Pdf-crop渲染失败</span>';
+		}
+		const containerId = `pdf-crop-img-${this.pdfCropIndex}`;
+		this.pdfCropIndex++
+		// return `<section id="${containerId}" class="admonition-parent admonition-${type}-parent">${root.outerHTML}</section>`;
+		console.log(`pdf-crop root:`, root);
+		this.previewRender.addElementByID(containerId, root)
+		return `<section id="${containerId}" class="wewrite pdf-crop" ></section>`;
     }
 }

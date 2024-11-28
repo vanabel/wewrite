@@ -26,6 +26,7 @@ import { Tokens } from "marked";
 import { WeWriteMarkedExtension } from "./extension";
 import { MathRenderer } from "./math";
 // import { wxUploadImage } from "../weixin-api";
+import { Canvg } from 'canvg'
 
 export class CardDataManager {
 	private cardData: Map<string, string>;
@@ -71,10 +72,12 @@ export class CodeRenderer extends WeWriteMarkedExtension {
 	showLineNumber: boolean;
 	mermaidIndex: number = 0;
 	admonitionIndex: number = 0;
+	chartsIndex: number = 0;
 
 	async prepare() {
 		this.mermaidIndex = 0;
 		this.admonitionIndex = 0;
+		this.chartsIndex = 0;
 	}
 
 	static srcToBlob(src: string) {
@@ -186,33 +189,75 @@ export class CodeRenderer extends WeWriteMarkedExtension {
 		CardDataManager.getInstance().setCardData(id, token.text);
 		return `<section data-id="${id}" class="note-mpcard-wrapper"><div class="note-mpcard-content"><img class="note-mpcard-headimg" width="54" height="54" src="${headimg}"></img><div class="note-mpcard-info"><div class="note-mpcard-nickname">${nickname}</div><div class="note-mpcard-signature">${signature}</div></div></div><div class="note-mpcard-foot">公众号</div></section>`;
 	}
-	renderAdmonition(type:string) {
+	renderAdmonition(type: string) {
 		const root = this.plugin.resourceManager.getMarkdownRenderedElement(this.admonitionIndex, '.admonition-parent')
-		if (!root){
+		if (!root) {
 			return '<span>admonition渲染失败</span>';
 		}
 		const containerId = `admonition-${this.admonitionIndex}`;
 		this.admonitionIndex++
 		const editDiv = root.querySelector('.edit-block-button');
-		if (editDiv){
+		if (editDiv) {
 			root.removeChild(editDiv);
 		}
 		this.previewRender.addElementByID(containerId, root)
 		return `<section id="${containerId}" class="admonition-parent admonition-${type}-parent wewrite "></section>`;
 	}
 
-	renderMermaid(token:Tokens.Generic) {
+	renderMermaid(token: Tokens.Generic) {
 		const root = this.plugin.resourceManager.getMarkdownRenderedElement(this.mermaidIndex, '.mermaid')
-		if (!root){
+		if (!root) {
 			return '<span>mermaid渲染失败</span>';
 		}
 		const containerId = `meraid-img-${this.mermaidIndex}`;
-		this.admonitionIndex++
+		this.mermaidIndex++
 		// return `<section id="${containerId}" class="admonition-parent admonition-${type}-parent">${root.outerHTML}</section>`;
 		console.log(`meraid root:`, root);
 		this.previewRender.addElementByID(containerId, root)
 		return `<section id="${containerId}" class="wewrite mermaid" ></section>`;
 	}
+	renderCharts(token: Tokens.Generic) {
+		const root = this.plugin.resourceManager.getMarkdownRenderedElement(this.chartsIndex, '.block-language-chart')
+		if (!root) {
+			return '<span>charts渲染失败</span>';
+		}
+		const containerId = `charts-img-${this.chartsIndex}`;
+		this.chartsIndex++;
+		const canvas = root.querySelector('canvas')
+		if (canvas) {
+			// this.chartsIndex++
+			// // return `<section id="${containerId}" class="admonition-parent admonition-${type}-parent">${root.outerHTML}</section>`;
+			// console.log(`chart root:`, root);
+			// const svg =  this.canvasToSVG(containerId ,canvas)
+			const MIME_TYPE = "image/png";
+
+			const imgURL = canvas.toDataURL(MIME_TYPE);
+
+			return `<section id="${containerId}" class="wewrite charts" ><img src="${imgURL}" ></section>`;
+		}
+	}
+	// async canvasToSVG(containerId:string, canvas: HTMLCanvasElement) {
+	// 	const svg = new Canvg(canvas.getContext('2d')!, canvas.ownerDocument)
+	// 	// 将 canvas 转换为 SVG
+	// 	// const v = await Canvg.fromString(null, canvas.toDataURL());
+
+	// 	// 创建一个 SVG 元素
+	// 	const container = document.createElement('div');
+
+	// 	// const svgElement = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+	// 	// svgElement.setAttribute('width', canvas.width.toString());
+	// 	// svgElement.setAttribute('height', canvas.height.toString());
+
+	// 	// // 渲染 SVG
+	// 	// v.start(svgElement);
+
+	// 	container.appendChild(svg.);
+	// 	this.previewRender.addElementByID(containerId, container)
+	// 	// 获取 SVG 字符串
+	// 	const serializer = new XMLSerializer();
+	// 	const svgString = serializer.serializeToString(svgElement);
+	// 	return svgString;
+	// }
 	markedExtension() {
 		return {
 			extensions: [{
@@ -225,6 +270,9 @@ export class CodeRenderer extends WeWriteMarkedExtension {
 					}
 					if (token.lang && token.lang.trim().toLocaleLowerCase() == 'mermaid') {
 						return this.renderMermaid(token);
+					}
+					if (token.lang && token.lang.trim().toLocaleLowerCase() == 'chart') {
+						return this.renderCharts(token);
 					}
 					if (token.lang && token.lang.trim().toLocaleLowerCase() == 'mpcard') {
 						return this.renderCard(token);
