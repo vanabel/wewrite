@@ -130,6 +130,15 @@ export class PreviewPanel extends ItemView implements PreviewRender {
                     })
                 }
             )
+            .addExtraButton(
+                (button) => {
+                    button.setIcon('panel-left')
+                        .setTooltip('show materials and drafts')
+                    button.onClick(async () => {
+                        this.plugin.showLeftView()
+                    })
+                }
+            )
 
         this.draftHeader = new MPArticleHeader(this.plugin, mainDiv)
 

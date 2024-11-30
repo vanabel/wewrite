@@ -20,12 +20,21 @@ import {
 
 import type { IconName } from "@fortawesome/fontawesome-svg-core";
 import { AdmonitionIconDefinition, DownloadableIconPack, DownloadableIcons, IconType } from "src/render/admonition";
-import { getIconIds, Notice, setIcon } from "obsidian";
+import { getIcon, getIconIds, Notice, setIcon } from "obsidian";
 import WeWritePlugin from "src/main";
 
 library.add(fas, far, fab, faCopy, faCamera);
 
 export class IconManager {
+    getIconSVG(name: string) {
+        
+        const icon = getIcon(name);
+        console.log(`getIconSVG:`, name, icon);
+        if (icon){
+            return icon
+        }
+        return ''
+    }
     DOWNLOADED: {
         [key in DownloadableIconPack]?: Record<string, string>;
     } = {};
@@ -45,6 +54,7 @@ export class IconManager {
     constructor(public plugin: WeWritePlugin) {}
     async load() {
         for (const icon of this.plugin.settings.icons) {
+            console.log('load icon pack:', icon)
             const exists = await this.plugin.app.vault.adapter.exists(
                 this.localIconPath(icon)
             );
@@ -92,6 +102,8 @@ export class IconManager {
         return `${this.plugin.manifest.dir}/${pack}.json`;
     }
     async downloadIcon(pack: DownloadableIconPack) {
+        console.log(`to download icon pack:`, pack)
+        
         try {
             const icons: Record<string, string> = await (
                 await fetch(this.iconPath(pack))

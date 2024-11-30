@@ -75,7 +75,7 @@ export class SVGIcon extends WeWriteMarkedExtension {
     async render(text: string) {
         const items = text.split('|');
         const name = items[0];
-        const svg = ''//await this.assetsManager.loadIcon(name);
+        const svg = this.plugin.iconManager.getIconSVG(name) ;''//await this.assetsManager.loadIcon(name);
         const body = svg==='' ? '未找到图标' + name : svg;
         const style = this.renderStyle(items);
         return `<span class="note-svg-icon" ${style}>${body}</span>`
@@ -97,9 +97,15 @@ export class SVGIcon extends WeWriteMarkedExtension {
                     let index;
                     let indexSrc = src;
 
-                    while (indexSrc) {
+                    if (indexSrc) {
                         index = indexSrc.indexOf('[:');
-                        if (index === -1) return;
+                        if (index === -1) {
+                            index = indexSrc.indexOf(':');
+                            if (index === -1) {
+                                return
+                            }
+                            return index;
+                        }
                         return index;
                     }
                 },
@@ -111,6 +117,15 @@ export class SVGIcon extends WeWriteMarkedExtension {
                             raw: match[0],
                             text: match[1],
                         };
+                    }else{
+                        const m = src.match(/^(.*?):(.*?):(.*)/);
+                        if (m) {
+                            return {
+                                type: 'SVGIcon',
+                                raw: m[0],
+                                text: m[1]
+                            };
+                        }
                     }
                 },
                 renderer(token: Tokens.Generic) {
