@@ -5,6 +5,7 @@ import { App, Notice, requestUrl, RequestUrlParam } from "obsidian";
 import WeWritePlugin from "src/main";
 import { getErrorMessage } from "./error-code";
 import { DraftArticle } from "./wechat-types";
+import { LocalDraftItem } from "src/assets/DraftManager";
 
 export class WechatClient {
   private static instance: WechatClient;
@@ -54,7 +55,7 @@ export class WechatClient {
   public async getBatchMaterial(accountName: string | undefined, type: string, offset: number = 0, count: number = 10) {
 
     const accessToken = await this.plugin.refreshAccessToken(accountName);
-    console.log(`wxBatchGetMaterial: accessToken=>${accessToken}`);
+    console.log(`getBatchMaterial: accessToken=>${accessToken}`);
     if (!accessToken) {
       return false;
     }
@@ -73,6 +74,46 @@ export class WechatClient {
     });
 
     return await res.json;
+  }
+  public async sendArticleToDraftBox(localDraft: LocalDraftItem, data: string){
+    const accessToken = await this.plugin.refreshAccessToken(this.plugin.settings.selectedAccount);
+    console.log(`sendArticleToDraftBox: accessToken=>${accessToken}`);
+    if (!accessToken) {
+      return false;
+    }
+    const url = 'https://api.weixin.qq.com/cgi-bin/draft/add?access_token=' + accessToken;
+    const body = {
+      articles: [{
+        title: localDraft.title,
+        content: data,
+        digest: localDraft.digest,
+        thumb_media_id: localDraft.thumb_media_id,
+        // ...localDraft.pic_crop_235_1 && { pic_crop_235_1: localDraft.pic_crop_235_1 },
+        // ...localDraft.pic_crop_1_1 && { pic_crop_1_1: localDraft.pic_crop_1_1 },
+        ...localDraft.content_source_url && { content_source_url: localDraft.content_source_url },
+        ...localDraft.need_open_comment !== undefined && { need_open_comment: localDraft.need_open_comment },
+        ...localDraft.only_fans_can_comment !== undefined && { only_fans_can_comment: localDraft.only_fans_can_comment },
+        ...localDraft.author && { author: localDraft.author },
+      }]
+    };
+
+    const res = await requestUrl({
+      method: 'POST',
+      url: url,
+      throw: false,
+      body: JSON.stringify(body)
+    });
+
+    console.log(`send draft:`, res.json);
+    const {errcode, media_id} = res.json;
+    if (errcode !== undefined && errcode !== 0) {
+      new Notice(getErrorMessage(errcode), 0)
+      return false;
+    }else{
+      new Notice(`草稿发送成功${media_id}`);
+    }
+    
+    return media_id;
   }
   public async wxAddDraft(token: string, data: DraftArticle) {
     const url = 'https://api.weixin.qq.com/cgi-bin/draft/add?access_token=' + token;

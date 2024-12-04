@@ -1,5 +1,8 @@
 import { MarkdownView } from 'obsidian';
 import WeWritePlugin from 'src/main';
+import { scrollToBottomOfElement } from 'src/utils/scroll';
+
+
 
 export class ResourceManager {
     private static instance: ResourceManager;
@@ -31,10 +34,40 @@ export class ResourceManager {
         }
         return null
     }
+    public forceRenderActiveMarkdownView() {
+        const view = this.getCurrentMarkdownView();
+        if (view) {
+            console.log(`trigger render for ${view.file?.path}`);
+            this.plugin.app.workspace.trigger('render', view)
+        }
+    }
+    public scrollActiveMarkdownView() {
+        const view = this.getCurrentMarkdownView();
+        if (view) {
+            console.log(`scroll ${view.file?.path}`);
+            const scroller = view.containerEl.querySelector('.cm-scroller');
+            if (!scroller) {
+                console.log('scroller element not found.');
+                return;
+            }
+
+            scrollToBottomOfElement(scroller as HTMLElement, 5000)
+        }
+    }
     public queryElements(query: string) {
         const view = this.getCurrentMarkdownView();
+        console.log(`queryElements=>view`, view);
         if (!view) return [];
-        return view.containerEl.querySelectorAll<HTMLElement>(query);
+        const preview = view.containerEl.querySelector('.markdown-reading-view')//('.markdown-preview-view')
+        console.log(`queryElements=>preview`, preview);
+        console.log(`queryElements=>preview.outer`, preview?.outerHTML);
+
+        if (!preview) {
+            console.log(`no preview found`);
+            return []
+
+        }
+        return preview.querySelectorAll<HTMLElement>(query);
     }
     public getMarkdownViewContainer() {
         const view = this.getCurrentMarkdownView();
@@ -43,15 +76,28 @@ export class ResourceManager {
         if (!view) return null;
         return view.containerEl;
     }
-    public getMarkdownRenderedElement(index: number, query: string){
-        const containers = this.plugin.resourceManager.queryElements(query);
+    public getMarkdownRenderedElement(index: number, query: string) {
+        const containers = this.queryElements(query);
+        console.log(`containers`, containers, 'query=>', query);
         if (containers.length <= index) {
-			return null;
-		}
-		const root = containers[index];
-		if (!root){
-			return null;
-		}
+            return null;
+        }
+        const root = containers[index];
+        if (!root) {
+            return null;
+        }
         return root;
+    }
+    public getFileOfLink(link: string) {
+        const file = this.plugin.app.metadataCache.getFirstLinkpathDest(link, '');
+        return file;
+    }
+    public async getLinkFileContent(link: string) {
+        const tf = this.getFileOfLink(link);
+        if (tf) {
+            const content = await this.plugin.app.vault.adapter.read(tf.path);
+            return content
+        }
+        return null
     }
 }

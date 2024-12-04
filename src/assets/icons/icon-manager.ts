@@ -20,7 +20,7 @@ import {
 
 import type { IconName } from "@fortawesome/fontawesome-svg-core";
 import { AdmonitionIconDefinition, DownloadableIconPack, DownloadableIcons, IconType } from "src/render/admonition";
-import { getIcon, getIconIds, Notice, setIcon } from "obsidian";
+import { getIcon, getIconIds, Notice, requestUrl, setIcon } from "obsidian";
 import WeWritePlugin from "src/main";
 
 library.add(fas, far, fab, faCopy, faCamera);
@@ -96,7 +96,9 @@ export class IconManager {
         ];
     }
     iconPath(pack: DownloadableIconPack) {
-        return `https://raw.githubusercontent.com/valentine195/obsidian-admonition/master/icons/${pack}/icons.json`;
+        // return `https://raw.githubusercontent.com/valentine195/obsidian-admonition/master/icons/${pack}/icons.json`;
+        return `https://gitee.com/northern_bank/wewrite/raw/master/icons/${pack}/icons.json`
+        
     }
     localIconPath(pack: DownloadableIconPack) {
         return `${this.plugin.manifest.dir}/${pack}.json`;
@@ -106,7 +108,8 @@ export class IconManager {
         
         try {
             const icons: Record<string, string> = await (
-                await fetch(this.iconPath(pack))
+                // await fetch(this.iconPath(pack))
+                await requestUrl(this.iconPath(pack))
             ).json();
             this.plugin.settings.icons.push(pack);
             this.plugin.settings.icons = [...new Set(this.plugin.settings.icons)];

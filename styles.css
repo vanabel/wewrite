@@ -136,16 +136,19 @@ details {
 }
 
 summary {
-  font-weight: bold;
+  font-weight: normal;
   cursor: pointer;
   outline: none;
-  padding: 10px 0;
+  padding: 20px 0;
 }
 
 summary::-webkit-details-marker {
   display: none;
 }
 
+.wechat-mp-article-preview-summary{
+  margin-left:0px;
+}
 summary::before {
   content: "";
   font-weight: normal;

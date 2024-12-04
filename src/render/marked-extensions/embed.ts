@@ -23,6 +23,8 @@
 import { Token, Tokens, MarkedExtension } from "marked";
 import { Notice, TAbstractFile, TFile, Vault, MarkdownView, requestUrl, sanitizeHTMLToDom } from "obsidian";
 import { WeWriteMarkedExtension } from "./extension";
+import { ResourceManager } from "src/assets/ResourceManager";
+import { handleRetriesFor } from "mathjax-full/js/util/Retries";
 
 declare module 'obsidian' {
     interface Vault {
@@ -47,7 +49,7 @@ function getEmbedType(link: string) {
     const reg_pdf_crop = /^pdf#page=(\d+)(&rect=.*?)$/
 
     const sep = link.lastIndexOf('|')
-    if (sep > 0){
+    if (sep > 0) {
         link = link.substring(0, sep)
     }
     const index = link.lastIndexOf('.')
@@ -156,9 +158,11 @@ export class LocalImageManager {
 
 
 export class Embed extends WeWriteMarkedExtension {
-    index: number = 0;
     public static fileCache: Map<string, string> = new Map<string, string>();
+    index: number = 0;
     pdfCropIndex: number = 0;
+    embedMarkdownIndex: number = 0;
+    excalidrawIndex: number = 0;
 
     generateId() {
         this.index += 1;
@@ -166,11 +170,14 @@ export class Embed extends WeWriteMarkedExtension {
     }
 
     async prepare() {
-		this.pdfCropIndex = 0;
-	}
+        this.pdfCropIndex = 0;
+        this.index = 0;
+        this.embedMarkdownIndex = 0;
+        this.excalidrawIndex = 0;
+    }
     searchFile(originPath: string): TAbstractFile | null {
         const resolvedPath = this.resolvePath(originPath);
-        const vault= this.plugin.app.vault;
+        const vault = this.plugin.app.vault;
         const attachmentFolderPath = vault.config.attachmentFolderPath || '';
         let localPath = resolvedPath;
         let file = null;
@@ -178,12 +185,12 @@ export class Embed extends WeWriteMarkedExtension {
         // 然后从根目录查找
         file = vault.getFileByPath(resolvedPath);
         if (file) {
-            return file; 
+            return file;
         }
 
         file = vault.getFileByPath(originPath);
         if (file) {
-            return file; 
+            return file;
         }
 
         // 先从附件文件夹查找
@@ -219,9 +226,9 @@ export class Embed extends WeWriteMarkedExtension {
         }
         const stack = basePath.split("/");
         const parts = relativePath.split("/");
-      
+
         stack.pop(); // Remove the current file name (or empty string)
-    
+
         for (const part of parts) {
             if (part === ".") continue;
             if (part === "..") stack.pop();
@@ -341,7 +348,7 @@ export class Embed extends WeWriteMarkedExtension {
                     if (result.trim() == '') {
                         for (let j = i - 1; j >= 0; j--) {
                             const l = lines[j];
-                            if (l.trim()!= '') {
+                            if (l.trim() != '') {
                                 result = l;
                                 break;
                             }
@@ -463,7 +470,7 @@ export class Embed extends WeWriteMarkedExtension {
         classname = postions.get(postion) || classname;
 
         console.log(`parseExcalidrawLink:`, filename);
-        
+
 
         if (filename.endsWith('excalidraw') || filename.endsWith('excalidraw.md')) {
             return { filename, style, classname };
@@ -474,26 +481,32 @@ export class Embed extends WeWriteMarkedExtension {
 
     async renderExcalidraw(name: string, id: string) {
         try {
-            let container: HTMLElement | null = null;
-            const currentFile = this.plugin.app.workspace.getActiveFile();
-            const leaves = this.plugin.app.workspace.getLeavesOfType('markdown');
-            for (let leaf of leaves) {
-                const markdownView = leaf.view as MarkdownView;
-                if (markdownView.file?.path === currentFile?.path) {
-                    container = markdownView.containerEl;
-                }
-            }
-            if (container) {
-                const containers = container.querySelectorAll('.internal-embed');
+            // let container: HTMLElement | null = null;
+            // const currentFile = this.plugin.app.workspace.getActiveFile();
+            // const leaves = this.plugin.app.workspace.getLeavesOfType('markdown');
+            // for (let leaf of leaves) {
+            //     const markdownView = leaf.view as MarkdownView;
+            //     console.log(`${markdownView.file?.path} == ${currentFile?.path}`);
+
+            //     if (markdownView.file?.path === currentFile?.path) {
+            //         container = markdownView.containerEl;
+            //     }
+            // }
+            // if (container) {
+            {
+                // const containers = container.querySelectorAll('.internal-embed');
+                const containers = ResourceManager.getInstance(this.plugin).queryElements('.internal-embed');
+
                 for (let container of containers) {
+                    console.log(`container:`, container);
                     if (name !== container.getAttribute('src')) {
                         continue;
                     }
                     console.log(`excalidraw: `, container.innerHTML);
-                    
+
                     const src = await this.getExcalidrawUrl(container.innerHTML);
                     console.log(`excalidraw src: `, src);
-                    
+
                     let svg = '';
                     if (src === undefined || !src) {
                         svg = '渲染失败';
@@ -511,10 +524,11 @@ export class Embed extends WeWriteMarkedExtension {
                     }
                     this.previewRender.updateElementByID(id, svg);
                 }
-            } else {
-                console.error('container is null ' + name);
-                // this.callback.updateElementByID(id, '渲染失败');
             }
+            // else {
+            //     console.error('container is null ' + name);
+            //     // this.callback.updateElementByID(id, '渲染失败');
+            // }
         } catch (error) {
             console.error(error.message);
             // this.callback.updateElementByID(id, '渲染失败:' + error.message);
@@ -558,7 +572,7 @@ export class Embed extends WeWriteMarkedExtension {
                 level: 'inline',
                 start: (src: string) => {
                     const index = src.indexOf('![[');
-                    console.log(`embed start: ${index}`);
+                    // console.log(`embed start: ${index}`);
 
                     if (index === -1) return;
                     return index;
@@ -577,24 +591,24 @@ export class Embed extends WeWriteMarkedExtension {
 
                     return token;
                 },
-                renderer: (token: Tokens.Image) => {
+                renderer: (token: Tokens.Generic) => {
                     const embedType = getEmbedType(token.href);
                     console.log(`embedType: ${embedType}`);
-                    
-                    if (embedType == 'image' || embedType == 'webp'){
+
+                    if (embedType == 'image' || embedType == 'webp') {
                         // images
                         let item = this.parseImageLink(token.href);
                         console.log(`localFile renderer: ${JSON.stringify(item)}`);
                         if (item) {
                             const src = this.getImagePath(item.path);
                             console.log(`localFile renderer: ${src}`);
-    
+
                             const width = item.width ? `width="${item.width}"` : '';
                             const height = item.height ? `height="${item.height}"` : '';
                             return `<img src="${src}" alt="${token.text}" ${width} ${height} />`;
                         }
-                    }else if (embedType == 'svg'){
-                            const info = this.parseSVGLink(token.href);
+                    } else if (embedType == 'svg') {
+                        const info = this.parseSVGLink(token.href);
                         const id = this.generateId();
                         let svg = '渲染中';
                         if (Embed.fileCache.has(info.filename)) {
@@ -604,23 +618,34 @@ export class Embed extends WeWriteMarkedExtension {
                             this.renderSVGFile(info.filename, id);
                         }
                         return `<span class="${info.classname}"><span class="note-embed-svg" id="${id}" ${info.style}>${svg}</span></span>`
-                  
-                    } else if (embedType == 'excalidraw'){
 
-                        const info = this.parseExcalidrawLink(token.href);
-                        if (info) {
-                            const id = this.generateId();
-                            let svg = '渲染中';
-                            if (Embed.fileCache.has(info.filename)) {
-                                svg = Embed.fileCache.get(info.filename) || '渲染失败';
-                            }
-                            else {
-                                this.renderExcalidraw(info.filename, id);
-                            }
-                            return `<span class="${info.classname}"><span class="note-embed-excalidraw" id="${id}" ${info.style}>${svg}</span></span>`
-                        }
-                    }else if (embedType == 'pdf-crop') {
+                    } else if (embedType == 'excalidraw') {
+
+                        return token.html;
+                        // const info = this.parseExcalidrawLink(token.href);
+                        // if (info) {
+                        //     const id = this.generateId();
+                        //     let svg = '渲染中';
+                        //     if (Embed.fileCache.has(info.filename)) {
+                        //         svg = Embed.fileCache.get(info.filename) || '渲染失败';
+                        //     }
+                        //     else {
+                        //         this.renderExcalidraw(info.filename, id);
+                        //     }
+                        //     return `<span class="${info.classname}"><span class="note-embed-excalidraw" id="${id}" ${info.style}>${svg}</span></span>`
+                        // }
+                        // const containerId = `excalidraw-embed-${this.excalidrawIndex}`;
+                        // this.renderExcalidrawDiv(token.href, containerId, this.excalidrawIndex);
+                        // this.excalidrawIndex++
+                        // return `<section id="${containerId}" class="wewrite excalidraw-embed" >embed excalidraw 渲染中...</section>`;
+
+                    } else if (embedType == 'pdf-crop') {
                         return this.renderPdfCrop(token.href);
+                    } else if (embedType == 'note') {
+                        const containerId = `markdown-embed-${this.embedMarkdownIndex}`;
+                        this.renderNote(token.href, containerId);
+                        this.embedMarkdownIndex++
+                        return `<section id="${containerId}" class="wewrite markdown-embed" >embed note 渲染中...</section>`;
                     }
 
 
@@ -644,19 +669,86 @@ export class Embed extends WeWriteMarkedExtension {
                     // const tag = 'section';
                     // return `<${tag} class="note-embed-file" id="${id}">渲染中</${tag}>`
                 }
-            }]
+
+            }],
+            async: true,
+            walkTokens: async (token: Tokens.Generic) => {
+                if (token.type !== 'Embed') return;
+                const embedType = getEmbedType(token.href);
+                if (embedType !== 'excalidraw') {
+                    return;
+                }
+                await this.renderExcalidrawDiv(token)
+
+
+            }
         };
+    }
+
+    async renderExcalidrawDiv(token: Tokens.Generic) {
+        // define default failed
+        token.html = "excalidraw渲染失败"
+
+        const href = token.href;
+        console.log(`renderExcalidrawDiv: ${href}`);
+        const index = this.excalidrawIndex;
+        this.excalidrawIndex++;
+
+        let svg = Embed.fileCache.get(href);
+        if (svg === undefined) {
+            const root = this.plugin.resourceManager.getMarkdownRenderedElement(index, '.excalidraw-svg.excalidraw-embedded-img')
+            if (!root) {
+                return
+            }
+            const src = root.getAttr('src')
+            const filesource = root.getAttr('filesource')
+            console.log(`src=>`, src);
+            console.log(`filesource=>`, filesource);
+
+            if (!src) {
+                // this.previewRender.updateElementByID(id, "excalidraw渲染失败")
+                return
+            }
+            const blob = await this.readBlob(src);
+            console.log(`blob=>`, blob);
+
+            if (blob.type === 'image/svg+xml') {
+                const svg = await blob.text();
+                console.log(`svg=>`, svg);
+                Embed.fileCache.set(href, svg);
+            }
+        }
+        //else we have cached svg
+        token.html = `<section class="excalidraw-svg" >${svg}</section>`
+    }
+    async renderNote(href: string, id: string) {
+        //TODO：we should remove the support of note embed.
+ 
+        console.log(`renderNote: ${href}`);
+
+        const tf = ResourceManager.getInstance(this.plugin).getFileOfLink(href)
+        if (tf) {
+            const file = this.plugin.app.vault.getFileByPath(tf.path)
+            console.log(`file=>`, file);
+            if (file) {
+                const content = await this.plugin.app.vault.adapter.read(file.path);
+                const body = await this.marked.parse(content);
+                console.log(`body=>`, body);
+                this.previewRender.updateElementByID(id, body)
+            }
+        }
+
     }
     renderPdfCrop(href: string): string | false | undefined {
         const root = this.plugin.resourceManager.getMarkdownRenderedElement(this.pdfCropIndex, '.pdf-cropped-embed')
-		if (!root){
-			return '<span>Pdf-crop渲染失败</span>';
-		}
-		const containerId = `pdf-crop-img-${this.pdfCropIndex}`;
-		this.pdfCropIndex++
-		// return `<section id="${containerId}" class="admonition-parent admonition-${type}-parent">${root.outerHTML}</section>`;
-		console.log(`pdf-crop root:`, root);
-		this.previewRender.addElementByID(containerId, root)
-		return `<section id="${containerId}" class="wewrite pdf-crop" ></section>`;
+        if (!root) {
+            return '<span>Pdf-crop渲染失败</span>';
+        }
+        const containerId = `pdf-crop-img-${this.pdfCropIndex}`;
+        this.pdfCropIndex++
+        // return `<section id="${containerId}" class="admonition-parent admonition-${type}-parent">${root.outerHTML}</section>`;
+        console.log(`pdf-crop root:`, root);
+        this.previewRender.addElementByID(containerId, root)
+        return `<section id="${containerId}" class="wewrite pdf-crop" ></section>`;
     }
 }

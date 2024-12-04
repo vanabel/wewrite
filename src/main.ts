@@ -31,10 +31,14 @@ const DEFAULT_SETTINGS: WeWriteSetting = {
 	codeLineNumber: true,
 	icons: ['rpg', 'octicons'],
 	useFontAwesome: true,
-    rpgDownloadedOnce: false
+    rpgDownloadedOnce: false,
+	
 }
 
 export default class WeWritePlugin extends Plugin {
+    updateArticleTitle(value: string) {
+    
+    }
     showLeftView() {
         this.activateMaterialView()
     }

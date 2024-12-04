@@ -2,6 +2,9 @@ import matter from "gray-matter";
 import { TFile, TFolder } from "obsidian";
 import WeWritePlugin from "src/main";
 import { DEFAULT_STYLE } from "src/render/default_css";
+import {TEMPLATE_CSS} from "src/assets/css/template-css";
+import {CORE_CSS} from "src/assets/css/core-css";
+
 // import * as STYLE from 'src/render/styles.css'
 
 export type WeChatTheme = {
@@ -13,9 +16,12 @@ export type WeChatTheme = {
 export class ThemeManager {
     plugin: WeWritePlugin;
     themes: WeChatTheme[] = [];
+    static template_css:string = TEMPLATE_CSS;
+    static core_css:string = CORE_CSS;
 
     private constructor(plugin: WeWritePlugin) {
         this.plugin = plugin;
+
     }
 
     static getInstance(plugin: WeWritePlugin): ThemeManager {
@@ -77,6 +83,15 @@ export class ThemeManager {
         }
 
         return cssBlocks.join('\n'); // 将所有 CSS 代码块合并成一个字符串
+
+    }
+    public async getCSS(){
+        let custom_css = ''
+        if (this.plugin.settings.custom_theme === undefined || !this.plugin.settings.custom_theme){
+
+        } else custom_css = await this.getThemeContent(this.plugin.settings.custom_theme)
+
+        return `${ThemeManager.template_css}\n${ThemeManager.core_css}\n${custom_css}`
 
     }
     private async getAllThemesInFolder(folder: TFolder): Promise<WeChatTheme[]> {

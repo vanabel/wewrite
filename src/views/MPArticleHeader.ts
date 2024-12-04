@@ -3,6 +3,7 @@ import { MarkdownView, Setting, TextAreaComponent, TextComponent, TFile, ToggleC
 import { placeholder } from '@codemirror/view';
 import { UrlUtils } from 'src/utils/urls';
 import { LocalDraftItem, LocalDraftManager } from 'src/assets/DraftManager';
+import { timeStamp } from 'console';
 
 export class MPArticleHeader {
     onNoteRename(file: TFile) {
@@ -12,7 +13,8 @@ export class MPArticleHeader {
             console.log(`not the active file. return`);
             return;
         }
-
+        console.log(`on note rename, update local draft`);
+        
         if (this.activeLocalDraft !== undefined) {
             this.activeLocalDraft.notePath = file.path
             const dm = LocalDraftManager.getInstance(this.plugin)
@@ -41,8 +43,22 @@ export class MPArticleHeader {
     constructor(plugin: WeWritePlugin, containerEl: HTMLElement) {
         this.plugin = plugin;
         this.localDraftmanager = LocalDraftManager.getInstance(plugin)
+        this.BuildUI(containerEl)
+        this.plugin.messageService.registerListener('wechat-account-changed', (data: string) => {
+            this.updateLocalDraft();
+        })
+        this.plugin.messageService.registerListener('active-file-changed', (data: string) => {
+            this.updateLocalDraft();
+        })
+        this.updateLocalDraft()
 
-        const details = containerEl.createEl('details', { cls: 'wechat-mp-article-preview', attr: { open: false } })
+    }
+
+    public getActiveLocalDraft() {
+        return this.activeLocalDraft
+    }
+    private BuildUI(containerEl: HTMLElement) {
+        const details = containerEl.createEl('details', { cls: 'wechat-mp-article-preview', attr: {  } })
         const summary = details.createEl('summary', { cls: 'wechat-mp-article-preview-summary', text: 'WeChat MP Article Properties' })
         new Setting(details).setName('Title')
             .addText(text => {
@@ -52,6 +68,7 @@ export class MPArticleHeader {
                         if (this.activeLocalDraft !== undefined) {
                             this.activeLocalDraft.title = value
                             this.localDraftmanager.setDraft(this.activeLocalDraft)
+                            this.plugin.messageService.sendMessage('draft-title-updated', value)
                         }
                     })
             })
@@ -84,12 +101,14 @@ export class MPArticleHeader {
         new Setting(details)
             .setName('Need Open Comments')
             .setDesc('是否打开评论，0不打开(默认)，1打开')
-            .addToggle(toggle => { this._needOpenComment = toggle; toggle.setValue(false); toggle.onChange(value => {
-                if (this.activeLocalDraft !== undefined) {
-                    this.activeLocalDraft.need_open_comment = value? 1:0
-                    this.localDraftmanager.setDraft(this.activeLocalDraft)
-                }
-}) })
+            .addToggle(toggle => {
+                this._needOpenComment = toggle; toggle.setValue(false); toggle.onChange(value => {
+                    if (this.activeLocalDraft !== undefined) {
+                        this.activeLocalDraft.need_open_comment = value ? 1 : 0
+                        this.localDraftmanager.setDraft(this.activeLocalDraft)
+                    }
+                })
+            })
         new Setting(details)
             .setName('Only Fans Can Comment')
             .setDesc('是否粉丝才可评论，0所有人可评论(默认)，1粉丝才可评论')
@@ -98,7 +117,7 @@ export class MPArticleHeader {
                 toggle.setValue(false);
                 toggle.onChange(value => {
                     if (this.activeLocalDraft !== undefined) {
-                        this.activeLocalDraft.only_fans_can_comment = value? 1:0
+                        this.activeLocalDraft.only_fans_can_comment = value ? 1 : 0
                         this.localDraftmanager.setDraft(this.activeLocalDraft)
                     }
                 })
@@ -174,16 +193,11 @@ export class MPArticleHeader {
                     }
                     console.log(`media_id: ${media_id}`);
                 }
-
-                // img.src = url
-
-
-
             }
             coverframe.removeClass('image-on-dragover')
         })
 
-        //panning for find right position of cover
+        //TODO panning for find right position of cover
         coverframe.onmousedown = (e: MouseEvent) => {
             console.log('mousedown:', e.clientX, e.clientY)
             this.panning = true
@@ -260,53 +274,64 @@ export class MPArticleHeader {
         }
     }
     async updateLocalDraft() {
+
+        if (this.localDraftmanager.isActiveNoteDraft(this.activeLocalDraft)){
+            console.log(`no real change on the active note. `);
+            
+            return;
+        }
         //could be called when switch account name
 
-        const activeView = this.plugin.app.workspace.getActiveViewOfType(MarkdownView);
+        this.activeLocalDraft = await this.localDraftmanager.getDrafOfActiveNote()
+        this.updateHeaderProporties()
+        return true;
+        // const activeView = this.plugin.app.workspace.getActiveViewOfType(MarkdownView);
 
-        if (activeView === undefined || activeView === null) {
-            console.log(`not a markdown view`);
-            return false;
+        // if (activeView === undefined || activeView === null) {
+        //     console.log(`not a markdown view`);
+        //     this.activeLocalDraft = undefined
+        //     this.updateHeaderProporties()
+        //     return false;
 
-        }
+        // }
 
-        const activeFile = this.plugin.app.workspace.getActiveFile();
-        console.log(`updateLocalDraft activeFile=>`, activeFile?.path);
-        if (activeFile === undefined || activeFile === null) {
-            console.log(`no activeFile`);
-            this.activeLocalDraft = undefined
-            return false
-        }
-        const notePath = activeFile.path;
-        if (this.activeLocalDraft !== undefined &&
-            this.activeLocalDraft.notePath === notePath &&
-            this.activeLocalDraft.accountName === this.plugin.settings.selectedAccount) {
-            //the same file
-            console.log(`updateLocalDraft, same account and same file `);
-            return false;
+        // const activeFile = this.plugin.app.workspace.getActiveFile();
+        // console.log(`updateLocalDraft activeFile=>`, activeFile?.path);
+        // if (activeFile === undefined || activeFile === null) {
+        //     console.log(`no activeFile`);
+        //     this.activeLocalDraft = undefined
+        //     this.updateHeaderProporties()
+        //     return false
+        // }
+        // const notePath = activeFile.path;
+        // if (this.activeLocalDraft !== undefined &&
+        //     this.activeLocalDraft.notePath === notePath &&
+        //     this.activeLocalDraft.accountName === this.plugin.settings.selectedAccount) {
+        //     //the same file
+        //     console.log(`updateLocalDraft, same account and same file `);
+        //     return false;
 
-        } else {
-            const dm = LocalDraftManager.getInstance(this.plugin)
-            const draft = await dm.getDraft(this.plugin.settings.selectedAccount!, notePath)
-            console.log(`get draft=>`, draft);
+        // } else {
+        //     const dm = LocalDraftManager.getInstance(this.plugin)
+        //     const draft = await dm.getDraft(this.plugin.settings.selectedAccount!, notePath)
+        //     console.log(`get draft=>`, draft);
 
-            if (draft !== undefined) {
-                this.activeLocalDraft = draft
-                // this.update()
-            } else {
-                console.log(`new draft`);
+        //     if (draft !== undefined) {
+        //         this.activeLocalDraft = draft
+        //     } else {
+        //         console.log(`new draft`);
 
-                this.activeLocalDraft = {
-                    accountName: this.plugin.settings.selectedAccount!,
-                    notePath: notePath,
-                    title: activeFile?.basename || "",
-                    content: ""
-                }
-                dm.setDraft(this.activeLocalDraft)
-            }
-            //this.update()
-            return true
-        }
+        //         this.activeLocalDraft = {
+        //             accountName: this.plugin.settings.selectedAccount!,
+        //             notePath: notePath,
+        //             title: activeFile?.basename || "",
+        //             content: ""
+        //         }
+        //         dm.setDraft(this.activeLocalDraft)
+        //     }
+        //     this.updateHeaderProporties()
+        //     return true
+        // }
     }
     updateHeaderProporties() {
         if (this.activeLocalDraft !== undefined) {
@@ -326,9 +351,10 @@ export class MPArticleHeader {
             this._needOpenComment.setValue(false)
             this._onlyFansCanComment.setValue(false)
             this.cover_image = ""
-            const x =  0
-            const y =  0
+            const x = 0
+            const y = 0
             this.coverframe.setAttr('style', `background-image: url('${this.cover_image}'); background-size:cover; background-repeat: no-repeat; background-position:  ${x}px ${y}px;`);
         }
+        this.plugin.messageService.sendMessage('draft-title-updated', this._title.getValue())
     }
 }

@@ -1,32 +1,22 @@
 /**
  * Define the right-side leaf of view as Previewer view
- */
+*/
 
-import { DropdownComponent, Editor, EventRef, ItemView, MarkdownFileInfo, MarkdownView, sanitizeHTMLToDom, Setting, TFile, WorkspaceLeaf } from 'obsidian';
-import { marked } from 'marked';
+import { DropdownComponent, Editor, EventRef, ItemView, MarkdownView, sanitizeHTMLToDom, Setting, TFile, WorkspaceLeaf } from 'obsidian';
 import { EditorView } from "@codemirror/view";
-import { WechatClient } from '../wechat-api/wechatClient';
+import { ResourceManager } from './../assets/ResourceManager';
 import WeWritePlugin from 'src/main';
-import { openImageSelectionModal } from './coverImageModal';
-import { getWeChatMPSetting } from 'src/settings/wechatMPSetting';
-import { VerifyItem } from 'src/assets/assetsManager';
-import { SrcThumbList } from 'src/utils/SrcThumbList';
-import { WeChatMPAccountSwitcher } from 'src/settings/AccountSwitcher';
-import { MPArticleHeader } from './MPArticleHeader';
-import { UrlUtils } from 'src/utils/urls';
-import { ThemeSuggest } from './ThemeSuggester';
-import { ThemeManager } from './ThemeManager';
-import { LocalDraftItem, LocalDraftManager } from 'src/assets/DraftManager';
-import { timeStamp } from 'console';
-import { defaultMaxListeners } from 'events';
 import { WechatRender } from 'src/render/WeChatRender';
 import { PreviewRender } from 'src/render/marked-extensions/extension';
+import { SrcThumbList } from 'src/utils/SrcThumbList';
+import { WechatClient } from '../wechat-api/wechatClient';
+import { MPArticleHeader } from './MPArticleHeader';
+import { ThemeManager } from './ThemeManager';
 
 export const VIEW_TYPE_NP_PREVIEW = 'wechat-np-article-preview';
 export interface ElectronWindow extends Window {
     WEBVIEW_SERVER_URL: string;
 }
-
 
 
 export class PreviewPanel extends ItemView implements PreviewRender {
@@ -45,7 +35,9 @@ export class PreviewPanel extends ItemView implements PreviewRender {
     lastLeaf: WorkspaceLeaf | undefined;
     renderDiv: any;
     styleEl: any;
-    elementMap: Map<string, Node>;
+    elementMap: Map<string, Node | string>;
+    articleTitle: Setting;
+    containerDiv: HTMLElement;
     getViewType(): string {
         return VIEW_TYPE_NP_PREVIEW;
     }
@@ -63,12 +55,11 @@ export class PreviewPanel extends ItemView implements PreviewRender {
 
     }
 
-
     async onOpen() {
         this.buildUI();
         this.startListen()
         this.plugin.messageService.registerListener(
-            (data: SrcThumbList) => {
+            'src-thumb-list-updated', (data: SrcThumbList) => {
                 console.log(`on messageService, data=>`, data);
                 // this.update()
                 this.articleDiv.empty();
@@ -85,15 +76,36 @@ export class PreviewPanel extends ItemView implements PreviewRender {
                 })
             }
         )
+        this.plugin.messageService.registerListener('draft-title-updated', (title: string) => {
+            console.log(`on messageService, title=>`, title);
+            
+            this.articleTitle.setName(title)
+        })
         this.startWatchThemes()
         this.startWatchActiveNoteChange()
+        
+    }
+    // reisterRenderCompleteEvent(){
+    //     this.plugin.registerEvent(
+    //         this.plugin.app.workspace.on('file-content-rendered', (leaf: WorkspaceLeaf) => {
+    //             if (leaf.view instanceof MarkdownView) {
+    //                 console.log(`File content rendered: ${leaf.view.file.path}`);
+    //                 // 在这里执行你需要的操作
+    //                 this.onFileContentRendered(leaf.view);
+    //             }
+    //         })
+    //     );
+    // }
+    
+    onFileContentRendered(view: MarkdownView) {
+        // throw new Error('Method not implemented.');
+        console.log(`onFile content rendered. `);
+        
     }
     startWatchActiveNoteChange() {
         // throw new Error('Method not implemented.');
-    }
+        console.log(`start watch activve note change. `);
 
-    getActiveMarkdownView() {
-        return this.app.workspace.getActiveViewOfType(MarkdownView)
     }
 
     async buildUI() {
@@ -101,14 +113,41 @@ export class PreviewPanel extends ItemView implements PreviewRender {
         container.empty();
 
         const mainDiv = container.createDiv({ cls: 'previewer-container' });
-        const accountEl = new WeChatMPAccountSwitcher(this.plugin, mainDiv)
-        accountEl.setName('MP Account: ')
+        this.articleTitle = new Setting(mainDiv)
+            .setName('Article Title')
+            .setHeading()
+            .addDropdown(async (dropdown) => {
+                this.themeDropdown = dropdown
+                await this.updateThemeOptions()
+
+                dropdown.onChange(async (value) => {
+                    console.log(value)
+                    this.plugin.settings.custom_theme = value
+                    this.setStyle(await this.getCSS())
+                })
+
+            })
+
             .addExtraButton(
                 (button) => {
                     button.setIcon('image-up')
                         .setTooltip('')
                         .onClick(async () => {
                             console.log(`upload materials.`);
+                            // ResourceManager.getInstance(this.plugin).forceRenderActiveMarkdownView()
+                            ResourceManager.getInstance(this.plugin).scrollActiveMarkdownView()
+
+                        })
+                }
+            )
+            .addExtraButton(
+                (button) => {
+                    button.setIcon('refresh-cw')
+                        .setTooltip('Rerender the article content.')
+                        .onClick(async () => {
+                            console.log(`rerender article content.`);
+                            // this.articleDiv.innerHTML = await 
+                            this.parseActiveMarkdown();
                         })
                 }
             )
@@ -118,6 +157,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
                         .setTooltip('send to draft box.')
                         .onClick(async () => {
                             console.log(`send to draft box.`);
+                            this.wechatClient.sendArticleToDraftBox(this.draftHeader.getActiveLocalDraft()!, this.getArticleContent())
                         })
                 }
             )
@@ -142,95 +182,27 @@ export class PreviewPanel extends ItemView implements PreviewRender {
 
         this.draftHeader = new MPArticleHeader(this.plugin, mainDiv)
 
-
-        new Setting(mainDiv)
-            .setName('Article Title')
-            .addDropdown(async (dropdown) => {
-                this.themeDropdown = dropdown
-                this.updateThemeOptions()
-                dropdown.onChange(async (value) => {
-                    console.log(value)
-                    this.tm.getThemeContent(value).then(content => {
-                        console.log(`css content=>`, content);
-
-                    })
-
-                })
-
-            })
-            // .addSearch( (search) => {
-            //     new ThemeSuggest(this.plugin, search.inputEl)
-            //     search.setPlaceholder('Select Theme')
-            //     search.onChange(async (value) => {
-            //         // console.log(value)
-            //         this.article.theme = 
-            //     })
-            // })
-            .addExtraButton(
-                (button) => {
-                    button.setIcon('refresh-cw')
-                        .setTooltip('Rerender the article content.')
-                        .onClick(async () => {
-                            console.log(`rerender article content.`);
-                            this.articleDiv.innerHTML = await this.parseActiveMarkdown();
-                        })
-                }
-            )
-            .addExtraButton(
-                (button) => {
-                    button.setIcon('flask-conical')
-                        .setTooltip('Test button')
-                        .onClick(async () => {
-                            console.log(`test button clicked.`);
-                            this.getItemViewDOM()
-                        })
-                }
-            )
-            .addExtraButton(
-                (button) => {
-                    button.setIcon('flask-conical')
-                        .setTooltip('Test button2')
-                        .onClick(async () => {
-                            const view1 = this.plugin.resourceManager.getCurrentMarkdownView()
-                            const app1 = this.plugin.app
-                            const app2 = this.plugin.resourceManager.plugin.app
-                            const view2 = app2.workspace.getActiveViewOfType(MarkdownView);
-                            const view3 = this.app.workspace.getActiveViewOfType(ItemView);
-
-                            console.log(`this.plugin.app == this.plugin.resourceManager.plugin.app?`, app1 === app2);
-                            console.log(`preview.app == this.plugin.resourceManager.plugin.app?`, this.app === app2);
-                            console.log(`previww.app == this.plugin.app?`, this.app === app1);
-                            console.log(`view1==view2?`, view1 === view2);
-                            console.log(`view1=>`, view1);
-                            console.log(`view2=>`, view2);
-
-
-
-                        })
-                }
-            )
-
         this.renderDiv = mainDiv.createDiv({ cls: 'render-div' });
         this.renderDiv.id = 'render-div';
         this.renderDiv.setAttribute('style', '-webkit-user-select: text; user-select: text;');
-        let shadowDom = this.renderDiv //.shawdowRoot;
+        let shadowDom = this.renderDiv.shawdowRoot;
         if (shadowDom === undefined || shadowDom === null) {
 
             shadowDom = this.renderDiv.attachShadow({ mode: 'open' });
         }
 
-
-        this.styleEl = shadowDom.createEl('style');
-        this.styleEl.setAttr('title', 'wewrite-mp-style');
+        this. containerDiv = shadowDom.createDiv({ cls: 'wewrite-article' });
+        this.styleEl = this.containerDiv.createEl('style');
+        this.styleEl.setAttr('title', 'wewrite-style');
         this.setStyle(await this.getCSS());
-        this.articleDiv = shadowDom.createEl('div');
-
+        this.articleDiv = this.containerDiv.createDiv({ cls: 'article-div' });
 
     }
-    async getCSS(): Promise<string> {
-        let css = await ThemeManager.getInstance(this.plugin).getThemeContent(this.themeDropdown.getValue())
-        css = css.replace(" ", '')
-        return css
+    public getArticleContent() {
+        return this.containerDiv.innerHTML
+    }
+    async getCSS() {
+        return await ThemeManager.getInstance(this.plugin).getCSS()
     }
     setStyle(css: string) {
         this.styleEl.empty();
@@ -246,6 +218,11 @@ export class PreviewPanel extends ItemView implements PreviewRender {
         themes.forEach(theme => {
             this.themeDropdown.addOption(theme.path, theme.name)
         })
+        if (this.plugin.settings.custom_theme === undefined || !this.plugin.settings.custom_theme) {
+            this.themeDropdown.setValue('')
+        } else {
+            this.themeDropdown.setValue(this.plugin.settings.custom_theme)
+        }
 
     }
     async onClose() {
@@ -306,104 +283,81 @@ export class PreviewPanel extends ItemView implements PreviewRender {
     }
 
     async parseActiveMarkdown() {
+        const mview = ResourceManager.getInstance(this.plugin).getCurrentMarkdownView()
+        if (!mview){
+            console.log(`not a markdown view`);
+            return 'not a markdown view';
+        }
+        const mode = (mview.currentMode as any).type
+        console.log('markdown view mode:', mode)
         this.articleDiv.empty();
-        this.elementMap = new Map<string, HTMLElement>()
+        if (mode !== 'preview') {
+            this.articleDiv.innerHTML = `<h1>Please switch MarkdownView to preview mode</h1>`
+            return 
+        }
+        this.elementMap = new Map<string, HTMLElement | string>()
         const activeFile = this.app.workspace.getActiveFile();
-        const md = await this.app.vault.adapter.read(activeFile!.path)
+        console.log(`activeFile =>`, activeFile);
         
+        if (!activeFile) {
+            console.log(`no active file`);
+            return `<h1>No active file</h1>`
+        }
+        if (activeFile.extension !== 'md') {
+            console.log(`not a markdown file`);
+            return `<h1>Not a markdown file</h1>`
+        }
+        const md = await this.app.vault.adapter.read(activeFile!.path)
+
         this.setStyle(await this.getCSS())
         let html = await WechatRender.getInstance(this.plugin, this).parse(md)
 
 
-        html = `<section class="wewrite-mp" id="article-section">${html}</section>`;
+        html = `<section class="wewrite-article-content" id="article-section">${html}</section>`;
 
         const doc = sanitizeHTMLToDom(html);
         if (doc.firstChild) {
             this.articleDiv.appendChild(doc.firstChild);
         }
 
-
         console.log(`this.elementMap=>`, this.elementMap);
-        
-        this.elementMap.forEach((node: HTMLElement,id:string) => {
+
+        this.elementMap.forEach(async (node: HTMLElement | string, id: string) => {
             const item = this.articleDiv.querySelector('#' + id) as HTMLElement;
             console.log(`id=${id}, item=>`, item);
             console.log(`node`);
-            
+
             if (!item) return;
-            // const newNode = node.cloneNode(true)
-            // item.replaceWith(node)
-            item.appendChild(node)
+            if (typeof node === 'string') {
+                const tf = ResourceManager.getInstance(this.plugin).getFileOfLink(node)
+                if (tf) {
+                    const file = this.plugin.app.vault.getFileByPath(tf.path)
+                    console.log(`file=>`, file);
+                    if (file) {
+                        const content = await this.plugin.app.vault.adapter.read(file.path);
+                        const body = await WechatRender.getInstance(this.plugin, this).parse(content);
+                        console.log(`body=>`, body);
+                        console.log(`item=>`, item);
+
+                        item.innerHTML = body
+
+                    }
+                }
+            } else {
+                item.appendChild(node)
+            }
 
         })
-        // console.log('-----------------------------------\n', this.articleDiv.innerHTML);
-
         return this.articleDiv.innerHTML
     }
-    getMarkdownViewDOM() {
-        const view = this.app.workspace.activeEditor?.editor?.getDoc()
-        console.log(view)
-        // 获取当前活动的 MarkdownView
-        // const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
-        // console.log(activeView)
-        // if (activeView) {
-        //     // 获取 MarkdownView 的内容 DOM 元素
-        //     const contentEl = activeView.contentEl;
-
-        //     // 打印 DOM 元素
-        //     console.log('Content DOM Element:', contentEl);
-
-        //     // 你可以在这里对 contentEl 进行进一步的操作
-        // } else {
-        //     console.log('No active MarkdownView found.');
-        // }
-    }
-    getItemViewDOM() {
-        // 获取当前活动的 MarkdownView
-        const activeView = this.app.workspace.getActiveViewOfType(ItemView);
-        console.log(activeView)
-        if (activeView) {
-            // 获取 MarkdownView 的内容 DOM 元素
-            const contentEl = activeView.contentEl;
-
-            // 打印 DOM 元素
-            console.log('Content DOM Element:', contentEl);
-
-            // 你可以在这里对 contentEl 进行进一步的操作
-        } else {
-            console.log('No active MarkdownView found.');
-        }
-    }
     async update() {
-        console.log(`onUpdate`);
-        const activeFile = this.app.workspace.getActiveFile();
-        console.log(`activeFile=>`, activeFile?.path);
-
+        
         await this.parseActiveMarkdown();
-
-        const view = this.app.workspace.getActiveViewOfType(MarkdownView);
-
-        // @ts-expect-error, not typed
-        const editorView = view?.editor?.cm as EditorView;
-        if (editorView === undefined || editorView === null) {
-            return
-        }
-        if (this.currentView !== editorView) {
-
-            this.currentView = editorView
-        }
-        if (this.articleDiv) {
-            this.articleDiv.innerHTML = ""
-        } else {
-            return
-        }
-        console.log('dom=>', editorView.dom)
-        // this.articleDiv.appendChild(editorView.dom.cloneNode(true))
 
     }
     startListen() {
         const ec = this.app.workspace.on('editor-change', (editor: Editor, info: MarkdownView) => {
-            // console.log(`editor-changed:`, editor);
+            
             this.onEditorChange(editor, info);
 
         });
@@ -421,79 +375,71 @@ export class PreviewPanel extends ItemView implements PreviewRender {
         this.listeners.forEach(e => this.app.workspace.offref(e))
     }
     startObserver() {
-        const view = this.app.workspace.getActiveViewOfType(MarkdownView);
-        // @ts-expect-error, not typed
-        const editorView = view?.editor?.cm as EditorView;
-        if (!editorView) return;
+        // const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+        // // @ts-expect-error, not typed
+        // const editorView = view?.editor?.cm as EditorView;
+        // if (!editorView) return;
 
-        if (this.editorView === editorView) {
-            return;
-        }
+        // if (this.editorView === editorView) {
+        //     return;
+        // }
 
-        this.stopObserver();
-        this.editorView = editorView;
-        const targetElement = editorView.dom;
+        // this.stopObserver();
+        // this.editorView = editorView;
+        // const targetElement = editorView.dom;
 
-        const filterElement = (target: HTMLElement) => {
-            if (target.getAttribute('src')?.includes('.excalidraw')) {
-                const name = target.getAttribute('src') || '';
-                // if (LocalFile.fileCache.has(name)) {
-                //     return;
-                // }
-                // this.debouncedRenderMarkdown();
-            }
-        };
-        this.observer = new MutationObserver((mutationsList) => {
-            mutationsList.forEach((mutation) => {
-                // 遍历每个变化的节点，子节点
-                try {
-                    const target = mutation.target as HTMLElement;
-                    if (target.classList.contains('internal-embed')) {
-                        filterElement(target);
-                    }
-                    else {
-                        const items = target.getElementsByClassName('internal-embed');
-                        for (let i = 0; i < items.length; i++) {
-                            filterElement(items[i] as HTMLElement);
-                        };
-                    }
-                } catch (error) {
-                    console.error(error);
-                }
-            });
-        });
+        // const filterElement = (target: HTMLElement) => {
+        //     if (target.getAttribute('src')?.includes('.excalidraw')) {
+        //         const name = target.getAttribute('src') || '';
+        //         // if (LocalFile.fileCache.has(name)) {
+        //         //     return;
+        //         // }
+        //         // this.debouncedRenderMarkdown();
+        //     }
+        // };
+        // this.observer = new MutationObserver((mutationsList) => {
+        //     mutationsList.forEach((mutation) => {
+        //         // 遍历每个变化的节点，子节点
+        //         try {
+        //             const target = mutation.target as HTMLElement;
+        //             if (target.classList.contains('internal-embed')) {
+        //                 filterElement(target);
+        //             }
+        //             else {
+        //                 const items = target.getElementsByClassName('internal-embed');
+        //                 for (let i = 0; i < items.length; i++) {
+        //                     filterElement(items[i] as HTMLElement);
+        //                 };
+        //             }
+        //         } catch (error) {
+        //             console.error(error);
+        //         }
+        //     });
+        // });
 
-        // 开始监听目标元素的 DOM 变化
-        this.observer.observe(targetElement, {
-            attributes: true,       // 监听属性变化
-            childList: true,        // 监听子节点的变化
-            subtree: true,          // 监听子树中的节点变化
-        });
+        // // 开始监听目标元素的 DOM 变化
+        // this.observer.observe(targetElement, {
+        //     attributes: true,       // 监听属性变化
+        //     childList: true,        // 监听子节点的变化
+        //     subtree: true,          // 监听子树中的节点变化
+        // });
     }
     stopObserver() {
-        this.observer?.disconnect();
-        this.observer = null;
-        this.editorView = null;
+        // this.observer?.disconnect();
+        // this.observer = null;
+        // this.editorView = null;
     }
 
     onEditorChange(editor: Editor, info: MarkdownView) {
-
-        // console.log(`onEditorChange:`, editor);
-        // const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
-        // const view       = this.app.workspace.getActiveViewOfType(MarkdownView);
-        // if (activeView === info){
-        //     console.log(`editor changed, view is same.`);
-
-        // }
-        // // @ts-expect-error, not typed
-        // const v = activeView?.editor.cm as EditorView
-        // console.log(`v:${v}`);
-
+        console.log(`onEditorChange:`, editor);
+        this.update()
     }
     updateElementByID(id: string, html: string): void {
         const item = this.articleDiv.querySelector('#' + id) as HTMLElement;
         if (!item) return;
         const doc = sanitizeHTMLToDom(html);
+        console.log(`doc=>`, doc);
+        
         item.empty();
         if (doc.childElementCount > 0) {
             for (const child of doc.children) {
@@ -504,10 +450,15 @@ export class PreviewPanel extends ItemView implements PreviewRender {
             item.innerText = '渲染失败';
         }
     }
-    addElementByID(id: string, node: HTMLElement): void {
-        
+    addElementByID(id: string, node: HTMLElement | string): void {
+
         console.log(`id=${id}, before add this.elementMap=>`, this.elementMap)
-        this.elementMap.set(id, node.cloneNode(true));
+        if (typeof node === 'string') {
+            this.elementMap.set(id, node);
+        } else {
+            this.elementMap.set(id, node.cloneNode(true));
+
+        }
         console.log(`after add this.elementMap=>`, this.elementMap)
     }
 

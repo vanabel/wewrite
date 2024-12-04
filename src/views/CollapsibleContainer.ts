@@ -2,6 +2,11 @@ import { Menu, Notice, setIcon } from "obsidian";
 import WeWritePlugin from "src/main";
 import { MaterialMeidaItem, MediaType } from "src/wechat-api/wechat-types";
 
+interface REROUCE_ITEM {
+  item:MaterialMeidaItem;
+  el:HTMLElement;
+}
+
 export class CollapsibleContainer {
   private container: HTMLElement;
   private header: HTMLElement;
@@ -12,6 +17,7 @@ export class CollapsibleContainer {
   private refreshButton: HTMLElement;
   private plugin: WeWritePlugin;
   private type: MediaType;
+  private items: REROUCE_ITEM[] = [];
 
   constructor(plugin: WeWritePlugin, parent: HTMLElement, title: string, type: MediaType) {
     this.plugin = plugin;
@@ -27,15 +33,10 @@ export class CollapsibleContainer {
     setIcon(this.toggleButton, 'chevron-right')
     setIcon(this.refreshButton, 'folder-sync')
 
-    // this.container.classList.add('collapsible-container');
-    // this.header.classList.add('collapsible-header');
-    // this.content.classList.add('collapsible-content');
-    // this.toggleButton.classList.add('toggle-button');
 
     this.titleSpan.textContent = title;
     this.totalSpan.textContent = '0';
     this.content.innerHTML = 'content';
-    // this.toggleButton.textContent = '展开';
 
     this.header.appendChild(this.toggleButton);
     this.container.appendChild(this.header);
@@ -44,71 +45,36 @@ export class CollapsibleContainer {
     this.toggleButton.addEventListener('click', () => this.toggleContent());
     this.refreshButton.addEventListener('click', () => this.refreshContent());
     this.initContent()
+    
+    this.plugin.messageService.registerListener(`clear-${this.type}-list`, ()=>{
+      this.clearContent()
+    })
+    this.plugin.messageService.registerListener(`${this.type}-item-updated`, (item)=>{
+      this.addItem(item)
+    })
+    this.plugin.messageService.registerListener(`${this.type}-item-deleted`, (item)=>{
+      this.removeItem(item)
+    })
+    if (this.type === 'image'){
+      this.plugin.messageService.registerListener(`image-used-updated`, (item)=>{
+        this.updateItemUsed(item)
+      })
+    }
   }
   async refreshContent(): Promise<any> {
-    // throw new Error("Method not implemented.");
-    //TODO: disable click avoid multiple refresh
     console.log(`refresh `);
     this.content.innerHTML = '';
+    this.items = []
     this.setTotal(0);
-    let total = 0;
-    this.content.style.display = 'block';
-    setIcon(this.toggleButton, 'chevron-up')
 
     if (this.type === 'draft') {
 
-      return await this.plugin.assetsManager.getAllDrafts((items) => {
-        items.forEach((item: any) => {
-          total += 1;
-          const itemDiv = this.content.createDiv({ cls: 'collapsible-item' });
-          itemDiv.style.cursor = 'pointer';
-          itemDiv.innerHTML = `<a href=${item.content.news_item[0].url}> ${item.content.news_item[0].title}</a>`
-          itemDiv.addEventListener('click', () => {
-            console.log(`click ${item.media_id}`)
-          })
-        })
+      return await this.plugin.assetsManager.getAllDrafts((item) => {
+          this.addItem(item)
       }, this.plugin.settings.selectedAccount)
     }
-    await this.plugin.assetsManager.getAllMaterialOfType(this.type, (items) => {
-      items.forEach((item: any) => {
-        total += 1;
-        const itemDiv = this.content.createDiv({ cls: 'collapsible-item' });
-        itemDiv.style.cursor = 'pointer';
-        if (this.type === 'image') {
-
-          // itemDiv.innerHTML = '<img src="' + item.url + '" alt="' + item.name + '" />'
-          const img = itemDiv.createEl('img', {attr:{ src: item.url, alt: item.name }})
-          img.addEventListener('dragstart', (e) => {
-            console.log(`set dataTransfer ${item.media_id}`);
-            
-            e.dataTransfer?.setData('media_id', item.media_id)
-          })
-          // img.ondragstart = (e) => {
-          //   console.log(`set dataTransfer ${item.media_id}`);
-            
-          //   e.dataTransfer?.setData('media_id', item.media_id)
-          // }
-          
-          itemDiv.addEventListener('dragstart', (e) => {
-            console.log(`set dataTransfer ${item.media_id}`);
-            
-            e.dataTransfer?.setData('media_id', item.media_id)
-          })
-          itemDiv.addEventListener('click', () => {
-            console.log(`click ${item.used}`)
-          })
-          itemDiv.addEventListener('contextmenu', (event) => {
-            event.preventDefault();
-            this.showContextMenu(item, event)
-          })
-        } else if (this.type === 'news') {
-          itemDiv.innerHTML = `<a href=${item.content.news_item[0].url}> ${item.content.news_item[0].title}</a>`
-          itemDiv.addEventListener('click', () => {
-            console.log(`click ${item.media_id}`)
-          })
-        }
-        this.setTotal(total)
-      });
+    await this.plugin.assetsManager.getAllMaterialOfType(this.type, (item) => {
+        this.addItem(item)
     }, this.plugin.settings.selectedAccount)
     //TODO: enable after all content 
 
@@ -161,6 +127,57 @@ export class CollapsibleContainer {
   updateItems(items: []) {
 
   }
+  clearContent(){
+    this.items = [];
+    this.content.innerHTML = '';
+    this.setTotal(0);
+    
+  }
+  addItem(item: any){
+    const itemDiv = this.content.createDiv({ cls: 'collapsible-item' });
+    itemDiv.style.cursor = 'pointer';
+    this.items.push({item:item, el:itemDiv});
+
+    if (this.type === 'draft' || this.type === 'news') {
+        console.log(`item=>`, item);
+        
+        itemDiv.innerHTML = `<a href=${item.content.news_item[0].url}> ${item.content.news_item[0].title}</a>`
+        itemDiv.addEventListener('click', () => { })
+    }else if (this.type === 'image') {
+        itemDiv.innerHTML = '<img src="' + item.url + '" alt="' + item.name + '" />'
+        itemDiv.addEventListener('click', () => {
+          console.log(`click ${item.used}`)
+        })
+        itemDiv.addEventListener('contextmenu', (event) => {
+          event.preventDefault();
+          this.showContextMenu(item, event)
+        })
+    }else{
+      console.log(`other type has not been implemented.`);
+      
+    }
+    this.setTotal(this.items.length)
+  }
+  updateItemUsed(item:any){
+    const old_item = this.items.find((i)=>{
+      i.item.media_id === item.media_id
+    })
+    if (old_item !== undefined) {
+      old_item.item.used = item.used
+    }else{
+      this.addItem(item)
+    }
+  }
+  removeItem(item: any) {
+    const index = this.items.findIndex((i)=>{
+      i.item.media_id === item.media_id
+    })
+    if (index !== -1) {
+      this.items[index].el.parentElement?.removeChild(this.items[index].el) 
+      this.items.splice(index, 1)
+    }
+    this.setTotal(this.items.length)
+  }
   async initContent(): Promise<any> {
     // throw new Error("Method not implemented.");
     //TODO: disable click avoid multiple refresh
@@ -175,40 +192,43 @@ export class CollapsibleContainer {
     if (items === undefined || items === null) {
       return;
     }
-    if (this.type === 'draft' || this.type === 'news') {
-      items.forEach((item: any) => {
-        total += 1;
-        const itemDiv = this.content.createDiv({ cls: 'collapsible-item' });
-        itemDiv.style.cursor = 'pointer';
-        itemDiv.innerHTML = `<a href=${item.content.news_item[0].url}> ${item.content.news_item[0].title}</a>`
-        itemDiv.addEventListener('click', () => { })
-      })
-    } else {
-      items.forEach((item: any) => {
-        total += 1;
-        const itemDiv = this.content.createDiv({ cls: 'collapsible-item' });
-        itemDiv.style.cursor = 'pointer';
-        if (this.type === 'image') {
+    items.forEach((item: any) => {
+      this.addItem(item)
+    })
+    // if (this.type === 'draft' || this.type === 'news') {
+    //   items.forEach((item: any) => {
+    //     total += 1;
+    //     const itemDiv = this.content.createDiv({ cls: 'collapsible-item' });
+    //     itemDiv.style.cursor = 'pointer';
+    //     itemDiv.innerHTML = `<a href=${item.content.news_item[0].url}> ${item.content.news_item[0].title}</a>`
+    //     itemDiv.addEventListener('click', () => { })
+    //   })
+    // } else {
+    //   items.forEach((item: any) => {
+    //     total += 1;
+    //     const itemDiv = this.content.createDiv({ cls: 'collapsible-item' });
+    //     itemDiv.style.cursor = 'pointer';
+    //     if (this.type === 'image') {
 
-          itemDiv.innerHTML = '<img src="' + item.url + '" alt="' + item.name + '" />'
-          itemDiv.addEventListener('click', () => {
-            console.log(`click ${item.used}`)
-          })
-          itemDiv.addEventListener('contextmenu', (event) => {
-            event.preventDefault();
-            this.showContextMenu(item, event)
-          })
-        } else if (this.type === 'news') {
-          itemDiv.innerHTML = `<a href=${item.content.news_item[0].url}> ${item.content.news_item[0].title}</a>`
-          itemDiv.addEventListener('click', () => {
-            console.log(`click ${item.media_id}`)
-          })
-        }
-      })
+    //       itemDiv.innerHTML = '<img src="' + item.url + '" alt="' + item.name + '" />'
+    //       itemDiv.addEventListener('click', () => {
+    //         console.log(`click ${item.used}`)
+    //       })
+    //       itemDiv.addEventListener('contextmenu', (event) => {
+    //         event.preventDefault();
+    //         this.showContextMenu(item, event)
+    //       })
+    //     } else if (this.type === 'news') {
+    //       itemDiv.innerHTML = `<a href=${item.content.news_item[0].url}> ${item.content.news_item[0].title}</a>`
+    //       itemDiv.addEventListener('click', () => {
+    //         console.log(`click ${item.media_id}`)
+    //       })
+    //     }
+    //   })
 
-    }
-    console.log(`type: ${this.type}, total: ${total}`);
+    // }
+    // console.log(`type: ${this.type}, total: ${total}`);
 
-    this.setTotal(total)
+    // this.setTotal(total)
   }
 }

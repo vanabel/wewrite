@@ -17,6 +17,7 @@ export type WeChatMPAccountInfo = {
     
 }
 export type WeChatMPSetting = {
+    custom_theme?: string;
 	codeLineNumber: boolean;
 	css_styles_folder: string;
     _id?: string; // = 'wechat-mp-setting';

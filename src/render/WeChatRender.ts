@@ -19,9 +19,9 @@ import { CodeHighlight } from './marked-extensions/code-highlight'
 import { Embed } from './marked-extensions/embed'
 import { PreviewRender, WeWriteMarkedExtension } from './marked-extensions/extension'
 import { Heading } from './marked-extensions/heading'
-import { SVGIcon } from './marked-extensions/icons'
+import { IconizeRender } from './marked-extensions/iconize'
 import { MathRenderer } from './marked-extensions/math'
-import { CalloutRenderer } from '../../test/callouts'
+import { RemixIconRenderer } from './marked-extensions/remix-icon'
 
 export class WechatRender {
     plugin: WeWritePlugin;
@@ -72,13 +72,13 @@ export class WechatRender {
         // const mathRenderer = new MathRenderer(this.plugin, this.previewRender, this.marked)
         // this.marked.use(mathRenderer.markedExtension())
         // this.addExtension(mathRenderer)
-        this.addExtension(new SVGIcon(this.plugin, this.previewRender, this.marked))
+        this.addExtension(new IconizeRender(this.plugin, this.previewRender, this.marked))
         this.addExtension(new Heading(this.plugin, this.previewRender, this.marked))
         this.addExtension(new Embed(this.plugin, this.previewRender, this.marked))
         this.addExtension(new CodeRenderer(this.plugin, this.previewRender, this.marked))
         this.addExtension(new CodeHighlight(this.plugin, this.previewRender, this.marked))
         this.addExtension(new MathRenderer(this.plugin, this.previewRender, this.marked))
-        // this.addExtension(new CalloutRenderer(this.plugin, this.previewRender, this.marked))
+        this.addExtension(new RemixIconRenderer(this.plugin, this.previewRender, this.marked))
         this.addExtension(new BlockquoteRenderer(this.plugin, this.previewRender, this.marked))
 
     }

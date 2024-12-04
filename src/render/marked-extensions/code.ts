@@ -218,6 +218,8 @@ export class CodeRenderer extends WeWriteMarkedExtension {
 	}
 	renderCharts(token: Tokens.Generic) {
 		const root = this.plugin.resourceManager.getMarkdownRenderedElement(this.chartsIndex, '.block-language-chart')
+		console.log(`renderCharts this.chartIndex:`, this.chartsIndex);
+		
 		if (!root) {
 			return '<span>charts渲染失败</span>';
 		}
@@ -287,8 +289,12 @@ export class CodeRenderer extends WeWriteMarkedExtension {
 					return this.codeRenderer(token.text, token.lang);
 					// return token.text
 				},
-			}]
+			}
+			]
 		}
+	}
+	iconsRenderer(text: string, lang: string | undefined) {
+		throw new Error("Method not implemented.");
 	}
 }
 

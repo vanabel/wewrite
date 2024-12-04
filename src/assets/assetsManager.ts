@@ -25,6 +25,7 @@ import { DraftItem, MaterialItem, MaterialMeidaItem, MaterialNewsItem, MediaType
 import PouchDB from 'pouchdb';
 import PouchDBFind from 'pouchdb-find';
 import { SrcThumbList } from "src/utils/SrcThumbList";
+import { areObjectsEqual } from "./DraftManager";
 
 type ThumbMideaIdSrc = {
     thumb_media_id: string;
@@ -80,36 +81,36 @@ export class AssetsManager {
     public async deltaSyncMaterial(accountName: string) {
         // load local assets
         await this.loadMaterial(accountName)
-        
+
         // get total number from remote
         const json = await this.plugin.wechatClient.getMaterialCounts(accountName)
-        if (json){
+        if (json) {
             const { errcode, voice_count, video_count, image_count, news_count } = json
-            if (this.assets.get('news')?.length != news_count){
+            if (this.assets.get('news')?.length != news_count) {
                 //TODO: parcial get the data.
             }
-            if (this.assets.get('image')?.length != image_count){
+            if (this.assets.get('image')?.length != image_count) {
                 //TODO: parcial get the data.
             }
-            if (this.assets.get('video')?.length != video_count){
+            if (this.assets.get('video')?.length != video_count) {
                 //TODO: parcial get the data.
             }
-            if (this.assets.get('voice')?.length != voice_count){
+            if (this.assets.get('voice')?.length != voice_count) {
                 //TODO: parcial get the data.
             }
-            
+
         }
 
         // the drafts
         const draft_count = await this.plugin.wechatClient.getDraftCount(accountName)
-        if (draft_count){
-            if (this.assets.get('draft')?.length != draft_count){
+        if (draft_count) {
+            if (this.assets.get('draft')?.length != draft_count) {
                 //TODO: parcial get the data.
-             }
+            }
         }
-        
+
         this.checkAssets()
-        
+
     }
     public async loadMaterial(accountName: string) {
         let list = await this.getAllMeterialOfTypeFromDB(accountName, 'news')
@@ -138,17 +139,23 @@ export class AssetsManager {
         if (list !== undefined || list !== null) {
             this.assets.set('draft', list)
         }
-        
+
         // assets check here.
         this.checkAssets()
         this.plugin.assetsUpdated()
     }
     public async pullAllMaterial(accountName: string) {
-        this.getAllDrafts((item)=>{}, accountName)
-        this.getAllNews((item)=>{}, accountName)
-        this.getAllMaterialOfType('image', (item)=>{}, accountName)
-        this.getAllMaterialOfType('video', (item)=>{}, accountName)
-        this.getAllMaterialOfType('voice', (item)=>{}, accountName)
+        this.plugin.messageService.sendMessage('clear-draft-list', null)
+        this.plugin.messageService.sendMessage('clear-news-list', null)
+        this.plugin.messageService.sendMessage('clear-image-list', null)
+        this.plugin.messageService.sendMessage('clear-video-list', null)
+        this.plugin.messageService.sendMessage('clear-voice-list', null)
+        this.plugin.messageService.sendMessage('clear-thumb-list', null)
+        this.getAllDrafts((item) => { this.plugin.messageService.sendMessage('draft-item-updated', item) }, accountName)
+        this.getAllNews((item) => { this.plugin.messageService.sendMessage('news-item-updated', item) }, accountName)
+        this.getAllMaterialOfType('image', (item) => { this.plugin.messageService.sendMessage('image-item-updated', item) }, accountName)
+        this.getAllMaterialOfType('video', (item) => { this.plugin.messageService.sendMessage('video-item-updated', item) }, accountName)
+        this.getAllMaterialOfType('voice', (item) => { this.plugin.messageService.sendMessage('voice-item-updated', item) }, accountName)
         this.checkAssets()
         this.plugin.assetsUpdated()
     }
@@ -168,8 +175,11 @@ export class AssetsManager {
             list.push(...item);
             total = total_count
             offset += item_count;
-            if (callback){
-                callback(item)
+            if (callback) {
+                // callback(item)
+                item.forEach((i: any) => {
+                    callback(i)
+                })
             }
         }
         this.assets.set('news', list)
@@ -180,7 +190,7 @@ export class AssetsManager {
             this.pushMaterailToDB(item)
         })
     }
-    public async getAllDrafts(callback: (newsItems: DraftItem[]) => void, accountName: string | undefined) {
+    public async getAllDrafts(callback: (newsItem: DraftItem) => void, accountName: string | undefined) {
         const draftList = []
         let offset = 0;
         let total = MAX_COUNT;
@@ -195,18 +205,22 @@ export class AssetsManager {
             draftList.push(...item);
             total = total_count
             offset += item_count;
-            if (callback){
-                callback(item)
+            if (callback) {
+                item.forEach((i: any) => {
+                    callback(i)
+                })
             }
         }
         this.assets.set('draft', draftList)
-        draftList.forEach((item: MaterialItem) => {
-            item.accountName = accountName
-            item.type = 'draft'
+        draftList.forEach((i: MaterialItem) => {
+            i.accountName = accountName
+            i.type = 'draft'
             // if (item._id === undefined){
             //     item._id = item.media_id
             // }
-            this.pushMaterailToDB(item)
+            console.log(`i=>`, i);
+            
+            this.pushMaterailToDB(i)
         })
     }
     public async getAllMaterialOfType(type: MediaType, callback: (items: []) => void, accountName: string | undefined) {
@@ -227,8 +241,11 @@ export class AssetsManager {
             list.push(...item);
             total = total_count
             offset += item_count;
-            if (callback){
-                callback(item)
+            if (callback) {
+                // callback(item)
+                item.forEach((i: any) => {
+                    callback(i)
+                })
             }
         }
         this.assets.set(type, list)
@@ -312,10 +329,11 @@ export class AssetsManager {
         })
 
         console.log(`verifyList=>`, verifyList);
-        this.plugin.messageService.sendMessage(verifyList)
+        this.plugin.messageService.sendMessage('src-thumb-list-updated', verifyList)
         images.forEach(image => {
             const used = verifyList.get(image.url) !== undefined
             image.used = used
+            this.plugin.messageService.sendMessage('image-used-updated', image)
         })
     }
 
@@ -351,18 +369,26 @@ export class AssetsManager {
             }
 
             this.db.get(doc._id).then(existedDoc => {
-                doc._rev = existedDoc._rev;
-                this.db.put(doc)
-                    .then(() => {
-                        console.log(`db saved meterial.`);
-                        resolve();
-                    })
-                    .catch((error: any) => {
-                        console.error('Error saving material:', error);
-                        resolve()
-                    });
+                if (areObjectsEqual(doc, existedDoc)) {
+                    // the material has not been changed
+                    console.log(`no change on material, no save needed.`);
+                    resolve()
+                } else {
+                    doc._rev = existedDoc._rev;
+                    this.db.put(doc)
+                        .then(() => {
+                            console.log(`db saved meterial.`);
+                            resolve();
+                        })
+                        .catch((error: any) => {
+                            console.error('Error saving material:', error);
+                            resolve()
+                        });
+                }
             }).catch(error => {
-                console.log('save material new item ', error);
+                console.log('material id not exist, new item: ', error);
+                console.log(`material item=>`, doc);
+                
                 this.db.put(doc).then(() => {
                     resolve()
                 }).catch((err) => {

@@ -40,8 +40,8 @@ export class BlockquoteRenderer extends WeWriteMarkedExtension {
     return `<blockquote dir="auto" ><p>${text}</p></blockquote>`
   }
   rendererCallout(token: Tokens.Blockquote) {
-    const root = this.plugin.resourceManager.getMarkdownRenderedElement(this.calloutIndex, '.cm-callout')
-    // console.log(`renderCallout root:`, root);
+    const root = this.plugin.resourceManager.getMarkdownRenderedElement(this.calloutIndex, '.markdown-reading-view  .callout:not(.admonition)')
+    console.log(`renderCallout root:`, root);
 		if (!root){
 			return '<span>Callout渲染失败</span>';
 		}

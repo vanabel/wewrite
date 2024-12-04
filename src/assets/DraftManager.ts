@@ -11,11 +11,31 @@ import PouchDB from 'pouchdb';
 import PouchDBFind from 'pouchdb-find';
 PouchDB.plugin(PouchDBFind);
 
+export function areObjectsEqual(obj1: any, obj2: any): boolean {
+    if (obj1 === obj2) return true;
+
+    if (typeof obj1 !== 'object' || obj1 === null || typeof obj2 !== 'object' || obj2 === null) {
+        return false;
+    }
+
+    const keys1 = Object.keys(obj1);
+    const keys2 = Object.keys(obj2);
+
+    if (keys1.length !== keys2.length) return false;
+
+    for (const key of keys1) {
+        if (!keys2.includes(key) || !areObjectsEqual(obj1[key], obj2[key])) {
+            return false;
+        }
+    }
+
+    return true;
+}
 
 export type LocalDraftItem = {
     accountName?: string;
     notePath?: string; //obsidan file path for the note. 
-    theme?:string; // the theme selected for rendering. missing will use default theme.
+    theme?: string; // the theme selected for rendering. missing will use default theme.
     cover_image_url?: string; // the cover image url for the article. could be a obsidian file path or url 
     _id?: string;
     _rev?: string;
@@ -31,10 +51,10 @@ export type LocalDraftItem = {
     pic_crop_235_1?: string; //X1_Y1_X2_Y2, 用分隔符_拼接为X1_Y1_X2_Y2  
     pic_crop_1_1?: string; //X1_Y1_X2_Y2, 用分隔符_拼接为X1_Y1_X2_Y2
     url?: string; //	草稿的临时链接
-    
- } 
 
- export class LocalDraftManager {
+}
+
+export class LocalDraftManager {
     private plugin: WeWritePlugin;
     private db: PouchDB.Database;
     private static instance: LocalDraftManager;
@@ -48,7 +68,40 @@ export type LocalDraftItem = {
         }
         return LocalDraftManager.instance;
     }
-    public async getDraft(accountName:string, notePath:string): Promise<LocalDraftItem|undefined> {
+    public async getDrafOfActiveNote() {
+        let draft: LocalDraftItem | undefined
+
+        const accountName = this.plugin.settings.selectedAccount;
+        if (accountName !== undefined && accountName) {
+            const f = this.plugin.app.workspace.getActiveFile()
+            if (f) {
+                draft = await this.getDraft(accountName, f.path)
+                if (draft === undefined) {
+                    draft = {
+                        accountName: accountName,
+                        notePath: f.path,
+                        title: f.basename,
+                        _id: accountName + f.path
+                    }
+                    await this.setDraft(draft)
+
+                }
+            }
+        }
+        return draft
+    }
+    public isActiveNoteDraft(draft: LocalDraftItem | undefined) {
+        const activeFile = this.plugin.app.workspace.getActiveFile()
+        if (draft === undefined && activeFile === null) {
+            console.log(`no active file and no draft`);
+            return true
+        }
+        if (draft !== undefined && activeFile ) {
+            return draft.notePath === activeFile.path
+        }
+        return false
+    }
+    public async getDraft(accountName: string, notePath: string): Promise<LocalDraftItem | undefined> {
         return new Promise((resolve) => {
             // console.log(`this.db=>`, this.db);
             // console.log(`this.db.find=>`, this.db.find);
@@ -78,27 +131,33 @@ export type LocalDraftItem = {
         })
     }
 
-    public async setDraft(doc:LocalDraftItem): Promise<void> {
+    public async setDraft(doc: LocalDraftItem): Promise<void> {
         return new Promise((resolve) => {
-            if (doc.accountName === undefined || doc.notePath === undefined){
+            if (doc.accountName === undefined || doc.notePath === undefined) {
                 console.log(`invalid draft item`, doc);
                 return
             }
             if (doc._id === undefined) {
                 doc._id = doc.accountName + doc.notePath
             }
-
             this.db.get(doc._id).then(existedDoc => {
-                doc._rev = existedDoc._rev;
-                this.db.put(doc)
-                    .then(() => {
-                        console.log(`db saved local draft.`);
-                        resolve();
-                    })
-                    .catch((error: any) => {
-                        console.error('Error saving local draft:', error);
-                        resolve()
-                    });
+                if (areObjectsEqual(doc, existedDoc)) {
+                    // the draft has not been changed
+                    console.log(`no change on draft, no save needed.`);
+
+                    resolve()
+
+                } else {
+                    doc._rev = existedDoc._rev;
+                    this.db.put(doc)
+                        .then(() => {
+                            resolve();
+                        })
+                        .catch((error: any) => {
+                            console.error('Error saving local draft:', error);
+                            resolve()
+                        });
+                }
             }).catch(error => {
                 console.log('save local draft new item ', error);
                 this.db.put(doc).then(() => {
@@ -112,4 +171,4 @@ export type LocalDraftItem = {
 
         })
     }
- }
+}
