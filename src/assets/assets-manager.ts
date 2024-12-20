@@ -24,8 +24,8 @@ import { getErrorMessage } from "src/wechat-api/error-code";
 import { DraftItem, MaterialItem, MaterialMeidaItem, MaterialNewsItem, MediaType, NewsItem } from "src/wechat-api/wechat-types";
 import PouchDB from 'pouchdb';
 import PouchDBFind from 'pouchdb-find';
-import { SrcThumbList } from "src/utils/SrcThumbList";
-import { areObjectsEqual } from "./DraftManager";
+import { SrcThumbList } from "src/utils/src-thumb-list";
+import { areObjectsEqual } from "./draft-manager";
 
 type ThumbMideaIdSrc = {
     thumb_media_id: string;
@@ -60,16 +60,19 @@ export class AssetsManager {
 
 
     private static instance: AssetsManager;
-    private plugin: WeWritePlugin;
+    private _plugin: WeWritePlugin;
     private thumbUrlList: SrcThumbList;
     private imgUrlList: SrcThumbList;
     constructor(app: App, plugin: WeWritePlugin) {
         this.app = app;
-        this.plugin = plugin
+        this._plugin = plugin
         this.assets = new Map()
         this.db = new PouchDB('wewrite-wechat-assets');
         this.thumbUrlList = new SrcThumbList();
         this.imgUrlList = new SrcThumbList();
+        this._plugin.messageService.registerListener('wechat-account-changed', (data: string) => {
+            this.loadMaterial(data)
+        })
 
     }
     public static getInstance(app: App, plugin: WeWritePlugin): AssetsManager {
@@ -83,7 +86,7 @@ export class AssetsManager {
         await this.loadMaterial(accountName)
 
         // get total number from remote
-        const json = await this.plugin.wechatClient.getMaterialCounts(accountName)
+        const json = await this._plugin.wechatClient.getMaterialCounts(accountName)
         if (json) {
             const { errcode, voice_count, video_count, image_count, news_count } = json
             if (this.assets.get('news')?.length != news_count) {
@@ -102,7 +105,7 @@ export class AssetsManager {
         }
 
         // the drafts
-        const draft_count = await this.plugin.wechatClient.getDraftCount(accountName)
+        const draft_count = await this._plugin.wechatClient.getDraftCount(accountName)
         if (draft_count) {
             if (this.assets.get('draft')?.length != draft_count) {
                 //TODO: parcial get the data.
@@ -113,51 +116,77 @@ export class AssetsManager {
 
     }
     public async loadMaterial(accountName: string) {
+        
+        this._plugin.messageService.sendMessage('clear-news-list', null)
         let list = await this.getAllMeterialOfTypeFromDB(accountName, 'news')
-        console.log(`news list:`, list);
+        // console.log(`news list:`, list);
 
         if (list !== undefined || list !== null) {
             this.assets.set('news', list)
+            list.forEach(item => {
+                this._plugin.messageService.sendMessage('news-item-updated', item)
+            });
         }
+
+        this._plugin.messageService.sendMessage('clear-image-list', null)
         list = await this.getAllMeterialOfTypeFromDB(accountName, 'image')
         console.log(`image list:`, list);
         if (list !== undefined || list !== null) {
             this.assets.set('image', list)
+            list.forEach(item => {
+                this._plugin.messageService.sendMessage('image-item-updated', item)
+            });
         }
+
+        this._plugin.messageService.sendMessage('clear-voice-list', null)
         list = await this.getAllMeterialOfTypeFromDB(accountName, 'voice')
         console.log(`voice list:`, list);
         if (list !== undefined || list !== null) {
             this.assets.set('voice', list)
+            list.forEach(item => {
+                this._plugin.messageService.sendMessage('voice-item-updated', item)
+            });
         }
+
+
+        this._plugin.messageService.sendMessage('clear-video-list', null)
         list = await this.getAllMeterialOfTypeFromDB(accountName, 'video')
         console.log(`video list:`, list);
         if (list !== undefined || list !== null) {
             this.assets.set('video', list)
+            list.forEach(item => {
+                this._plugin.messageService.sendMessage('video-item-updated', item)
+            });
         }
+
+        this._plugin.messageService.sendMessage('clear-draft-list', null)
         list = await this.getAllMeterialOfTypeFromDB(accountName, 'draft')
         console.log(`draft list:`, list);
         if (list !== undefined || list !== null) {
             this.assets.set('draft', list)
+            list.forEach(item => {
+                this._plugin.messageService.sendMessage('draft-item-updated', item)
+            });
         }
 
         // assets check here.
         this.checkAssets()
-        this.plugin.assetsUpdated()
+        // this._plugin.assetsUpdated()
     }
     public async pullAllMaterial(accountName: string) {
-        this.plugin.messageService.sendMessage('clear-draft-list', null)
-        this.plugin.messageService.sendMessage('clear-news-list', null)
-        this.plugin.messageService.sendMessage('clear-image-list', null)
-        this.plugin.messageService.sendMessage('clear-video-list', null)
-        this.plugin.messageService.sendMessage('clear-voice-list', null)
-        this.plugin.messageService.sendMessage('clear-thumb-list', null)
-        this.getAllDrafts((item) => { this.plugin.messageService.sendMessage('draft-item-updated', item) }, accountName)
-        this.getAllNews((item) => { this.plugin.messageService.sendMessage('news-item-updated', item) }, accountName)
-        this.getAllMaterialOfType('image', (item) => { this.plugin.messageService.sendMessage('image-item-updated', item) }, accountName)
-        this.getAllMaterialOfType('video', (item) => { this.plugin.messageService.sendMessage('video-item-updated', item) }, accountName)
-        this.getAllMaterialOfType('voice', (item) => { this.plugin.messageService.sendMessage('voice-item-updated', item) }, accountName)
+        this._plugin.messageService.sendMessage('clear-draft-list', null)
+        this._plugin.messageService.sendMessage('clear-news-list', null)
+        this._plugin.messageService.sendMessage('clear-image-list', null)
+        this._plugin.messageService.sendMessage('clear-video-list', null)
+        this._plugin.messageService.sendMessage('clear-voice-list', null)
+        this._plugin.messageService.sendMessage('clear-thumb-list', null)
+        this.getAllDrafts((item) => { this._plugin.messageService.sendMessage('draft-item-updated', item) }, accountName)
+        this.getAllNews((item) => { this._plugin.messageService.sendMessage('news-item-updated', item) }, accountName)
+        this.getAllMaterialOfType('image', (item) => { this._plugin.messageService.sendMessage('image-item-updated', item) }, accountName)
+        this.getAllMaterialOfType('video', (item) => { this._plugin.messageService.sendMessage('video-item-updated', item) }, accountName)
+        this.getAllMaterialOfType('voice', (item) => { this._plugin.messageService.sendMessage('voice-item-updated', item) }, accountName)
         this.checkAssets()
-        this.plugin.assetsUpdated()
+        this._plugin.assetsUpdated()
     }
 
     public async getAllNews(callback: (newsItems: DraftItem[]) => void, accountName: string | undefined) {
@@ -165,7 +194,7 @@ export class AssetsManager {
         let offset = 0;
         let total = MAX_COUNT;
         while (offset < total) {
-            const json = await this.plugin.wechatClient.getBatchMaterial(accountName, 'news', offset, MAX_COUNT);
+            const json = await this._plugin.wechatClient.getBatchMaterial(accountName, 'news', offset, MAX_COUNT);
             const { errcode, item, total_count, item_count } = json;
             if (errcode !== undefined && errcode !== 0) {
                 new Notice(getErrorMessage(errcode), 0)
@@ -195,7 +224,7 @@ export class AssetsManager {
         let offset = 0;
         let total = MAX_COUNT;
         while (offset < total) {
-            const json = await this.plugin.wechatClient.getBatchDraftList(accountName, offset, MAX_COUNT);
+            const json = await this._plugin.wechatClient.getBatchDraftList(accountName, offset, MAX_COUNT);
             const { errcode, item, total_count, item_count } = json;
             if (errcode !== undefined && errcode !== 0) {
                 new Notice(getErrorMessage(errcode), 0)
@@ -231,7 +260,7 @@ export class AssetsManager {
         let offset = 0;
         let total = MAX_COUNT;
         while (offset < total) {
-            const json = await this.plugin.wechatClient.getBatchMaterial(accountName, type, offset, MAX_COUNT);
+            const json = await this._plugin.wechatClient.getBatchMaterial(accountName, type, offset, MAX_COUNT);
             const { errcode, item, total_count, item_count } = json;
             if (errcode !== undefined && errcode !== 0) {
                 new Notice(getErrorMessage(errcode), 0)
@@ -317,8 +346,8 @@ export class AssetsManager {
         const drafts = this.assets.get('draft')
         this.getImageSrc(drafts as DraftItem[])
 
-        console.log(`thumbMediaIdList=>`, this.thumbUrlList);
-        console.log(`dataSrcList=>`, this.imgUrlList);
+        // console.log(`thumbMediaIdList=>`, this.thumbUrlList);
+        // console.log(`dataSrcList=>`, this.imgUrlList);
 
         const verifyList = new SrcThumbList()
         this.thumbUrlList.list.forEach((articles, url) => {
@@ -328,12 +357,12 @@ export class AssetsManager {
             verifyList.add(url, articles)
         })
 
-        console.log(`verifyList=>`, verifyList);
-        this.plugin.messageService.sendMessage('src-thumb-list-updated', verifyList)
+        // console.log(`verifyList=>`, verifyList);
+        this._plugin.messageService.sendMessage('src-thumb-list-updated', verifyList)
         images.forEach(image => {
             const used = verifyList.get(image.url) !== undefined
             image.used = used
-            this.plugin.messageService.sendMessage('image-used-updated', image)
+            this._plugin.messageService.sendMessage('image-used-updated', image)
         })
     }
 
@@ -420,6 +449,10 @@ export class AssetsManager {
             let offset = 0; // 当前偏移量
             let total = 10; // 总记录数
             const items: Array<MaterialItem> = []
+            if (accountName === undefined || !accountName){
+                resolve(items)
+                return
+            }
             while (true) {
                 const result = await this.db.find({
                     selector: {

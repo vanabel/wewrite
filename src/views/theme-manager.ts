@@ -1,7 +1,7 @@
 import matter from "gray-matter";
 import { TFile, TFolder } from "obsidian";
 import WeWritePlugin from "src/main";
-import { DEFAULT_STYLE } from "src/render/default_css";
+import { DEFAULT_STYLE } from "src/render/default-css";
 import {TEMPLATE_CSS} from "src/assets/css/template-css";
 import {CORE_CSS} from "src/assets/css/core-css";
 
@@ -14,13 +14,16 @@ export type WeChatTheme = {
 }
 
 export class ThemeManager {
-    plugin: WeWritePlugin;
+	downloadThemes() {
+		throw new Error("Method not implemented.");
+	}
+    private _plugin: WeWritePlugin;
     themes: WeChatTheme[] = [];
     static template_css:string = TEMPLATE_CSS;
     static core_css:string = CORE_CSS;
 
     private constructor(plugin: WeWritePlugin) {
-        this.plugin = plugin;
+        this._plugin = plugin;
 
     }
 
@@ -30,8 +33,8 @@ export class ThemeManager {
 
     async loadThemes() {
         this.themes = [];
-        const folder_path = this.plugin.settings.css_styles_folder;
-        const folder = this.plugin.app.vault.getAbstractFileByPath(folder_path);
+        const folder_path = this._plugin.settings.css_styles_folder;
+        const folder = this._plugin.app.vault.getAbstractFileByPath(folder_path);
         if (folder instanceof TFolder) {
             this.themes = await this.getAllThemesInFolder(folder);
         }
@@ -63,11 +66,11 @@ export class ThemeManager {
     public async getThemeContent(path: string) {
         console.log(`path:`, path);
 
-        const file = this.plugin.app.vault.getFileByPath(path);
+        const file = this._plugin.app.vault.getFileByPath(path);
         if (!file) {
             return DEFAULT_STYLE;
         }
-        const fileContent = await this.plugin.app.vault.cachedRead(file);
+        const fileContent = await this._plugin.app.vault.cachedRead(file);
         // console.log(`fileContent:`, fileContent);
 
         const reg_css_block = /```[cC][Ss]{2}\s*([\s\S]*?)\s*```/g;
@@ -87,11 +90,14 @@ export class ThemeManager {
     }
     public async getCSS(){
         let custom_css = ''
-        if (this.plugin.settings.custom_theme === undefined || !this.plugin.settings.custom_theme){
+        if (this._plugin.settings.custom_theme === undefined || !this._plugin.settings.custom_theme){
 
-        } else custom_css = await this.getThemeContent(this.plugin.settings.custom_theme)
+        } else {
+            custom_css = await this.getThemeContent(this._plugin.settings.custom_theme)
+        }
 
-        return `${ThemeManager.template_css}\n${ThemeManager.core_css}\n${custom_css}`
+        // return `${ThemeManager.template_css}\n${ThemeManager.core_css}\n${custom_css}`
+        return custom_css
 
     }
     private async getAllThemesInFolder(folder: TFolder): Promise<WeChatTheme[]> {
@@ -123,7 +129,7 @@ export class ThemeManager {
     }
 
     private async getThemeProperties(file: TFile): Promise<WeChatTheme | undefined> {
-        const fileContent = await this.plugin.app.vault.cachedRead(file);
+        const fileContent = await this._plugin.app.vault.cachedRead(file);
         const { data } = matter(fileContent); // 解析前置元数据
         console.log(`data`, data);
 

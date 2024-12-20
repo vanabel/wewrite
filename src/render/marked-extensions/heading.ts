@@ -93,9 +93,6 @@ export class Heading extends WeWriteMarkedExtension {
 
         return `
             <h${depth}>
-              <a name="${escapedText}" class="anchor" href="#${escapedText}">
-                <span class="header-link"></span>
-              </a>
               ${text}
             </h${depth}>`;
   
@@ -113,26 +110,7 @@ export class Heading extends WeWriteMarkedExtension {
             extensions: [{
                 name: 'heading',
                 level: 'inline',
-                // start(src: string) {
-                //     let index;
-                //     let indexSrc = src;
-
-                //     while (indexSrc) {
-                //         index = indexSrc.indexOf('[:');
-                //         if (index === -1) return;
-                //         return index;
-                //     }
-                // },
-                // tokenizer(src: string) {
-                //     const match = src.match(iconsRegex);
-                //     if (match) {
-                //         return {
-                //             type: 'SVGIcon',
-                //             raw: match[0],
-                //             text: match[1],
-                //         };
-                //     }
-                // },
+                
                 renderer(token: Tokens.Generic) {
                     return token.html;
                 }

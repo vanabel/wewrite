@@ -4,17 +4,17 @@ import { App, Notice, TAbstractFile, TFile, TFolder } from "obsidian";
 import { TextInputSuggest } from "../utils/suggest"
 import WeWritePlugin from "src/main";
 
-import { ThemeManager, WeChatTheme } from "./ThemeManager";
+import { ThemeManager, WeChatTheme } from "./theme-manager";
 
 export class ThemeSuggest extends TextInputSuggest<WeChatTheme> {
-    plugin: WeWritePlugin;
+    private _plugin: WeWritePlugin;
     constructor(plugin: WeWritePlugin, inputEl: HTMLInputElement | HTMLTextAreaElement) {
         super(plugin.app, inputEl);
-        this.plugin = plugin;
+        this._plugin = plugin;
     }
 
     async getSuggestions(inputStr: string): Promise<WeChatTheme[]> {
-        const manager = ThemeManager.getInstance(this.plugin);
+        const manager = ThemeManager.getInstance(this._plugin);
         const themes = await manager.loadThemes()
         return themes.filter(theme => theme.name.toLowerCase().contains(inputStr.toLowerCase()))
     }

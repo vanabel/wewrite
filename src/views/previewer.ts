@@ -4,14 +4,16 @@
 
 import { DropdownComponent, Editor, EventRef, ItemView, MarkdownView, sanitizeHTMLToDom, Setting, TFile, WorkspaceLeaf } from 'obsidian';
 import { EditorView } from "@codemirror/view";
-import { ResourceManager } from './../assets/ResourceManager';
+import { ResourceManager } from '../assets/resource-manager';
 import WeWritePlugin from 'src/main';
-import { WechatRender } from 'src/render/WeChatRender';
+import { WechatRender } from 'src/render/wechat-render';
 import { PreviewRender } from 'src/render/marked-extensions/extension';
-import { SrcThumbList } from 'src/utils/SrcThumbList';
-import { WechatClient } from '../wechat-api/wechatClient';
-import { MPArticleHeader } from './MPArticleHeader';
-import { ThemeManager } from './ThemeManager';
+import { SrcThumbList } from 'src/utils/src-thumb-list';
+import { WechatClient } from '../wechat-api/wechat-client';
+import { MPArticleHeader } from './mp-article-header';
+import { ThemeManager } from './theme-manager';
+import { ThemeSelector } from './theme-selector';
+import { ThemeProcessor } from 'src/assets/theme-processor';
 
 export const VIEW_TYPE_NP_PREVIEW = 'wechat-np-article-preview';
 export interface ElectronWindow extends Window {
@@ -26,9 +28,8 @@ export class PreviewPanel extends ItemView implements PreviewRender {
     currentView: EditorView;
     observer: any;
     private wechatClient: WechatClient;
-    private plugin: WeWritePlugin
-    private themeDropdown: DropdownComponent;
-    private tm: ThemeManager
+    private _plugin: WeWritePlugin
+    private themeSelector: ThemeSelector;
 
     private draftHeader: MPArticleHeader
     editorView: EditorView | null = null;
@@ -49,16 +50,16 @@ export class PreviewPanel extends ItemView implements PreviewRender {
     }
     constructor(leaf: WorkspaceLeaf, plugin: WeWritePlugin) {
         super(leaf);
-        this.plugin = plugin
-        this.wechatClient = WechatClient.getInstance(this.plugin)
-        this.tm = ThemeManager.getInstance(this.plugin)
+        this._plugin = plugin
+        this.wechatClient = WechatClient.getInstance(this._plugin)
+        this.themeSelector = new ThemeSelector(plugin)
 
     }
 
     async onOpen() {
         this.buildUI();
         this.startListen()
-        this.plugin.messageService.registerListener(
+        this._plugin.messageService.registerListener(
             'src-thumb-list-updated', (data: SrcThumbList) => {
                 console.log(`on messageService, data=>`, data);
                 // this.update()
@@ -76,26 +77,18 @@ export class PreviewPanel extends ItemView implements PreviewRender {
                 })
             }
         )
-        this.plugin.messageService.registerListener('draft-title-updated', (title: string) => {
+        this._plugin.messageService.registerListener('draft-title-updated', (title: string) => {
             console.log(`on messageService, title=>`, title);
             
             this.articleTitle.setName(title)
         })
-        this.startWatchThemes()
+        this.themeSelector.startWatchThemes()
         this.startWatchActiveNoteChange()
+        this._plugin.messageService.registerListener('custom-theme-changed', async (theme: string)=>{
+            this.setStyle(await this.getCSS())
+        })
         
     }
-    // reisterRenderCompleteEvent(){
-    //     this.plugin.registerEvent(
-    //         this.plugin.app.workspace.on('file-content-rendered', (leaf: WorkspaceLeaf) => {
-    //             if (leaf.view instanceof MarkdownView) {
-    //                 console.log(`File content rendered: ${leaf.view.file.path}`);
-    //                 // 在这里执行你需要的操作
-    //                 this.onFileContentRendered(leaf.view);
-    //             }
-    //         })
-    //     );
-    // }
     
     onFileContentRendered(view: MarkdownView) {
         // throw new Error('Method not implemented.');
@@ -116,26 +109,17 @@ export class PreviewPanel extends ItemView implements PreviewRender {
         this.articleTitle = new Setting(mainDiv)
             .setName('Article Title')
             .setHeading()
-            .addDropdown(async (dropdown) => {
-                this.themeDropdown = dropdown
-                await this.updateThemeOptions()
-
-                dropdown.onChange(async (value) => {
-                    console.log(value)
-                    this.plugin.settings.custom_theme = value
-                    this.setStyle(await this.getCSS())
-                })
-
+            .addDropdown((dropdown: DropdownComponent) =>{
+                this.themeSelector.dropdown(dropdown);
             })
-
             .addExtraButton(
                 (button) => {
                     button.setIcon('image-up')
                         .setTooltip('')
                         .onClick(async () => {
                             console.log(`upload materials.`);
-                            // ResourceManager.getInstance(this.plugin).forceRenderActiveMarkdownView()
-                            ResourceManager.getInstance(this.plugin).scrollActiveMarkdownView()
+                            // ResourceManager.getInstance(this._plugin).forceRenderActiveMarkdownView()
+                            ResourceManager.getInstance(this._plugin).scrollActiveMarkdownView()
 
                         })
                 }
@@ -147,7 +131,8 @@ export class PreviewPanel extends ItemView implements PreviewRender {
                         .onClick(async () => {
                             console.log(`rerender article content.`);
                             // this.articleDiv.innerHTML = await 
-                            this.parseActiveMarkdown();
+                            // this.parseActiveMarkdown();
+                            this.renderDraft()
                         })
                 }
             )
@@ -175,17 +160,19 @@ export class PreviewPanel extends ItemView implements PreviewRender {
                     button.setIcon('panel-left')
                         .setTooltip('show materials and drafts')
                     button.onClick(async () => {
-                        this.plugin.showLeftView()
+                        this._plugin.showLeftView()
                     })
                 }
             )
 
-        this.draftHeader = new MPArticleHeader(this.plugin, mainDiv)
+        this.draftHeader = new MPArticleHeader(this._plugin, mainDiv)
 
         this.renderDiv = mainDiv.createDiv({ cls: 'render-div' });
         this.renderDiv.id = 'render-div';
         this.renderDiv.setAttribute('style', '-webkit-user-select: text; user-select: text;');
-        let shadowDom = this.renderDiv.shawdowRoot;
+
+        //TODO: keep the shadow dom for future use, here for computed style from obsidian and all other plugins
+        let shadowDom = this.renderDiv //.shawdowRoot;
         if (shadowDom === undefined || shadowDom === null) {
 
             shadowDom = this.renderDiv.attachShadow({ mode: 'open' });
@@ -202,88 +189,23 @@ export class PreviewPanel extends ItemView implements PreviewRender {
         return this.containerDiv.innerHTML
     }
     async getCSS() {
-        return await ThemeManager.getInstance(this.plugin).getCSS()
+        return await ThemeManager.getInstance(this._plugin).getCSS()
     }
     setStyle(css: string) {
         this.styleEl.empty();
         this.styleEl.appendChild(document.createTextNode(css));
     }
-    async updateThemeOptions() {
-        const themes = await this.tm.loadThemes()
-        console.log(`themes=>`, themes);
-
-        //clear all options
-        this.themeDropdown.selectEl.length = 0
-        this.themeDropdown.addOption('', 'Default')
-        themes.forEach(theme => {
-            this.themeDropdown.addOption(theme.path, theme.name)
-        })
-        if (this.plugin.settings.custom_theme === undefined || !this.plugin.settings.custom_theme) {
-            this.themeDropdown.setValue('')
-        } else {
-            this.themeDropdown.setValue(this.plugin.settings.custom_theme)
-        }
-
-    }
+    
     async onClose() {
         // Clean up our view
         this.stopListen()
-        this.stopWatchThemes()
+        this.themeSelector.stopWatchThemes()
 
     }
-    onThemeChange(file: TFile) {
-        if (file instanceof TFile && file.extension === 'md' && file.path.startsWith(this.plugin.settings.css_styles_folder)) {
-            console.log(`theme file changed: ${file.path}`);
-            this.updateThemeOptions()
-        } else {
-            console.log(`not a theme file`);
-
-        }
-    }
-    startWatchThemes() {
-        this.registerEvent(
-            this.app.vault.on('rename', (file: TFile) => {
-                console.log(`File renamed: ${file.path}`);
-                //TODO: localdraft is not valid any more
-                this.draftHeader.onNoteRename(file)
-                // 在这里处理文件修改的逻辑
-                this.onThemeChange(file)
-
-            })
-        );
-        this.registerEvent(
-            this.app.vault.on('modify', (file: TFile) => {
-                console.log(`File modified: ${file.path}`);
-                // 在这里处理文件修改的逻辑
-                this.onThemeChange(file)
-
-            })
-        );
-
-        this.registerEvent(
-            this.app.vault.on('create', (file: TFile) => {
-                console.log(`File created: ${file.path}`);
-                // 在这里处理文件创建的逻辑
-                this.onThemeChange(file)
-            })
-        );
-
-        this.registerEvent(
-            this.app.vault.on('delete', (file: TFile) => {
-                console.log(`File deleted: ${file.path}`);
-                // 在这里处理文件删除的逻辑
-                this.onThemeChange(file)
-            })
-        );
-    }
-    stopWatchThemes() {
-        // throw new Error('Method not implemented.');
-        console.log(`stop watch themes`);
-
-    }
+    
 
     async parseActiveMarkdown() {
-        const mview = ResourceManager.getInstance(this.plugin).getCurrentMarkdownView()
+        const mview = ResourceManager.getInstance(this._plugin).getCurrentMarkdownView()
         if (!mview){
             console.log(`not a markdown view`);
             return 'not a markdown view';
@@ -310,7 +232,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
         const md = await this.app.vault.adapter.read(activeFile!.path)
 
         this.setStyle(await this.getCSS())
-        let html = await WechatRender.getInstance(this.plugin, this).parse(md)
+        let html = await WechatRender.getInstance(this._plugin, this).parse(md)
 
 
         html = `<section class="wewrite-article-content" id="article-section">${html}</section>`;
@@ -320,8 +242,8 @@ export class PreviewPanel extends ItemView implements PreviewRender {
             this.articleDiv.appendChild(doc.firstChild);
         }
 
+        // render the async part of the doc.
         console.log(`this.elementMap=>`, this.elementMap);
-
         this.elementMap.forEach(async (node: HTMLElement | string, id: string) => {
             const item = this.articleDiv.querySelector('#' + id) as HTMLElement;
             console.log(`id=${id}, item=>`, item);
@@ -329,13 +251,13 @@ export class PreviewPanel extends ItemView implements PreviewRender {
 
             if (!item) return;
             if (typeof node === 'string') {
-                const tf = ResourceManager.getInstance(this.plugin).getFileOfLink(node)
+                const tf = ResourceManager.getInstance(this._plugin).getFileOfLink(node)
                 if (tf) {
-                    const file = this.plugin.app.vault.getFileByPath(tf.path)
+                    const file = this._plugin.app.vault.getFileByPath(tf.path)
                     console.log(`file=>`, file);
                     if (file) {
-                        const content = await this.plugin.app.vault.adapter.read(file.path);
-                        const body = await WechatRender.getInstance(this.plugin, this).parse(content);
+                        const content = await this._plugin.app.vault.adapter.read(file.path);
+                        const body = await WechatRender.getInstance(this._plugin, this).parse(content);
                         console.log(`body=>`, body);
                         console.log(`item=>`, item);
 
@@ -350,12 +272,20 @@ export class PreviewPanel extends ItemView implements PreviewRender {
         })
         return this.articleDiv.innerHTML
     }
-    async update() {
+    async renderDraft() {
         
         await this.parseActiveMarkdown();
+        await ThemeProcessor.getInstance(this._plugin).processNamedStyle(this.articleDiv, 'wewrite-style')
 
     }
     startListen() {
+        this.registerEvent(
+            this._plugin.app.vault.on('rename', (file: TFile) => {
+                console.log(`File renamed: ${file.path}`);
+                //TODO: localdraft is not valid any more
+                this.draftHeader.onNoteRename(file)
+            })
+        );
         const ec = this.app.workspace.on('editor-change', (editor: Editor, info: MarkdownView) => {
             
             this.onEditorChange(editor, info);
@@ -366,7 +296,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
         // const el = this.app.workspace.on('active-leaf-change', () => this.update())
         const el = this.app.workspace.on('active-leaf-change', async () => {
             if (await this.draftHeader.updateLocalDraft()) {
-                this.update()
+                this.renderDraft()
             }
         })
         this.listeners.push(el);
@@ -432,7 +362,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
 
     onEditorChange(editor: Editor, info: MarkdownView) {
         console.log(`onEditorChange:`, editor);
-        this.update()
+        this.renderDraft()
     }
     updateElementByID(id: string, html: string): void {
         const item = this.articleDiv.querySelector('#' + id) as HTMLElement;

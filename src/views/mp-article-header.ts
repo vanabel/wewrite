@@ -2,27 +2,12 @@ import WeWritePlugin from 'src/main';
 import { MarkdownView, Setting, TextAreaComponent, TextComponent, TFile, ToggleComponent } from "obsidian";
 import { placeholder } from '@codemirror/view';
 import { UrlUtils } from 'src/utils/urls';
-import { LocalDraftItem, LocalDraftManager } from 'src/assets/DraftManager';
+import { LocalDraftItem, LocalDraftManager } from 'src/assets/draft-manager';
 import { timeStamp } from 'console';
 
 export class MPArticleHeader {
-    onNoteRename(file: TFile) {
-        //TODO: only if the file is the active file
-        const activeFile = this.plugin.app.workspace.getActiveFile()
-        if (activeFile === undefined || file !== activeFile) {
-            console.log(`not the active file. return`);
-            return;
-        }
-        console.log(`on note rename, update local draft`);
-        
-        if (this.activeLocalDraft !== undefined) {
-            this.activeLocalDraft.notePath = file.path
-            const dm = LocalDraftManager.getInstance(this.plugin)
-            dm.setDraft(this.activeLocalDraft)
-        }
-
-    }
-    private plugin: WeWritePlugin;
+    
+    private _plugin: WeWritePlugin;
     private panning: boolean = false
     private origin_x: number
     private origin_y: number
@@ -41,16 +26,33 @@ export class MPArticleHeader {
     private _cover_image: string | null
     private _cover_image_url: string | null
     constructor(plugin: WeWritePlugin, containerEl: HTMLElement) {
-        this.plugin = plugin;
+        this._plugin = plugin;
         this.localDraftmanager = LocalDraftManager.getInstance(plugin)
         this.BuildUI(containerEl)
-        this.plugin.messageService.registerListener('wechat-account-changed', (data: string) => {
+        this._plugin.messageService.registerListener('wechat-account-changed', (data: string) => {
             this.updateLocalDraft();
         })
-        this.plugin.messageService.registerListener('active-file-changed', (data: string) => {
+        this._plugin.messageService.registerListener('active-file-changed', (data: string) => {
             this.updateLocalDraft();
         })
         this.updateLocalDraft()
+
+    }
+
+    onNoteRename(file: TFile) {
+        //TODO: only if the file is the active file
+        const activeFile = this._plugin.app.workspace.getActiveFile()
+        if (activeFile === undefined || file !== activeFile) {
+            console.log(`not the active file. return`);
+            return;
+        }
+        console.log(`on note rename, update local draft`);
+        
+        if (this.activeLocalDraft !== undefined) {
+            this.activeLocalDraft.notePath = file.path
+            const dm = LocalDraftManager.getInstance(this._plugin)
+            dm.setDraft(this.activeLocalDraft)
+        }
 
     }
 
@@ -68,7 +70,7 @@ export class MPArticleHeader {
                         if (this.activeLocalDraft !== undefined) {
                             this.activeLocalDraft.title = value
                             this.localDraftmanager.setDraft(this.activeLocalDraft)
-                            this.plugin.messageService.sendMessage('draft-title-updated', value)
+                            this._plugin.messageService.sendMessage('draft-title-updated', value)
                         }
                     })
             })
@@ -134,7 +136,7 @@ export class MPArticleHeader {
                     .setTooltip('pick image in WeChat Official Account from left side view')
                     .onClick(async () => {
                         console.log('show left view')
-                        this.plugin.showLeftView()
+                        this._plugin.showLeftView()
                     })
             )
         const coverframe = details.createDiv({ cls: 'wechat-mp-article-preview-cover', attr: { droppable: true } })
@@ -169,7 +171,7 @@ export class MPArticleHeader {
             if (url) {
                 if (url.startsWith('obsidian://')) {
 
-                    const urlParser = new UrlUtils(this.plugin.app);
+                    const urlParser = new UrlUtils(this._plugin.app);
 
                     const appurl = await urlParser.getInternalLinkDisplayUrl(url)
                     console.log(`appUrl: ${appurl}`);
@@ -186,13 +188,15 @@ export class MPArticleHeader {
                     this.setCoverImage()
 
                     // coverframe.setAttr('style', `background-image: url('${url}'); background-size:cover; background-position: 0px 0px;`);
-                    const media_id = this.plugin.findImageMediaId(url)
+                    const media_id = this._plugin.findImageMediaId(url)
                     coverframe.setAttr('data-media_id', media_id)
                     if (this.activeLocalDraft !== undefined) {
                         this.activeLocalDraft.thumb_media_id = media_id
                     }
                     console.log(`media_id: ${media_id}`);
+                    
                 }
+                this.localDraftmanager.setDraft(this.activeLocalDraft!)
             }
             coverframe.removeClass('image-on-dragover')
         })
@@ -285,7 +289,7 @@ export class MPArticleHeader {
         this.activeLocalDraft = await this.localDraftmanager.getDrafOfActiveNote()
         this.updateHeaderProporties()
         return true;
-        // const activeView = this.plugin.app.workspace.getActiveViewOfType(MarkdownView);
+        // const activeView = this._plugin.app.workspace.getActiveViewOfType(MarkdownView);
 
         // if (activeView === undefined || activeView === null) {
         //     console.log(`not a markdown view`);
@@ -295,7 +299,7 @@ export class MPArticleHeader {
 
         // }
 
-        // const activeFile = this.plugin.app.workspace.getActiveFile();
+        // const activeFile = this._plugin.app.workspace.getActiveFile();
         // console.log(`updateLocalDraft activeFile=>`, activeFile?.path);
         // if (activeFile === undefined || activeFile === null) {
         //     console.log(`no activeFile`);
@@ -306,14 +310,14 @@ export class MPArticleHeader {
         // const notePath = activeFile.path;
         // if (this.activeLocalDraft !== undefined &&
         //     this.activeLocalDraft.notePath === notePath &&
-        //     this.activeLocalDraft.accountName === this.plugin.settings.selectedAccount) {
+        //     this.activeLocalDraft.accountName === this._plugin.settings.selectedAccount) {
         //     //the same file
         //     console.log(`updateLocalDraft, same account and same file `);
         //     return false;
 
         // } else {
-        //     const dm = LocalDraftManager.getInstance(this.plugin)
-        //     const draft = await dm.getDraft(this.plugin.settings.selectedAccount!, notePath)
+        //     const dm = LocalDraftManager.getInstance(this._plugin)
+        //     const draft = await dm.getDraft(this._plugin.settings.selectedAccount!, notePath)
         //     console.log(`get draft=>`, draft);
 
         //     if (draft !== undefined) {
@@ -322,7 +326,7 @@ export class MPArticleHeader {
         //         console.log(`new draft`);
 
         //         this.activeLocalDraft = {
-        //             accountName: this.plugin.settings.selectedAccount!,
+        //             accountName: this._plugin.settings.selectedAccount!,
         //             notePath: notePath,
         //             title: activeFile?.basename || "",
         //             content: ""
@@ -355,6 +359,6 @@ export class MPArticleHeader {
             const y = 0
             this.coverframe.setAttr('style', `background-image: url('${this.cover_image}'); background-size:cover; background-repeat: no-repeat; background-position:  ${x}px ${y}px;`);
         }
-        this.plugin.messageService.sendMessage('draft-title-updated', this._title.getValue())
+        this._plugin.messageService.sendMessage('draft-title-updated', this._title.getValue())
     }
 }

@@ -7,7 +7,7 @@ interface REROUCE_ITEM {
   el:HTMLElement;
 }
 
-export class CollapsibleContainer {
+export class MaterialPanel {
   private container: HTMLElement;
   private header: HTMLElement;
   private content: HTMLElement;
@@ -15,12 +15,12 @@ export class CollapsibleContainer {
   private totalSpan: HTMLSpanElement;
   private toggleButton: HTMLElement;
   private refreshButton: HTMLElement;
-  private plugin: WeWritePlugin;
+  private _plugin: WeWritePlugin;
   private type: MediaType;
   private items: REROUCE_ITEM[] = [];
 
   constructor(plugin: WeWritePlugin, parent: HTMLElement, title: string, type: MediaType) {
-    this.plugin = plugin;
+    this._plugin = plugin;
     this.type = type;
     this.container = parent.createDiv({ cls: 'collapsible-container' });
     this.header = parent.createDiv({ cls: 'collapsible-header' });
@@ -46,17 +46,17 @@ export class CollapsibleContainer {
     this.refreshButton.addEventListener('click', () => this.refreshContent());
     this.initContent()
     
-    this.plugin.messageService.registerListener(`clear-${this.type}-list`, ()=>{
+    this._plugin.messageService.registerListener(`clear-${this.type}-list`, ()=>{
       this.clearContent()
     })
-    this.plugin.messageService.registerListener(`${this.type}-item-updated`, (item)=>{
+    this._plugin.messageService.registerListener(`${this.type}-item-updated`, (item)=>{
       this.addItem(item)
     })
-    this.plugin.messageService.registerListener(`${this.type}-item-deleted`, (item)=>{
+    this._plugin.messageService.registerListener(`${this.type}-item-deleted`, (item)=>{
       this.removeItem(item)
     })
     if (this.type === 'image'){
-      this.plugin.messageService.registerListener(`image-used-updated`, (item)=>{
+      this._plugin.messageService.registerListener(`image-used-updated`, (item)=>{
         this.updateItemUsed(item)
       })
     }
@@ -69,13 +69,13 @@ export class CollapsibleContainer {
 
     if (this.type === 'draft') {
 
-      return await this.plugin.assetsManager.getAllDrafts((item) => {
+      return await this._plugin.assetsManager.getAllDrafts((item) => {
           this.addItem(item)
-      }, this.plugin.settings.selectedAccount)
+      }, this._plugin.settings.selectedAccount)
     }
-    await this.plugin.assetsManager.getAllMaterialOfType(this.type, (item) => {
+    await this._plugin.assetsManager.getAllMaterialOfType(this.type, (item) => {
         this.addItem(item)
-    }, this.plugin.settings.selectedAccount)
+    }, this._plugin.settings.selectedAccount)
     //TODO: enable after all content 
 
   }
@@ -139,11 +139,13 @@ export class CollapsibleContainer {
     this.items.push({item:item, el:itemDiv});
 
     if (this.type === 'draft' || this.type === 'news') {
-        console.log(`item=>`, item);
+        // console.log(`item=>`, item);
         
         itemDiv.innerHTML = `<a href=${item.content.news_item[0].url}> ${item.content.news_item[0].title}</a>`
         itemDiv.addEventListener('click', () => { })
     }else if (this.type === 'image') {
+      // console.log(`image[${this.items.length}].media_id=${item.media_id}`);
+      
         itemDiv.innerHTML = '<img src="' + item.url + '" alt="' + item.name + '" />'
         itemDiv.addEventListener('click', () => {
           console.log(`click ${item.used}`)
@@ -160,11 +162,13 @@ export class CollapsibleContainer {
   }
   updateItemUsed(item:any){
     const old_item = this.items.find((i)=>{
-      i.item.media_id === item.media_id
+      return i.item.media_id === item.media_id
     })
-    if (old_item !== undefined) {
+    if (old_item !== undefined && old_item !== null) {
       old_item.item.used = item.used
     }else{
+      // console.log(`Update used: item.media_id:`, item.media_id );
+      
       this.addItem(item)
     }
   }
@@ -181,14 +185,14 @@ export class CollapsibleContainer {
   async initContent(): Promise<any> {
     // throw new Error("Method not implemented.");
     //TODO: disable click avoid multiple refresh
-    console.log(`load content from local db `);
+    // console.log(`load content from local db `);
     this.content.innerHTML = '';
     this.setTotal(0);
     let total = 0;
     this.content.style.display = 'block';
     setIcon(this.toggleButton, 'chevron-up')
 
-    const items = this.plugin.assetsManager.assets.get(this.type)
+    const items = this._plugin.assetsManager.assets.get(this.type)
     if (items === undefined || items === null) {
       return;
     }

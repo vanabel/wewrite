@@ -23,7 +23,7 @@
 import { Token, Tokens, MarkedExtension } from "marked";
 import { Notice, TAbstractFile, TFile, Vault, MarkdownView, requestUrl, sanitizeHTMLToDom } from "obsidian";
 import { WeWriteMarkedExtension } from "./extension";
-import { ResourceManager } from "src/assets/ResourceManager";
+import { ResourceManager } from "src/assets/resource-manager";
 import { handleRetriesFor } from "mathjax-full/js/util/Retries";
 
 declare module 'obsidian' {
@@ -256,7 +256,7 @@ export class Embed extends WeWriteMarkedExtension {
             console.error('找不到文件：' + path);
             return '';
         }
-        // const file = this.plugin.app.vault.getFileByPath(path);
+        // const file = this._plugin.app.vault.getFileByPath(path);
         const resPath = this.plugin.app.vault.getResourcePath(file as TFile);
         const info = {
             resUrl: resPath,
@@ -383,7 +383,7 @@ export class Embed extends WeWriteMarkedExtension {
         // let { path, head: header, block} = this.parseFileLink(link);
         // let file = null;
         // if (path === '') {
-        //     file = this.plugin.app.workspace.getActiveFile();
+        //     file = this._plugin.app.workspace.getActiveFile();
         // }
         // else {
         //     if (!path.endsWith('.md')) {
@@ -482,8 +482,8 @@ export class Embed extends WeWriteMarkedExtension {
     async renderExcalidraw(name: string, id: string) {
         try {
             // let container: HTMLElement | null = null;
-            // const currentFile = this.plugin.app.workspace.getActiveFile();
-            // const leaves = this.plugin.app.workspace.getLeavesOfType('markdown');
+            // const currentFile = this._plugin.app.workspace.getActiveFile();
+            // const leaves = this._plugin.app.workspace.getLeavesOfType('markdown');
             // for (let leaf of leaves) {
             //     const markdownView = leaf.view as MarkdownView;
             //     console.log(`${markdownView.file?.path} == ${currentFile?.path}`);

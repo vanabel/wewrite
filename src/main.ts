@@ -1,16 +1,16 @@
-import { AssetsManager } from './assets/assetsManager';
+import { AssetsManager } from './assets/assets-manager';
 import { App, Editor, EventRef, MarkdownFileInfo, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, WorkspaceLeaf } from 'obsidian';
 import { PreviewPanel, VIEW_TYPE_NP_PREVIEW } from './views/previewer';
-import { getWeChatMPSetting, saveWeChatMPSetting, WeChatMPSetting as WeWriteSetting } from './settings/wechatMPSetting';
-import { WechatClient } from './wechat-api/wechatClient';
-import { WeWriteSettingTab } from './settings/settingTab';
-import { getPublicIpAddress } from "src/utils/ipAddress";
-import { MaterialView, VIEW_TYPE_MP_MATERIAL } from './views/materialView';
+import { getWeChatMPSetting, saveWeWriteSetting, WeWriteSetting as WeWriteSetting } from './settings/wewrite-setting';
+import { WechatClient } from './wechat-api/wechat-client';
+import { WeWriteSettingTab } from './settings/setting-tab';
+import { getPublicIpAddress } from "src/utils/ip-address";
+import { MaterialView, VIEW_TYPE_MP_MATERIAL } from './views/material-view';
 import { appendFileSync } from 'fs';
-import { MessageService } from './utils/messageService';
+import { MessageService } from './utils/message-service';
 import { DownloadableIconPack } from './render/admonition';
 import { IconManager } from './assets/icons/icon-manager';
-import { ResourceManager } from './assets/ResourceManager';
+import { ResourceManager } from './assets/resource-manager';
 
 // Remember to rename these classes and interfaces!
 
@@ -191,7 +191,7 @@ export default class WeWritePlugin extends Plugin {
 		delete this.settings._id
 		delete this.settings._rev
 		await this.saveData(this.settings);
-		await saveWeChatMPSetting(this.settings);
+		await saveWeWriteSetting(this.settings);
 	}
 	async activateView() {
 		const { workspace } = this.app;

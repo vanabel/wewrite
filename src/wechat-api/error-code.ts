@@ -53,6 +53,7 @@ export const WECHAT_API_ERROR_CODE = new Map(
         [40137, '不支持的图片格式'],
         [40155, '请勿添加其他公众号的主页链接'],
         [40163, 'oauth_code已使用'],
+        [40164, 'IP地址不在白名单上，将ip添加到ip白名单列表即可'],
         [40227, '标题为空'],
         [40243, 'AppSecret已被冻结，请登录MP解冻后再次调用'],
         [40249, '不支持下发营销/推广类的消息内容'],
@@ -155,6 +156,9 @@ export const WECHAT_API_ERROR_CODE = new Map(
         [65316, '该公众号的菜单设置了过多的域名外跳（最多跳转到 3 个域名的链接）'],
         [65317, '不合法的 URL'],
         [87009, '无效的签名'],
+        [89503, '此次调用需要管理员确认，请耐心等候'],
+        [89506, '该IP调用求请求已被公众号管理员拒绝，请24小时后再试，建议调用前与管理员沟通确认'],
+        [89507, '该IP调用求请求已被公众号管理员拒绝，请1小时后再试，建议调用前与管理员沟通确认'],
         [900100, '	POST 数据参数不合法'],
         [900100, '	远端服务不可用'],
         [900100, '	Ticket 不合法'],
@@ -181,10 +185,15 @@ export const WECHAT_API_ERROR_CODE = new Map(
         [900103, '	门店 ID 不合法'],
         [900103, '	设备备注信息过长'],
         [900103, '	设备申请参数不合法'],
-        [900103, '	查询起始值 begin 不合法']
+        [900103, '	查询起始值 begin 不合法'],
+        [40114, 'invalid index value'],
+        [41039, 'invalid content_source_url'],
+        [45166, 'invalid content'],
+        [88000, 'without comment privilege'],
     ])
 
 export function getErrorMessage(code: number) {
     return WECHAT_API_ERROR_CODE.get(code) || 'unknow error.'
 }
+
 

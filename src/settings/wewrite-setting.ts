@@ -5,7 +5,7 @@ manage the wechat account settings
 import PouchDB from 'pouchdb';
 import { DownloadableIconPack } from 'src/render/admonition';
 
-export type WeChatMPAccountInfo = {
+export type WeWriteAccountInfo = {
     _id?: string;
     accountName: string;
     appId: string;
@@ -16,7 +16,7 @@ export type WeChatMPAccountInfo = {
     isTokenValid?: boolean;
     
 }
-export type WeChatMPSetting = {
+export type WeWriteSetting = {
     custom_theme?: string;
 	codeLineNumber: boolean;
 	css_styles_folder: string;
@@ -24,7 +24,7 @@ export type WeChatMPSetting = {
     _rev?: string; 
     ipAddress?: string;
     selectedAccount?: string;
-    mpAccounts: Array<WeChatMPAccountInfo>;
+    mpAccounts: Array<WeWriteAccountInfo>;
     icons: Array<DownloadableIconPack>;
     useFontAwesome: boolean;
     rpgDownloadedOnce: boolean;
@@ -33,7 +33,7 @@ export type WeChatMPSetting = {
 // Create a new database
 const db = new PouchDB('wewrite-wechat-mp-setting');
 
-export const getWeChatMPSetting = async (): Promise<WeChatMPSetting|undefined> => {
+export const getWeChatMPSetting = async (): Promise<WeWriteSetting|undefined> => {
     return new Promise((resolve, reject) => {
         db.get('wechat-mp-setting')
             .then((doc: any) => {
@@ -46,7 +46,7 @@ export const getWeChatMPSetting = async (): Promise<WeChatMPSetting|undefined> =
     })
 }
 
-export const saveWeChatMPSetting = async (doc:WeChatMPSetting): Promise<void> => {
+export const saveWeWriteSetting = async (doc:WeWriteSetting): Promise<void> => {
     return new Promise((resolve, reject) => {
         doc._id = 'wechat-mp-setting';
         db.get(doc._id).then(existedDoc => {

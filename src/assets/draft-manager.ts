@@ -55,11 +55,11 @@ export type LocalDraftItem = {
 }
 
 export class LocalDraftManager {
-    private plugin: WeWritePlugin;
+    private _plugin: WeWritePlugin;
     private db: PouchDB.Database;
     private static instance: LocalDraftManager;
     private constructor(plugin: WeWritePlugin) {
-        this.plugin = plugin;
+        this._plugin = plugin;
         this.db = new PouchDB('wewrite-local-drafts');
     }
     public static getInstance(plugin: WeWritePlugin): LocalDraftManager {
@@ -71,9 +71,9 @@ export class LocalDraftManager {
     public async getDrafOfActiveNote() {
         let draft: LocalDraftItem | undefined
 
-        const accountName = this.plugin.settings.selectedAccount;
+        const accountName = this._plugin.settings.selectedAccount;
         if (accountName !== undefined && accountName) {
-            const f = this.plugin.app.workspace.getActiveFile()
+            const f = this._plugin.app.workspace.getActiveFile()
             if (f) {
                 draft = await this.getDraft(accountName, f.path)
                 if (draft === undefined) {
@@ -91,7 +91,7 @@ export class LocalDraftManager {
         return draft
     }
     public isActiveNoteDraft(draft: LocalDraftItem | undefined) {
-        const activeFile = this.plugin.app.workspace.getActiveFile()
+        const activeFile = this._plugin.app.workspace.getActiveFile()
         if (draft === undefined && activeFile === null) {
             console.log(`no active file and no draft`);
             return true

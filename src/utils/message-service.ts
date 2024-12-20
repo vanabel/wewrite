@@ -1,4 +1,4 @@
-import { SrcThumbList } from "./SrcThumbList";
+import { SrcThumbList } from "./src-thumb-list";
 
 export type MSG_TYPE  = 
   'src-thumb-list-updated' | 
@@ -26,7 +26,8 @@ export type MSG_TYPE  =
   'voice-item-deleted' |
   'image-used-updated' |
   'thumb-item-updated' |
-  'thumb-item-deleted' 
+  'thumb-item-deleted' |
+  'custom-theme-changed'
   
 
 export class MessageService {

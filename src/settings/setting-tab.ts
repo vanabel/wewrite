@@ -5,12 +5,13 @@
 import { App, Component, DropdownComponent, Notice, PluginSettingTab, Setting } from "obsidian";
 import WeWritePlugin from "src/main";
 import { WECHAT_MP_WEB_PAGE } from "./images";
-import { getPublicIpAddress } from "src/utils/ipAddress";
-import { WeChatMPAccountInfo } from "./wechatMPSetting";
-import { FolderSuggest } from "./FolderSuggester";
+import { getPublicIpAddress } from "src/utils/ip-address";
+import { WeWriteAccountInfo } from "./wewrite-setting";
+import { FolderSuggest } from "./folder-suggester";
+import { ThemeManager } from "src/views/theme-manager";
 
 export class WeWriteSettingTab extends PluginSettingTab {
-	plugin: WeWritePlugin;
+	private _plugin: WeWritePlugin;
 	appIdEl: Setting
 	appSecretEl: Setting
 	accountEl: HTMLElement
@@ -19,7 +20,7 @@ export class WeWriteSettingTab extends PluginSettingTab {
 
 	constructor(app: App, plugin: WeWritePlugin) {
 		super(app, plugin);
-		this.plugin = plugin;
+		this._plugin = plugin;
 	}
 
 	async display(): Promise<void> {
@@ -35,17 +36,17 @@ export class WeWriteSettingTab extends PluginSettingTab {
 		containerEl.createEl('hr')
 		// external IP
 		const ip = new Setting(containerEl)
-			.setName('Public IP Address: ' + this.plugin.settings.ipAddress)
+			.setName('Public IP Address: ' + this._plugin.settings.ipAddress)
 			.setHeading()
 			.setDesc('You should add this IP to "IP Whitelist" on your WeChat Official Account Platform development configuration.')
-		this.plugin.updateIpAddress().then(ipAddress => {
+		this._plugin.updateIpAddress().then(ipAddress => {
 			ip.setName('Public IP Address: ' + ipAddress)
 		})
 		ip.addExtraButton(button => {
 			button.setIcon('clipboard-copy')
 				.setTooltip('Copy IP to clipboard')
 				.onClick(async () => {
-					await navigator.clipboard.writeText(this.plugin.settings.ipAddress ?? '');
+					await navigator.clipboard.writeText(this._plugin.settings.ipAddress ?? '');
 					new Notice('IP copied to clipboard');
 				});
 		});
@@ -67,26 +68,27 @@ export class WeWriteSettingTab extends PluginSettingTab {
 			.addDropdown(
 				(dropdown) => {
 					this.accountDropdown = dropdown
-					if (this.plugin.settings.mpAccounts.length == 0) {
+					if (this._plugin.settings.mpAccounts.length == 0) {
 						this.newAccountInfo()
 					}else{
-						this.plugin.settings.mpAccounts.forEach(account => {
+						this._plugin.settings.mpAccounts.forEach(account => {
 							dropdown.addOption(account.accountName, account.accountName)
 						})
-						// if (this.plugin.settings.selectedAccount === undefined || !this.plugin.settings.mpAccounts.some(account => account.accountName === this.plugin.settings.selectedAccount)){
+						// if (this._plugin.settings.selectedAccount === undefined || !this._plugin.settings.mpAccounts.some(account => account.accountName === this._plugin.settings.selectedAccount)){
 							
 						// }
 					}
 					dropdown
-						.setValue(this.plugin.settings.selectedAccount ?? 'Select WeChat MP Account')
+						.setValue(this._plugin.settings.selectedAccount ?? 'Select WeChat MP Account')
 						.onChange(async (value) => {
 							//TODO: only update when the account has been tested successfully.
 							//TODO: should not update with every key press.
 							//TODO: if the acount is tested, we sync the data. 
 							
-							this.plugin.settings.selectedAccount = value;
-							this.updateAccountSettings(this.plugin.settings.selectedAccount, this.accountEl)
-							await this.plugin.saveSettings();
+							this._plugin.settings.selectedAccount = value;
+							this.updateAccountSettings(this._plugin.settings.selectedAccount, this.accountEl)
+							await this._plugin.saveSettings();
+							this._plugin.messageService.sendMessage('wechat-account-changed', value)
 						});
 				}
 			)
@@ -111,7 +113,7 @@ export class WeWriteSettingTab extends PluginSettingTab {
 					button.setIcon('download')
 						.setTooltip('Import account info')
 						.onClick(async () => {
-							// const json = await this.plugin.loadSettings()
+							// const json = await this._plugin.loadSettings()
 							// console.log(json)
 							console.log(`import account info`);
 
@@ -123,7 +125,7 @@ export class WeWriteSettingTab extends PluginSettingTab {
 					button.setIcon('upload')
 						.setTooltip('Export account info')
 						.onClick(async () => {
-							// const json = await this.plugin.loadSettings()
+							// const json = await this._plugin.loadSettings()
 							// console.log(json)
 							console.log(`export account info`);
 
@@ -143,10 +145,10 @@ export class WeWriteSettingTab extends PluginSettingTab {
 		.addSearch((cb) => {
 			new FolderSuggest(this.app, cb.inputEl);
 			cb.setPlaceholder("Example: folder1/folder2")
-				.setValue(this.plugin.settings.css_styles_folder)
+				.setValue(this._plugin.settings.css_styles_folder)
 				.onChange((new_folder) => {
-					this.plugin.settings.css_styles_folder = new_folder;
-					this.plugin.saveSettings(); 
+					this._plugin.settings.css_styles_folder = new_folder;
+					this._plugin.saveSettings(); 
 				});
 			// @ts-ignore
 			// cb.containerEl.addClass("templater_search");
@@ -156,6 +158,7 @@ export class WeWriteSettingTab extends PluginSettingTab {
 					.setTooltip("Download CSS style themes from Server")
 					.onClick(async () => {
 						console.log(`to download themes`);
+						ThemeManager.getInstance(this._plugin).downloadThemes();
 						
 					});
 			}
@@ -165,7 +168,7 @@ export class WeWriteSettingTab extends PluginSettingTab {
 		let n = 0
 		let newName = 'New Account'
 		while (true) {
-			const account = this.plugin.settings.mpAccounts.find((account: WeChatMPAccountInfo) => account.accountName === newName)
+			const account = this._plugin.settings.mpAccounts.find((account: WeWriteAccountInfo) => account.accountName === newName)
 			if (account === undefined || account === null) {
 				break
 			}
@@ -178,7 +181,7 @@ export class WeWriteSettingTab extends PluginSettingTab {
 			appId: '',
 			appSecret: ''
 		}
-		this.plugin.settings.mpAccounts.push(newAccount)
+		this._plugin.settings.mpAccounts.push(newAccount)
 		this.accountDropdown.addOption(newName, newName)
 		this.accountDropdown.setValue(newName)
 		// this.updateAccountSettings(newName, containerEl)
@@ -189,7 +192,7 @@ export class WeWriteSettingTab extends PluginSettingTab {
 		if (accountName === undefined) {
 			return
 		}
-		const account = this.plugin.getMPAccountByName(accountName)
+		const account = this._plugin.getMPAccountByName(accountName)
 		if (account === undefined) {
 			return
 		}
@@ -203,7 +206,8 @@ export class WeWriteSettingTab extends PluginSettingTab {
 				.setValue(account.accountName)
 				.onChange(async (value) => {
 					account.accountName = value;
-					await this.plugin.saveSettings();
+					await this._plugin.saveSettings();
+					this.updateAccountOptions()
 				}));
 		//addId		
 		new Setting(cEl)
@@ -213,7 +217,7 @@ export class WeWriteSettingTab extends PluginSettingTab {
 				.setValue(account.appId)
 				.onChange(async (value) => {
 					account.appId = value;
-					await this.plugin.saveSettings();
+					await this._plugin.saveSettings();
 				}));
 
 
@@ -225,7 +229,7 @@ export class WeWriteSettingTab extends PluginSettingTab {
 				.setValue(account.appSecret)
 				.onChange(async (value) => {
 					account.appSecret = value;
-					await this.plugin.saveSettings();
+					await this._plugin.saveSettings();
 				}));
 		// refresh token
 		new Setting(cEl)
@@ -234,7 +238,7 @@ export class WeWriteSettingTab extends PluginSettingTab {
 			.addExtraButton(async button => {
 				button.setTooltip('click to test connection').setIcon('plug-zap');
 				button.onClick(async () => {
-					const success = await this.plugin.TestAccessToken(accountName);
+					const success = await this._plugin.TestAccessToken(account.accountName);
 					if (success) {
 						new Notice('Successfully connected to WeChat official account platform.');
 					} else {
@@ -252,8 +256,23 @@ export class WeWriteSettingTab extends PluginSettingTab {
 				button.setTooltip('click to delete account').setIcon('trash-2');
 				button.onClick(async () => {
 					console.log(`to delete the account ${accountName}`);
+					this._plugin.settings.mpAccounts = this._plugin.settings.mpAccounts.filter(account => account.accountName !== accountName)
+					const account = this._plugin.settings.mpAccounts[0]
+					if (account !== undefined){
+						this._plugin.settings.selectedAccount = account.accountName
+						this.updateAccountOptions()
+					}else{
+						this.newAccountInfo()
+					}
 				});
 			})
+	}
+	updateAccountOptions(){
+		this.accountDropdown.selectEl.options.length = 0
+		this._plugin.settings.mpAccounts.forEach(account => {
+			this.accountDropdown.addOption(account.accountName, account.accountName)
+		})
+		this.accountDropdown.setValue(this._plugin.settings.selectedAccount?? '')
 	}
 	async detectIP(ip: Setting) {
 		let address = await getPublicIpAddress();

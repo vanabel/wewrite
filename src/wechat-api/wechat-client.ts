@@ -5,15 +5,15 @@ import { App, Notice, requestUrl, RequestUrlParam } from "obsidian";
 import WeWritePlugin from "src/main";
 import { getErrorMessage } from "./error-code";
 import { DraftArticle } from "./wechat-types";
-import { LocalDraftItem } from "src/assets/DraftManager";
+import { LocalDraftItem } from "src/assets/draft-manager";
 
 export class WechatClient {
   private static instance: WechatClient;
   private app: App;
-  private plugin: WeWritePlugin;
+  private _plugin: WeWritePlugin;
   readonly baseUrl: string = 'https://api.weixin.qq.com/cgi-bin';
   private constructor(plugin: WeWritePlugin) {
-    this.plugin = plugin
+    this._plugin = plugin
   }
   public static getInstance(plugin: WeWritePlugin): WechatClient {
     if (!WechatClient.instance) {
@@ -44,7 +44,7 @@ export class WechatClient {
     console.log(`token：${access_token}`);
 
     if (access_token === undefined) {
-      console.error('获取AccessToken失败');
+      console.error('获取AccessToken失败:', errcode);
       new Notice(getErrorMessage(errcode), 0);
       return false;
     }
@@ -54,7 +54,7 @@ export class WechatClient {
   }
   public async getBatchMaterial(accountName: string | undefined, type: string, offset: number = 0, count: number = 10) {
 
-    const accessToken = await this.plugin.refreshAccessToken(accountName);
+    const accessToken = await this._plugin.refreshAccessToken(accountName);
     console.log(`getBatchMaterial: accessToken=>${accessToken}`);
     if (!accessToken) {
       return false;
@@ -76,7 +76,7 @@ export class WechatClient {
     return await res.json;
   }
   public async sendArticleToDraftBox(localDraft: LocalDraftItem, data: string){
-    const accessToken = await this.plugin.refreshAccessToken(this.plugin.settings.selectedAccount);
+    const accessToken = await this._plugin.refreshAccessToken(this._plugin.settings.selectedAccount);
     console.log(`sendArticleToDraftBox: accessToken=>${accessToken}`);
     if (!accessToken) {
       return false;
@@ -182,7 +182,7 @@ export class WechatClient {
   }
   // public async getAllMaterialList(accountName:string) {
 
-  //   const accessToken = this.plugin.getAccessToken(accountName);
+  //   const accessToken = this._plugin.getAccessToken(accountName);
   //   const url = `${this.baseUrl}/material/get_materialcount?access_token=${accessToken}`
   //   const req: RequestUrlParam = {
   //     url: url,
@@ -220,7 +220,7 @@ export class WechatClient {
   //   return imageList;
   // }
   public async getMaterialList(accountName: string, type: string, offset: number = 0, count: number = 20) {
-    const accessToken = await this.plugin.refreshAccessToken(accountName);
+    const accessToken = await this._plugin.refreshAccessToken(accountName);
     if (!accessToken) {
       return false;
     }
@@ -244,7 +244,7 @@ export class WechatClient {
     return resp.json;
   }
   public async getMaterialById(accountName: string, media_id: string) {
-    const accessToken = await this.plugin.refreshAccessToken(accountName);
+    const accessToken = await this._plugin.refreshAccessToken(accountName);
     if (!accessToken) {
       return false;
     }
@@ -268,7 +268,7 @@ export class WechatClient {
 
   }
   public async getBatchDraftList(accountName: string | undefined, offset: number = 0, count: number = 20) {
-    const accessToken = await this.plugin.refreshAccessToken(accountName);
+    const accessToken = await this._plugin.refreshAccessToken(accountName);
     if (!accessToken) {
       return false;
     }
@@ -294,7 +294,7 @@ export class WechatClient {
 
   public async getMaterialCounts(accountName: string) {
 
-    const accessToken = this.plugin.getAccessToken(accountName);
+    const accessToken = this._plugin.getAccessToken(accountName);
     const url = `${this.baseUrl}/material/get_materialcount?access_token=${accessToken}`
     const req: RequestUrlParam = {
       url: url,
@@ -316,7 +316,7 @@ export class WechatClient {
   }
   public async getDraftCount(accountName: string) {
 
-    const accessToken = this.plugin.getAccessToken(accountName);
+    const accessToken = this._plugin.getAccessToken(accountName);
     const url = `${this.baseUrl}/draft/count?access_token=${accessToken}`
     const req: RequestUrlParam = {
       url: url,

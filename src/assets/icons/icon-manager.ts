@@ -26,6 +26,7 @@ import WeWritePlugin from "src/main";
 library.add(fas, far, fab, faCopy, faCamera);
 
 export class IconManager {
+    private _plugin: WeWritePlugin;
     getIconSVG(name: string) {
         
         const icon = getIcon(name);
@@ -51,19 +52,21 @@ export class IconManager {
                 ];
             })
     );
-    constructor(public plugin: WeWritePlugin) {}
+    constructor(public plugin: WeWritePlugin) {
+        this._plugin = plugin;
+    }
     async load() {
-        for (const icon of this.plugin.settings.icons) {
+        for (const icon of this._plugin.settings.icons) {
             console.log('load icon pack:', icon)
-            const exists = await this.plugin.app.vault.adapter.exists(
+            const exists = await this._plugin.app.vault.adapter.exists(
                 this.localIconPath(icon)
             );
             if (!exists) {
                 await this.downloadIcon(icon);
             } else {
                 this.DOWNLOADED[icon] = JSON.parse(
-                    await this.plugin.app.vault.adapter.read(
-                        `${this.plugin.manifest.dir}/${icon}.json`
+                    await this._plugin.app.vault.adapter.read(
+                        `${this._plugin.manifest.dir}/${icon}.json`
                     )
                 );
             }
@@ -73,7 +76,7 @@ export class IconManager {
     iconDefinitions: AdmonitionIconDefinition[] = [];
     setIconDefinitions() {
         const downloaded: AdmonitionIconDefinition[] = [];
-        for (const pack of this.plugin.settings.icons) {
+        for (const pack of this._plugin.settings.icons) {
             if (!(pack in this.DOWNLOADED)) continue;
             const icons = this.DOWNLOADED[pack];
             if (icons === undefined){
@@ -86,7 +89,7 @@ export class IconManager {
             );
         }
         this.iconDefinitions = [
-            ...(this.plugin.settings.useFontAwesome
+            ...(this._plugin.settings.useFontAwesome
                 ? this.FONT_AWESOME_MAP.values()
                 : []),
             ...getIconIds().map((name) => {
@@ -101,7 +104,7 @@ export class IconManager {
         
     }
     localIconPath(pack: DownloadableIconPack) {
-        return `${this.plugin.manifest.dir}/${pack}.json`;
+        return `${this._plugin.manifest.dir}/${pack}.json`;
     }
     async downloadIcon(pack: DownloadableIconPack) {
         console.log(`to download icon pack:`, pack)
@@ -111,14 +114,14 @@ export class IconManager {
                 // await fetch(this.iconPath(pack))
                 await requestUrl(this.iconPath(pack))
             ).json();
-            this.plugin.settings.icons.push(pack);
-            this.plugin.settings.icons = [...new Set(this.plugin.settings.icons)];
-            await this.plugin.app.vault.adapter.write(
+            this._plugin.settings.icons.push(pack);
+            this._plugin.settings.icons = [...new Set(this._plugin.settings.icons)];
+            await this._plugin.app.vault.adapter.write(
                 this.localIconPath(pack),
                 JSON.stringify(icons)
             );
             this.DOWNLOADED[pack] = icons;
-            await this.plugin.saveSettings();
+            await this._plugin.saveSettings();
             this.setIconDefinitions();
 
             new Notice(`${DownloadableIcons[pack]} successfully downloaded.`);
@@ -128,11 +131,11 @@ export class IconManager {
         }
     }
     async removeIcon(pack: DownloadableIconPack) {
-        await this.plugin.app.vault.adapter.remove(this.localIconPath(pack));
+        await this._plugin.app.vault.adapter.remove(this.localIconPath(pack));
         delete this.DOWNLOADED[pack];
-        this.plugin.settings.icons.remove(pack);
-        this.plugin.settings.icons = [...new Set(this.plugin.settings.icons)];
-        await this.plugin.saveSettings();
+        this._plugin.settings.icons.remove(pack);
+        this._plugin.settings.icons = [...new Set(this._plugin.settings.icons)];
+        await this._plugin.saveSettings();
         this.setIconDefinitions();
     }
     getIconType(str: string): IconType | undefined {
