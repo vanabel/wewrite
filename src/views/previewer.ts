@@ -2,7 +2,7 @@
  * Define the right-side leaf of view as Previewer view
 */
 
-import { DropdownComponent, Editor, EventRef, ItemView, MarkdownView, sanitizeHTMLToDom, Setting, TFile, WorkspaceLeaf } from 'obsidian';
+import { DropdownComponent, Editor, EventRef, ItemView, MarkdownView, Notice, sanitizeHTMLToDom, Setting, TFile, WorkspaceLeaf } from 'obsidian';
 import { EditorView } from "@codemirror/view";
 import { ResourceManager } from '../assets/resource-manager';
 import WeWritePlugin from 'src/main';
@@ -13,7 +13,12 @@ import { WechatClient } from '../wechat-api/wechat-client';
 import { MPArticleHeader } from './mp-article-header';
 import { ThemeManager } from './theme-manager';
 import { ThemeSelector } from './theme-selector';
-import { ThemeProcessor } from 'src/assets/theme-processor';
+import { extractUniqueStyles, processStyle, setFullStyle, ThemeProcessor } from 'src/assets/theme-processor';
+import { uploadCanvas, uploadSVGs, uploadURLImage } from 'src/render/post-render';
+import { applyCSS } from 'src/assets/theme-apply';
+import { HtmlRender } from 'src/render/html-render';
+import { RenderCache } from 'src/render/render-cache';
+import { htmlRender } from 'src/render/image-render';
 
 export const VIEW_TYPE_NP_PREVIEW = 'wechat-np-article-preview';
 export interface ElectronWindow extends Window {
@@ -35,7 +40,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
     editorView: EditorView | null = null;
     lastLeaf: WorkspaceLeaf | undefined;
     renderDiv: any;
-    styleEl: any;
+    // styleEl: any;
     elementMap: Map<string, Node | string>;
     articleTitle: Setting;
     containerDiv: HTMLElement;
@@ -79,21 +84,21 @@ export class PreviewPanel extends ItemView implements PreviewRender {
         )
         this._plugin.messageService.registerListener('draft-title-updated', (title: string) => {
             console.log(`on messageService, title=>`, title);
-            
+
             this.articleTitle.setName(title)
         })
         this.themeSelector.startWatchThemes()
         this.startWatchActiveNoteChange()
-        this._plugin.messageService.registerListener('custom-theme-changed', async (theme: string)=>{
-            this.setStyle(await this.getCSS())
+        this._plugin.messageService.registerListener('custom-theme-changed', async (theme: string) => {
+            // this.setStyle(await this.getCSS())
         })
-        
+
     }
-    
+
     onFileContentRendered(view: MarkdownView) {
         // throw new Error('Method not implemented.');
         console.log(`onFile content rendered. `);
-        
+
     }
     startWatchActiveNoteChange() {
         // throw new Error('Method not implemented.');
@@ -109,7 +114,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
         this.articleTitle = new Setting(mainDiv)
             .setName('Article Title')
             .setHeading()
-            .addDropdown((dropdown: DropdownComponent) =>{
+            .addDropdown((dropdown: DropdownComponent) => {
                 this.themeSelector.dropdown(dropdown);
             })
             .addExtraButton(
@@ -119,7 +124,10 @@ export class PreviewPanel extends ItemView implements PreviewRender {
                         .onClick(async () => {
                             console.log(`upload materials.`);
                             // ResourceManager.getInstance(this._plugin).forceRenderActiveMarkdownView()
-                            ResourceManager.getInstance(this._plugin).scrollActiveMarkdownView()
+                            // ResourceManager.getInstance(this._plugin).scrollActiveMarkdownView()
+                            uploadSVGs(this.articleDiv, this._plugin.wechatClient)
+                            uploadCanvas(this.articleDiv, this._plugin.wechatClient)
+                            uploadURLImage(this.articleDiv, this._plugin.wechatClient)
 
                         })
                 }
@@ -152,6 +160,32 @@ export class PreviewPanel extends ItemView implements PreviewRender {
                         .setTooltip('publish to MP directly.')
                     button.onClick(async () => {
                         console.log(`publish to MP directly.`);
+                        const activeFile = this.app.workspace.getActiveFile();
+                        // RenderCache.getInstance(this._plugin).seaarchResource(activeFile!.path)
+                        // // console.log(`activeFile =>`, activeFile);
+
+                        if (!activeFile) {
+                            console.log(`no active file`);
+                            return `<h1>No active file</h1>`
+                        }
+                        if (activeFile.extension !== 'md') {
+                            console.log(`not a markdown file`);
+                            return `<h1>Not a markdown file</h1>`
+                        }
+                        const md = await this.app.vault.adapter.read(activeFile!.path)
+                        this.articleDiv.empty();
+                        await htmlRender(this.app, md, activeFile.path, this.articleDiv)
+                        // const renderer = new HtmlRender(this.app)
+                        // // const node = await renderer.renderDocument(md, activeFile.path)
+                        // const node = await renderer.renderMarkdown(md, activeFile.path)
+                        // // console.log(`html render node=>`, node);
+
+                        // this.articleDiv.empty();
+                        // this.articleDiv.appendChild(node!);
+                        // const html = applyCSS(this.articleDiv.innerHTML, await this.getCSS())
+                        // this.articleDiv.innerHTML = html
+
+
                     })
                 }
             )
@@ -172,41 +206,42 @@ export class PreviewPanel extends ItemView implements PreviewRender {
         this.renderDiv.setAttribute('style', '-webkit-user-select: text; user-select: text;');
 
         //TODO: keep the shadow dom for future use, here for computed style from obsidian and all other plugins
-        let shadowDom = this.renderDiv //.shawdowRoot;
+        let shadowDom = this.renderDiv.shawdowRoot;
         if (shadowDom === undefined || shadowDom === null) {
 
-            shadowDom = this.renderDiv.attachShadow({ mode: 'open' });
+            shadowDom = this.renderDiv//.attachShadow({ mode: 'open' });
         }
 
-        this. containerDiv = shadowDom.createDiv({ cls: 'wewrite-article' });
-        this.styleEl = this.containerDiv.createEl('style');
-        this.styleEl.setAttr('title', 'wewrite-style');
-        this.setStyle(await this.getCSS());
+        this.containerDiv = shadowDom.createDiv({ cls: 'wewrite-article' });
+        // this.styleEl = this.containerDiv.createEl('style');
+        // this.styleEl.setAttr('title', 'wewrite-style');
+        // this.setStyle(await this.getCSS());
         this.articleDiv = this.containerDiv.createDiv({ cls: 'article-div' });
 
     }
     public getArticleContent() {
-        return this.containerDiv.innerHTML
+        // return this.containerDiv.innerHTML
+        return this.articleDiv.outerHTML
     }
     async getCSS() {
         return await ThemeManager.getInstance(this._plugin).getCSS()
     }
-    setStyle(css: string) {
-        this.styleEl.empty();
-        this.styleEl.appendChild(document.createTextNode(css));
-    }
-    
+    // setStyle(css: string) {
+    //     // this.styleEl.empty();
+    //     // this.styleEl.appendChild(document.createTextNode(css));
+    // }
+
     async onClose() {
         // Clean up our view
         this.stopListen()
         this.themeSelector.stopWatchThemes()
 
     }
-    
+
 
     async parseActiveMarkdown() {
         const mview = ResourceManager.getInstance(this._plugin).getCurrentMarkdownView()
-        if (!mview){
+        if (!mview) {
             console.log(`not a markdown view`);
             return 'not a markdown view';
         }
@@ -215,12 +250,12 @@ export class PreviewPanel extends ItemView implements PreviewRender {
         this.articleDiv.empty();
         if (mode !== 'preview') {
             this.articleDiv.innerHTML = `<h1>Please switch MarkdownView to preview mode</h1>`
-            return 
+            return
         }
         this.elementMap = new Map<string, HTMLElement | string>()
         const activeFile = this.app.workspace.getActiveFile();
         console.log(`activeFile =>`, activeFile);
-        
+
         if (!activeFile) {
             console.log(`no active file`);
             return `<h1>No active file</h1>`
@@ -231,7 +266,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
         }
         const md = await this.app.vault.adapter.read(activeFile!.path)
 
-        this.setStyle(await this.getCSS())
+        // this.setStyle(await this.getCSS())
         let html = await WechatRender.getInstance(this._plugin, this).parse(md)
 
 
@@ -243,29 +278,31 @@ export class PreviewPanel extends ItemView implements PreviewRender {
         }
 
         // render the async part of the doc.
-        console.log(`this.elementMap=>`, this.elementMap);
+        // console.log(`this.elementMap=>`, this.elementMap);
         this.elementMap.forEach(async (node: HTMLElement | string, id: string) => {
             const item = this.articleDiv.querySelector('#' + id) as HTMLElement;
-            console.log(`id=${id}, item=>`, item);
-            console.log(`node`);
+            // console.log(`id=${id}, item=>`, item);
+            // console.log(`node`);
 
             if (!item) return;
             if (typeof node === 'string') {
                 const tf = ResourceManager.getInstance(this._plugin).getFileOfLink(node)
                 if (tf) {
                     const file = this._plugin.app.vault.getFileByPath(tf.path)
-                    console.log(`file=>`, file);
+                    // console.log(`file=>`, file);
                     if (file) {
                         const content = await this._plugin.app.vault.adapter.read(file.path);
                         const body = await WechatRender.getInstance(this._plugin, this).parse(content);
-                        console.log(`body=>`, body);
-                        console.log(`item=>`, item);
+                        // console.log(`body=>`, body);
+                        // console.log(`item=>`, item);
 
                         item.innerHTML = body
 
                     }
                 }
             } else {
+                // console.log(`after rendering: node=>`, node, item);
+
                 item.appendChild(node)
             }
 
@@ -273,9 +310,14 @@ export class PreviewPanel extends ItemView implements PreviewRender {
         return this.articleDiv.innerHTML
     }
     async renderDraft() {
-        
+
         await this.parseActiveMarkdown();
-        await ThemeProcessor.getInstance(this._plugin).processNamedStyle(this.articleDiv, 'wewrite-style')
+        // await ThemeProcessor.getInstance(this._plugin).processNamedStyle(this.articleDiv, 'wewrite-style')
+        // extractUniqueStyles(this.articleDiv)
+        // processStyle(this.articleDiv)
+        // setFullStyle(this.articleDiv)
+        const html = applyCSS(this.articleDiv.innerHTML, await this.getCSS())
+        this.articleDiv.innerHTML = html
 
     }
     startListen() {
@@ -287,7 +329,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
             })
         );
         const ec = this.app.workspace.on('editor-change', (editor: Editor, info: MarkdownView) => {
-            
+
             this.onEditorChange(editor, info);
 
         });
@@ -369,7 +411,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
         if (!item) return;
         const doc = sanitizeHTMLToDom(html);
         console.log(`doc=>`, doc);
-        
+
         item.empty();
         if (doc.childElementCount > 0) {
             for (const child of doc.children) {
@@ -382,15 +424,17 @@ export class PreviewPanel extends ItemView implements PreviewRender {
     }
     addElementByID(id: string, node: HTMLElement | string): void {
 
-        console.log(`id=${id}, before add this.elementMap=>`, this.elementMap)
+
+        // console.log(`id=${id}, before add this.elementMap=>`, this.elementMap)
         if (typeof node === 'string') {
             this.elementMap.set(id, node);
         } else {
             this.elementMap.set(id, node.cloneNode(true));
 
         }
-        console.log(`after add this.elementMap=>`, this.elementMap)
+        // console.log(`after add this.elementMap=>`, this.elementMap)
     }
+
 
 
 

@@ -41,7 +41,7 @@ export class BlockquoteRenderer extends WeWriteMarkedExtension {
   }
   rendererCallout(token: Tokens.Blockquote) {
     const root = this.plugin.resourceManager.getMarkdownRenderedElement(this.calloutIndex, '.markdown-reading-view  .callout:not(.admonition)')
-    console.log(`renderCallout root:`, root);
+    // console.log(`renderCallout root:`, root);
 		if (!root){
 			return '<span>Callout渲染失败</span>';
 		}
@@ -64,7 +64,7 @@ export class BlockquoteRenderer extends WeWriteMarkedExtension {
         const regex = /\[\!(.*?)\]/g;
         const matched = token.text.match(regex);
         if (matched){
-          console.log(`callout matched:${matched}`);
+          // console.log(`callout matched:${matched}`);
           
           token.html =  this.rendererCallout(token as Tokens.Blockquote)
         }else{

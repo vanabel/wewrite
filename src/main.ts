@@ -11,6 +11,9 @@ import { MessageService } from './utils/message-service';
 import { DownloadableIconPack } from './render/admonition';
 import { IconManager } from './assets/icons/icon-manager';
 import { ResourceManager } from './assets/resource-manager';
+import { RenderCache } from './render/render-cache';
+
+
 
 // Remember to rename these classes and interfaces!
 
@@ -163,6 +166,21 @@ export default class WeWritePlugin extends Plugin {
 		
 		// When registering intervals, this function will automatically clear the interval when the plugin is disabled.
 		// this.registerInterval(window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000));
+
+		//for test
+		 // 监听 Markdown 文件的渲染事件
+		// const process = this.registerMarkdownPostProcessor((el, ctx) => {
+		// 	Object.entries(classMap).forEach(([key, value]) => {
+		// 		const elements = el.querySelectorAll(value);
+		// 		if (elements.length > 0 ) {
+		// 			console.log(`markdown post processor ${key} =>:`, elements);
+		// 		}
+		// 	})
+        // });
+
+		// process.sortOrder = 10000;
+		RenderCache.getInstance(this).registerProcessor();
+
 	}
 
 	onunload() {

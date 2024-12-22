@@ -89,7 +89,7 @@ export class WechatRender {
     }
     async parse(md:string){
         const { data, content } = matter(md)
-        console.log(`attributes`, data);
+        // console.log(`attributes`, data);
         for (const extension of this.extensions){
             await extension.prepare()
         }

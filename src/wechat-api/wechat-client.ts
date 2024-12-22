@@ -1,7 +1,7 @@
 /* 
 */
 
-import { App, Notice, requestUrl, RequestUrlParam } from "obsidian";
+import { App, getBlobArrayBuffer, Notice, requestUrl, RequestUrlParam } from "obsidian";
 import WeWritePlugin from "src/main";
 import { getErrorMessage } from "./error-code";
 import { DraftArticle } from "./wechat-types";
@@ -140,6 +140,63 @@ export class WechatClient {
     });
 
     return res;
+  }
+  public async uploadImage(data: Blob, filename: string, type?: string) {
+    console.log(`uploadImage: filename=`, filename);
+    console.log(`uploadImage: data=`, data);
+    
+    const accessToken = await this._plugin.refreshAccessToken(this._plugin.settings.selectedAccount);
+    console.log(`uploadImage: accessToken=>${accessToken}`);
+    if (!accessToken) {
+      return false;
+    }
+
+    let url = `https://api.weixin.qq.com/cgi-bin/media/uploadimg?access_token=${accessToken}`
+    //上传图文消息内的图片获取URL,"上传图文消息内的图片获取URL"接口所上传的图片，不占用公众号的素材库中图片数量的100000个的限制，图片仅支持jpg/png格式，大小必须在1MB以下
+    //http请求方式: POST，https协议 https://api.weixin.qq.com/cgi-bin/media/uploadimg?access_token=ACCESS_TOKEN 调用示例（使用curl命令，用FORM表单方式上传一个图片）
+    if (type === undefined && data.size >= 1024 * 1024 ){
+      type = 'image'
+    }
+    if (type !== undefined ) {
+      url = `https://api.weixin.qq.com/cgi-bin/material/add_material?access_token=${accessToken}&type=${type}`
+    }
+
+
+    //新增其他类型永久素材 image 10M 
+    // http请求方式: POST，需使用https https://api.weixin.qq.com/cgi-bin/material/add_material?access_token=ACCESS_TOKEN&type=TYPE 调用示例（使用curl命令，用FORM表单方式新增一个其他类型的永久素材，
+
+    const N = 16 // The length of our random boundry string
+    const randomBoundryString = "djmangoBoundry" + Array(N + 1).join((Math.random().toString(36) + '00000000000000000').slice(2, 18)).slice(0, N)
+
+    // Construct the form data payload as a string
+    const pre_string = `------${randomBoundryString}\r\nContent-Disposition: form-data; name="media"; filename="${filename}"\r\nContent-Type: "application/octet-stream"\r\n\r\n`;
+    const post_string = `\r\n------${randomBoundryString}--`
+
+    // Convert the form data payload to a blob by concatenating the pre_string, the file data, and the post_string, and then return the blob as an array buffer
+    const pre_string_encoded = new TextEncoder().encode(pre_string);
+    // const data = file;
+    const post_string_encoded = new TextEncoder().encode(post_string);
+    const concatenated = await new Blob([pre_string_encoded, await getBlobArrayBuffer(data), post_string_encoded]).arrayBuffer()
+
+    // Now that we have the form data payload as an array buffer, we can pass it to requestURL
+    // We also need to set the content type to multipart/form-data and pass in the boundry string
+    const options: RequestUrlParam = {
+      method: 'POST',
+      url: url,
+      contentType: `multipart/form-data; boundary=----${randomBoundryString}`,
+      body: concatenated
+    };
+
+    const res = await requestUrl(options);
+    console.log(`uploadImage:`, res.json);
+    
+    const resData = await res.json;
+    return {
+      url: resData.url || '',
+      media_id: resData.media_id || '',
+      errcode: resData.errcode || 0,
+      errmsg: resData.errmsg || '',
+    }
   }
   public async wxUploadImage(data: Blob, filename: string, token: string, type?: string) {
     // let url = '';

@@ -56,11 +56,11 @@ export class ResourceManager {
     }
     public queryElements(query: string) {
         const view = this.getCurrentMarkdownView();
-        console.log(`queryElements=>view`, view);
+        // console.log(`queryElements=>view`, view);
         if (!view) return [];
         const preview = view.containerEl.querySelector('.markdown-reading-view')//('.markdown-preview-view')
-        console.log(`queryElements=>preview`, preview);
-        console.log(`queryElements=>preview.outer`, preview?.outerHTML);
+        // console.log(`queryElements=>preview`, preview);
+        // console.log(`queryElements=>preview.outer`, preview?.outerHTML);
 
         if (!preview) {
             console.log(`no preview found`);
@@ -71,14 +71,14 @@ export class ResourceManager {
     }
     public getMarkdownViewContainer() {
         const view = this.getCurrentMarkdownView();
-        console.log(`getMarkdownViewContainer=>view`, view);
+        // console.log(`getMarkdownViewContainer=>view`, view);
 
         if (!view) return null;
         return view.containerEl;
     }
     public getMarkdownRenderedElement(index: number, query: string) {
         const containers = this.queryElements(query);
-        console.log(`containers`, containers, 'query=>', query);
+        // console.log(`containers`, containers, 'query=>', query);
         if (containers.length <= index) {
             return null;
         }

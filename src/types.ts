@@ -1,10 +1,25 @@
+
 declare module "obsidian" {
     interface App {
         dom: {
             appContainerEl: HTMLElement;
         };
+        internalPlugins: {
+            plugins: InternalPlugins;
+            getPluginById<T extends keyof InternalPlugins>(id: T): InternalPlugins[T];
+        };
     }
-
+    interface InternalPlugin {
+        disable(): void;
+        enable(): void;
+        enabled: boolean;
+        _loaded: boolean;
+        instance: { name: string; id: string };
+    }
+    interface InternalPlugins {
+        "page-preview": InternalPlugin;
+        "markdown-renderer": InternalPlugin;
+    }
     interface Vault {
         getConfig: (key: string) => string;
         exists: (path: string) => Promise<boolean>;
@@ -46,4 +61,4 @@ declare module "obsidian" {
     }
 }
 
-export {};
+export { };

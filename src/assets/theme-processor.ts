@@ -29,7 +29,7 @@ export class ThemeProcessor {
             }
         }
     }
-    private  applyStyleDeclarationsToElementStyleProperty(element: HTMLElement, styles: CSSStyleDeclaration, computedStyle: CSSStyleDeclaration) {
+    private applyStyleDeclarationsToElementStyleProperty(element: HTMLElement, styles: CSSStyleDeclaration, computedStyle: CSSStyleDeclaration) {
 
         for (let i = 0; i < styles.length; i++) {
             const propertyName = styles[i];
@@ -84,7 +84,7 @@ export class ThemeProcessor {
         }
     }
     static parseCSS(css: string) {
-        
+
         return postcss.parse(css);
     }
     static ruleToStyle(rule: postcss.Rule) {
@@ -139,5 +139,131 @@ export class ThemeProcessor {
         // iterately apply cssRoot to root
         this.applyStyle(root, cssRoot);
         return root.outerHTML;
+    }
+}
+
+
+// function getComputedStyleWithoutDefaults(element: HTMLElement): CSSStyleDeclaration {
+//     const computedStyle = window.getComputedStyle(element);
+//     const defaultElement = document.createElement(element.tagName);
+//     document.body.appendChild(defaultElement);
+//     const defaultStyle = window.getComputedStyle(defaultElement);
+//     document.body.removeChild(defaultElement);
+
+//     const nonDefaultStyles: CSSStyleDeclaration = {} as CSSStyleDeclaration;
+//     for (let i = 0; i < computedStyle.length; i++) {
+//         const property = computedStyle[i];
+//         if (computedStyle.getPropertyValue(property) !== defaultStyle.getPropertyValue(property)) {
+//             nonDefaultStyles[property] = computedStyle.getPropertyValue(property);
+//         }
+//     }
+//     return nonDefaultStyles;
+// }
+
+// function applyUniqueStyles(element: HTMLElement, parentStyles: CSSStyleDeclaration = {}) {
+//     const nonDefaultStyles = getComputedStyleWithoutDefaults(element);
+//     const uniqueStyles: CSSStyleDeclaration = {} as CSSStyleDeclaration;
+
+//     for (let i = 0; i < nonDefaultStyles.length; i++) {
+//         const property = nonDefaultStyles[i];
+//         if (nonDefaultStyles.getPropertyValue(property) !== parentStyles.getPropertyValue(property)) {
+//             uniqueStyles[property] = nonDefaultStyles.getPropertyValue(property);
+//         }
+//     }
+
+//     for (let i = 0; i < uniqueStyles.length; i++) {
+//         const property = uniqueStyles[i];
+//         element.style.setProperty(property, uniqueStyles.getPropertyValue(property));
+//     }
+
+//     Array.from(element.children).forEach(child => applyUniqueStyles(child as HTMLElement, nonDefaultStyles));
+// }
+
+// export function extractAndApplyStyles() {
+//     const allElements = document.querySelectorAll('*');
+//     allElements.forEach(element => applyUniqueStyles(element as HTMLElement));
+// }
+
+// extractAndApplyStyles();
+
+
+export function extractUniqueStyles(element: HTMLElement) {
+    // 获取当前元素的计算样式
+    const style = window.getComputedStyle(element);
+    // 获取父元素的样式，以便比较
+    const parentStyle = element.parentElement ? window.getComputedStyle(element.parentElement) : null;
+
+    // 遍历所有样式属性
+    for (let i = 0; i < style.length; i++) {
+        const property = style[i];
+        const value = style.getPropertyValue(property);
+        const parentValue = parentStyle ? parentStyle.getPropertyValue(property) : null;
+
+        // // 检查是否是默认值或者继承自父元素
+        // if (value !== parentValue && value !== '') {
+        //    // 使用 setProperty 方法来设置样式属性
+        //    element.style.setProperty(property, value);
+        // }
+        // 检查是否是默认值或者继承自父元素
+        if (value !== parentValue && value !== '') {
+            // 对于SVG元素，保留必要的样式属性
+            if (element instanceof SVGElement) {
+                const isImportantStyle = property === 'stroke' || property === 'fill' || property === 'stroke-width' || property === 'marker-start' || property === 'marker-end';
+                if (isImportantStyle || !parentStyle || parentStyle.getPropertyValue(property) !== value) {
+                    element.style.setProperty(property, value);
+                }
+            } else {
+                element.style.setProperty(property, value);
+            }
+        }
+    }
+
+    // 递归处理子元素
+    Array.from(element.children).forEach(child => extractUniqueStyles(child as HTMLElement));
+}
+
+// 从根元素开始提取样式
+// extractUniqueStyles(document.body);
+
+
+
+export function processStyle(element: HTMLElement) {
+    // 获取当前元素的计算样式
+    const style = window.getComputedStyle(element);
+    // 获取父元素的样式，以便比较
+    const parentStyle = element.parentElement ? window.getComputedStyle(element.parentElement) : null;
+
+    // 遍历所有样式属性
+    for (let i = 0; i < style.length; i++) {
+        
+        const property = style[i];
+        const value = style.getPropertyValue(property);
+        element.style.setProperty(property, value);
+        // const parentValue = parentStyle ? parentStyle.getPropertyValue(property) : null;
+
+        // if (value !== parentValue && value) {
+        //     element.style.setProperty(property, value);
+        //     // // 对于SVG元素，保留必要的样式属性
+        //     // if (element instanceof SVGElement) {
+        //     //     const isImportantStyle = property === 'stroke' || property === 'fill' || property === 'stroke-width' || property === 'marker-start' || property === 'marker-end';
+        //     //     if (isImportantStyle || !parentStyle || parentStyle.getPropertyValue(property) !== value) {
+        //     //         element.style.setProperty(property, value);
+        //     //     }
+        //     // } else {
+        //     //     element.style.setProperty(property, value);
+        //     // }
+        // }
+    }
+
+    // 递归处理子元素
+    Array.from(element.children).forEach(child => processStyle(child as HTMLElement));
+}
+
+export function setFullStyle(element: HTMLElement) {
+    const style = window.getComputedStyle(element);
+    for (let i = 0; i < style.length; i++) {
+        const property = style[i];
+        const value = style.getPropertyValue(property);
+        element.style.setProperty(property, value);
     }
 }

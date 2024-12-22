@@ -36,7 +36,7 @@ export class IconizeRender extends WeWriteMarkedExtension {
 
     render(text: string) {
 
-        console.log(`iconize render, text=>`, text);
+        // console.log(`iconize render, text=>`, text);
         
         // const items = text.split('|');
 

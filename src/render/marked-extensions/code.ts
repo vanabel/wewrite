@@ -26,7 +26,8 @@ import { Tokens } from "marked";
 import { WeWriteMarkedExtension } from "./extension";
 import { MathRenderer } from "./math";
 // import { wxUploadImage } from "../weixin-api";
-import { Canvg } from 'canvg'
+import * as htmlToImage from 'html-to-image';
+import { processStyle } from "src/assets/theme-processor";
 
 export class CardDataManager {
 	private cardData: Map<string, string>;
@@ -112,14 +113,14 @@ export class CodeRenderer extends WeWriteMarkedExtension {
 	}
 
 	codeRenderer(code: string, infostring: string | undefined): string {
-		console.log(`code:`, code);
-		console.log(`infostring:`, infostring);
+		// console.log(`code:`, code);
+		// console.log(`infostring:`, infostring);
 
 		const lang = (infostring || '').match(/^\S*/)?.[0];
 		code = code.replace(/\n$/, '') + '\n';
 
-		console.log(`code:`, code);
-		console.log(`lang:`, lang);
+		// console.log(`code:`, code);
+		// console.log(`lang:`, lang);
 
 
 		let codeSection = '';
@@ -181,7 +182,7 @@ export class CodeRenderer extends WeWriteMarkedExtension {
 		};
 	}
 
-	renderCard(token: Tokens.Code) {
+	renderCard(token: Tokens.Generic) {
 		const { id, headimg, nickname, signature } = this.parseCard(token.text);
 		if (id === '') {
 			return '<span>公众号卡片数据错误，没有id</span>';
@@ -189,18 +190,42 @@ export class CodeRenderer extends WeWriteMarkedExtension {
 		CardDataManager.getInstance().setCardData(id, token.text);
 		return `<section data-id="${id}" class="note-mpcard-wrapper"><div class="note-mpcard-content"><img class="note-mpcard-headimg" width="54" height="54" src="${headimg}"></img><div class="note-mpcard-info"><div class="note-mpcard-nickname">${nickname}</div><div class="note-mpcard-signature">${signature}</div></div></div><div class="note-mpcard-foot">公众号</div></section>`;
 	}
-	renderAdmonition(type: string) {
-		const root = this.plugin.resourceManager.getMarkdownRenderedElement(this.admonitionIndex, '.admonition-parent')
+	renderAdmonition(token: Tokens.Generic, type: string) {
+		let root = this.plugin.resourceManager.getMarkdownRenderedElement(this.admonitionIndex, '.admonition-parent')
 		if (!root) {
 			return '<span>admonition渲染失败</span>';
 		}
 		const containerId = `admonition-${this.admonitionIndex}`;
 		this.admonitionIndex++
-		const editDiv = root.querySelector('.edit-block-button');
+
+		// const dataUrl = await htmlToImage.toPng(root)
+		// token.html = `admonition image: <img src="${dataUrl}" >`
+		// return
+
+		const clonedRoot = root.cloneNode(true) as HTMLElement;
+		// console.log(`clonedRoot:`, clonedRoot);
+		
+		const editDiv = clonedRoot.querySelector('.edit-block-button');
 		if (editDiv) {
-			root.removeChild(editDiv);
+			editDiv.parentNode!.removeChild(editDiv);
 		}
-		this.previewRender.addElementByID(containerId, root)
+		const foldDiv = clonedRoot.querySelector('.callout-fold');
+		if (foldDiv) {
+
+			try {
+				foldDiv.parentNode!.removeChild(foldDiv);
+			} catch (e) {
+				console.error(e)
+			}
+
+		}
+		const contentDiv = clonedRoot.querySelector('.admonition-content');
+		if (contentDiv) {
+			contentDiv.removeAttribute('style')
+		}
+		processStyle(clonedRoot)
+
+		this.previewRender.addElementByID(containerId, clonedRoot)
 		return `<section id="${containerId}" class="admonition-parent admonition-${type}-parent wewrite "></section>`;
 	}
 
@@ -216,10 +241,27 @@ export class CodeRenderer extends WeWriteMarkedExtension {
 		this.previewRender.addElementByID(containerId, root)
 		return `<section id="${containerId}" class="wewrite mermaid" ></section>`;
 	}
+	async renderMermaidAsync(token: Tokens.Generic) {
+        // define default failed
+        token.html = '<span>mermaid渲染失败</span>';
+
+        const href = token.href;
+        console.log(`renderMermaidAsync: ${href}`);
+        const index = this.mermaidIndex;
+        this.mermaidIndex++;
+
+        const root = this.plugin.resourceManager.getMarkdownRenderedElement(index, '.mermaid')
+        if (!root) {
+            return
+        }
+        const dataUrl = await htmlToImage.toPng(root)
+        token.html = `<img src="${dataUrl}" >`
+	}
+
 	renderCharts(token: Tokens.Generic) {
 		const root = this.plugin.resourceManager.getMarkdownRenderedElement(this.chartsIndex, '.block-language-chart')
 		console.log(`renderCharts this.chartIndex:`, this.chartsIndex);
-		
+
 		if (!root) {
 			return '<span>charts渲染失败</span>';
 		}
@@ -265,13 +307,14 @@ export class CodeRenderer extends WeWriteMarkedExtension {
 			extensions: [{
 				name: 'code',
 				level: 'block',
-				renderer: (token: Tokens.Code) => {
+				renderer: (token: Tokens.Generic) => {
 					const type = CodeRenderer.getMathType(token.lang ?? '');
 					if (type) {
 						return new MathRenderer(this.plugin, this.previewRender, this.marked).renderer(token, false, type); //MathRendererQueue.getInstance().render(token, false, type, this.callback);
 					}
 					if (token.lang && token.lang.trim().toLocaleLowerCase() == 'mermaid') {
-						return this.renderMermaid(token);
+						// return this.renderMermaid(token);
+						return token.html
 					}
 					if (token.lang && token.lang.trim().toLocaleLowerCase() == 'chart') {
 						return this.renderCharts(token);
@@ -280,17 +323,30 @@ export class CodeRenderer extends WeWriteMarkedExtension {
 						return this.renderCard(token);
 					}
 					if (token.lang && token.lang.trim().toLocaleLowerCase().startsWith('ad-')) {
+						// return token.html
 						//admonition
 						let type = token.lang.trim().toLocaleLowerCase().replace('ad-', '');
 						if (type === '') type = 'note';
 
-						return this.renderAdmonition(type);
+						return this.renderAdmonition(token, type);
 					}
 					return this.codeRenderer(token.text, token.lang);
 					// return token.text
 				},
 			}
-			]
+			],
+			async: true,
+			walkTokens: async (token: Tokens.Generic) => {
+				if (token.lang && token.lang.trim().toLocaleLowerCase() == 'mermaid') {
+					await this.renderMermaidAsync(token);
+				}
+				// if (token.lang && token.lang.trim().toLocaleLowerCase().startsWith('ad-')) {
+				// 	let type = token.lang.trim().toLocaleLowerCase().replace('ad-', '');
+				// 	if (type === '') type = 'note';
+
+				// 	await this.renderAdmonition(token, type);
+				// }
+			}
 		}
 	}
 	iconsRenderer(text: string, lang: string | undefined) {
