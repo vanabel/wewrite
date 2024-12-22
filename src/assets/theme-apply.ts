@@ -1,5 +1,6 @@
 import { sanitizeHTMLToDom } from "obsidian";
 import postcss from "postcss";
+import { compileCSS } from "src/compile-css";
 
 export function parseCSS(css: string) {
 	return postcss.parse(css);
@@ -52,7 +53,7 @@ export function applyCSS(html: string, css: string) {
 	const root = doc.firstChild as HTMLElement;
     try{
 
-        const cssRoot = postcss.parse(css);
+        const cssRoot = compileCSS(css)// postcss.parse(css);
         // console.log(`applyCSS:`, root, cssRoot);
         applyStyle(root, cssRoot);
     }catch(e){

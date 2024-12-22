@@ -38,7 +38,7 @@ export class ThemeManager {
         if (folder instanceof TFolder) {
             this.themes = await this.getAllThemesInFolder(folder);
         }
-        console.log(`themes:`, this.themes);
+        // console.log(`themes:`, this.themes);
 
         return this.themes;
     }
@@ -104,14 +104,14 @@ export class ThemeManager {
         const themes: WeChatTheme[] = [];
 
         const getAllFiles = async (folder: TFolder) => {
-            console.log(`getAllfiles in folder: ${folder.path}`);
+            // console.log(`getAllfiles in folder: ${folder.path}`);
 
             const promises = folder.children.map(async (child) => {
                 if (child instanceof TFile && child.extension === "md") {
-                    console.log(`theme found: ${child.path}`);
+                    // console.log(`theme found: ${child.path}`);
 
                     const theme = await this.getThemeProperties(child);
-                    console.log(`theme properties:`, theme);
+                    // console.log(`theme properties:`, theme);
                     if (theme) {
                         themes.push(theme);
                     }
@@ -131,7 +131,7 @@ export class ThemeManager {
     private async getThemeProperties(file: TFile): Promise<WeChatTheme | undefined> {
         const fileContent = await this._plugin.app.vault.cachedRead(file);
         const { data } = matter(fileContent); // 解析前置元数据
-        console.log(`data`, data);
+        // console.log(`data`, data);
 
         if (data.theme_name === undefined || !data.theme_name.trim()) {
             // it is not a valid theme.

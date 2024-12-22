@@ -1,0 +1,301 @@
+/* the template css for wewrite */
+/* basic principle: 
+    1. use less variables, to manage only the most common items, use in :root
+    2. .wewrite-article-content is for the top level parent setting.
+        - headings
+        - text
+    3. section by section set rest of the styles.
+        - admonition
+        - table
+        - code
+        - callout
+        - image
+        - svg icon
+*/
+
+:root {
+    --text-color: rgb(51, 51, 51);
+    --background-color: rgb(255, 255, 255);
+    --heading-color: rgb(51, 51, 51);
+    --heading-font-size: 1.5rem;
+    --heading-font-weight: 500;
+    --heading-line-height: 1.5;
+    --heading-margin-bottom: 0.5rem;
+    --heading-margin-top: 1rem;
+    --heading-margin-left: 0;
+    --list-color: rgb(51, 51, 51);
+    --border-color: rgb(51, 51, 51)
+}
+
+.wewrite-article-content {
+    color: var(--text-color);
+    background-color: var(--background-color);
+    font-family: 'Source Sans Pro', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+/* headings */
+h1 {
+    font-size: 2.5rem;
+}
+
+h2 {
+    font-size: 2.2rem;
+}
+
+h3 {
+    font-size: 2.0rem;
+}
+
+h4 {
+    font-size: 1.8rem;
+}
+
+h5 {
+    font-size: 1.6rem;
+}
+
+h6 {
+    font-size: 1.3rem;
+}
+
+p {
+    line-height: inherit;
+    margin-top: 22px;
+    margin-bottom: 22px;
+}
+
+/* other sections */
+img {
+    max-width: 100%;
+    border-radius: 2px;
+    display: block;
+    margin: auto;
+    border: 1px solid rgba(104, 107, 105, 0.2);
+}
+
+hr {
+    border-top: 1px solid var(--border-color);
+    border-bottom: none;
+    border-left: none;
+    border-right: none;
+    margin-top: 32px;
+    margin-bottom: 32px;
+}
+
+/* tables */
+table {
+    display: inline-block !important;
+    font-size: 12px;
+    width: auto;
+    max-width: 100%;
+    overflow: auto;
+    border: solid 1px var(--border-color);
+}
+
+thead {
+    background: #3eaf7c;
+    color: #fff;
+    text-align: left;
+}
+
+tr:nth-child(2n) {
+    background-color: rgba(62, 175, 124, 0.2);
+}
+
+th,
+td {
+    padding: 12px 7px;
+    line-height: 24px;
+}
+
+td {
+    min-width: 120px;
+}
+
+/* blockquote */
+blockquote {
+    color: #666;
+    padding: 1px 23px;
+    margin: 22px 0;
+    border-left: 0.5rem solid rgba(62, 175, 124, 0.6);
+    border-color: #42b983;
+    background-color: #f8f8f8;
+}
+
+blockquote::after {
+    display: block;
+    content: "";
+}
+
+blockquote>p {
+    margin: 10px 0;
+}
+
+/* details and summary */
+details {
+    border: none;
+    outline: none;
+    border-left: 4px solid #3eaf7c;
+    padding-left: 10px;
+    margin-left: 4px;
+}
+
+details summary {
+    cursor: pointer;
+    border: none;
+    outline: none;
+    background: white;
+    margin: 0px -17px;
+}
+
+details summary::-webkit-details-marker {
+    color: #3eaf7c;
+}
+
+/* list */
+ol,
+ul {
+    padding-left: 28px;
+}
+
+ol li,
+ul li {
+    margin-bottom: 0;
+    list-style: inherit;
+}
+
+ol li .task-list-item,
+ul li .task-list-item {
+    list-style: none;
+}
+
+ol li .task-list-item ul,
+ul li .task-list-item ul,
+ol li .task-list-item ol,
+ul li .task-list-item ol {
+    margin-top: 0;
+}
+
+ol ul,
+ul ul,
+ol ol,
+ul ol {
+    margin-top: 3px;
+}
+
+ol li {
+    padding-left: 6px;
+}
+
+ol li::marker {
+    color: #3eaf7c;
+}
+
+ul li::marker {
+    color: #3eaf7c;
+}
+
+/* code */
+.wewrite-article-content code {
+    font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+    word-break: break-word;
+    overflow-x: auto;
+    padding: 0.2rem 0.5rem;
+    margin: 0;
+    color: #3eaf7c;
+    font-size: 1em;
+    background-color: rgba(27, 31, 35, 0.05);
+    border-radius: 3px;
+}
+
+pre {
+    font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+    overflow: auto;
+    position: relative;
+    line-height: 1.8em;
+}
+
+pre>code {
+    font-size: 1em;
+    padding: 15px 12px;
+    margin: 0;
+    word-break: normal;
+    display: block;
+    overflow-x: auto;
+    color: #333;
+    background: #f8f8f8;
+}
+
+.code-section {
+    display: flex;
+
+
+    background: #1E1E1E;
+    color: #DCDCDC;
+
+
+
+    border-radius: 6px;
+    /*border: 2px solid #3eaf7c;*/
+}
+
+.code-section pre {
+    margin: 0;
+    display: block;
+    padding: 0.6em;
+    overflow-x: auto;
+}
+
+.code-section pre code {
+    border: none;
+    background: #f8f8f8;
+    font-size: 1em;
+    line-height: 1.8em;
+    padding: 0 !important;
+    margin: 0 !important;
+    text-wrap: nowrap;
+}
+
+.code-section ul {
+    flex-shrink: 0;
+    counter-reset: line;
+    margin: 0;
+    padding: 1em 0 1em 1em;
+    border-left: solid 1px gray;
+    white-space: normal;
+    width: fit-content;
+}
+
+.code-section ul>li {
+    position: relative;
+    margin: 0;
+    padding: 0;
+    display: list-item;
+    text-align: right;
+    line-height: 1.8em;
+    font-size: 1em;
+    font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+    padding: 0;
+    list-style-type: none;
+    text-wrap: nowrap;
+}
+
+.code-section ul>li::marker {
+    content: none;
+}
+
+/* callout */
+
+.callout {
+    overflow: hidden;
+    border-style: solid;
+    border-color: rgba(var(--callout-color), var(--callout-border-opacity));
+    border-width: var(--callout-border-width);
+    border-radius: var(--callout-radius);
+    margin: 1em 0;
+    mix-blend-mode: var(--callout-blend-mode);
+    background-color: rgba(var(--callout-color), 0.1);
+    padding: var(--callout-padding);
+  }

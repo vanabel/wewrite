@@ -26,8 +26,10 @@ import { Tokens } from "marked";
 import { WeWriteMarkedExtension } from "./extension";
 import { MathRenderer } from "./math";
 // import { wxUploadImage } from "../weixin-api";
-import * as htmlToImage from 'html-to-image';
+// import * as htmlToImage from 'html-to-image';
+import domtoimage from 'dom-to-image'
 import { processStyle } from "src/assets/theme-processor";
+import { ObsidianMarkdownRenderer } from "../markdown-render";
 
 export class CardDataManager {
 	private cardData: Map<string, string>;
@@ -191,7 +193,8 @@ export class CodeRenderer extends WeWriteMarkedExtension {
 		return `<section data-id="${id}" class="note-mpcard-wrapper"><div class="note-mpcard-content"><img class="note-mpcard-headimg" width="54" height="54" src="${headimg}"></img><div class="note-mpcard-info"><div class="note-mpcard-nickname">${nickname}</div><div class="note-mpcard-signature">${signature}</div></div></div><div class="note-mpcard-foot">公众号</div></section>`;
 	}
 	renderAdmonition(token: Tokens.Generic, type: string) {
-		let root = this.plugin.resourceManager.getMarkdownRenderedElement(this.admonitionIndex, '.admonition-parent')
+		// let root = this.plugin.resourceManager.getMarkdownRenderedElement(this.admonitionIndex, '.admonition-parent')
+		let root = ObsidianMarkdownRenderer.getInstance(this.plugin.app).queryElement(this.admonitionIndex, '.callout.admonition')
 		if (!root) {
 			return '<span>admonition渲染失败</span>';
 		}
@@ -202,14 +205,14 @@ export class CodeRenderer extends WeWriteMarkedExtension {
 		// token.html = `admonition image: <img src="${dataUrl}" >`
 		// return
 
-		const clonedRoot = root.cloneNode(true) as HTMLElement;
+		// const clonedRoot = root.cloneNode(true) as HTMLElement;
 		// console.log(`clonedRoot:`, clonedRoot);
 		
-		const editDiv = clonedRoot.querySelector('.edit-block-button');
+		const editDiv = root.querySelector('.edit-block-button');
 		if (editDiv) {
 			editDiv.parentNode!.removeChild(editDiv);
 		}
-		const foldDiv = clonedRoot.querySelector('.callout-fold');
+		const foldDiv = root.querySelector('.callout-fold');
 		if (foldDiv) {
 
 			try {
@@ -219,27 +222,30 @@ export class CodeRenderer extends WeWriteMarkedExtension {
 			}
 
 		}
-		const contentDiv = clonedRoot.querySelector('.admonition-content');
-		if (contentDiv) {
-			contentDiv.removeAttribute('style')
-		}
-		processStyle(clonedRoot)
+		// const contentDiv = clonedRoot.querySelector('.admonition-content');
+		// if (contentDiv) {
+		// 	contentDiv.removeAttribute('style')
+		// }
+		// processStyle(clonedRoot)
 
-		this.previewRender.addElementByID(containerId, clonedRoot)
-		return `<section id="${containerId}" class="admonition-parent admonition-${type}-parent wewrite "></section>`;
+		// this.previewRender.addElementByID(containerId, clonedRoot)
+		// return `<section id="${containerId}" class="admonition-parent admonition-${type}-parent wewrite "></section>`;
+		return root.outerHTML
 	}
 
 	renderMermaid(token: Tokens.Generic) {
-		const root = this.plugin.resourceManager.getMarkdownRenderedElement(this.mermaidIndex, '.mermaid')
+		// const root = this.plugin.resourceManager.getMarkdownRenderedElement(this.mermaidIndex, '.mermaid')
+		const root = ObsidianMarkdownRenderer.getInstance(this.plugin.app).queryElement(this.mermaidIndex, '.mermaid')
 		if (!root) {
 			return '<span>mermaid渲染失败</span>';
 		}
-		const containerId = `meraid-img-${this.mermaidIndex}`;
+		// const containerId = `meraid-img-${this.mermaidIndex}`;
 		this.mermaidIndex++
 		// return `<section id="${containerId}" class="admonition-parent admonition-${type}-parent">${root.outerHTML}</section>`;
 		console.log(`meraid root:`, root);
-		this.previewRender.addElementByID(containerId, root)
-		return `<section id="${containerId}" class="wewrite mermaid" ></section>`;
+		// this.previewRender.addElementByID(containerId, root)
+		// return `<section id="${containerId}" class="wewrite mermaid" ></section>`;
+		return root.outerHTML;
 	}
 	async renderMermaidAsync(token: Tokens.Generic) {
         // define default failed
@@ -250,16 +256,22 @@ export class CodeRenderer extends WeWriteMarkedExtension {
         const index = this.mermaidIndex;
         this.mermaidIndex++;
 
-        const root = this.plugin.resourceManager.getMarkdownRenderedElement(index, '.mermaid')
+        // const root = this.plugin.resourceManager.getMarkdownRenderedElement(index, '.mermaid')
+        const root = ObsidianMarkdownRenderer.getInstance(this.plugin.app).queryElement(index, '.mermaid')
         if (!root) {
             return
         }
-        const dataUrl = await htmlToImage.toPng(root)
-        token.html = `<img src="${dataUrl}" >`
+		console.log(`mermaid root:`, root);
+		
+        // const dataUrl = await domtoimage.toBlob(root)
+		// console.log(`dataUrl:`, dataUrl);
+		
+        token.html = root.outerHTML;// `<img src="${dataUrl}" >`
 	}
 
 	renderCharts(token: Tokens.Generic) {
-		const root = this.plugin.resourceManager.getMarkdownRenderedElement(this.chartsIndex, '.block-language-chart')
+		// const root = this.plugin.resourceManager.getMarkdownRenderedElement(this.chartsIndex, '.block-language-chart')
+		const root = ObsidianMarkdownRenderer.getInstance(this.plugin.app).queryElement(this.chartsIndex, '.block-language-chart')
 		console.log(`renderCharts this.chartIndex:`, this.chartsIndex);
 
 		if (!root) {

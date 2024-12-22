@@ -2,8 +2,6 @@ import { MarkdownView } from 'obsidian';
 import WeWritePlugin from 'src/main';
 import { scrollToBottomOfElement } from 'src/utils/scroll';
 
-
-
 export class ResourceManager {
     private static instance: ResourceManager;
     private iconMap: Map<string, string>;
@@ -99,5 +97,9 @@ export class ResourceManager {
             return content
         }
         return null
+    }
+
+    public async renderMarkdown(path:string){
+        
     }
 }

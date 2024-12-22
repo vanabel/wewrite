@@ -26,6 +26,7 @@ import { WeWriteMarkedExtension } from "./extension";
 import { ResourceManager } from "src/assets/resource-manager";
 import { handleRetriesFor } from "mathjax-full/js/util/Retries";
 import * as htmlToImage from 'html-to-image';
+import { ObsidianMarkdownRenderer } from "../markdown-render";
 
 declare module 'obsidian' {
     interface Vault {
@@ -646,10 +647,6 @@ export class Embed extends WeWriteMarkedExtension {
                         return this.renderPdfCrop(token.href);
                     } else if (embedType == 'note') {
                         return token.html
-                        const containerId = `markdown-embed-${this.embedMarkdownIndex}`;
-                        this.renderNote(token.href, containerId);
-                        this.embedMarkdownIndex++
-                        return `<section id="${containerId}" class="wewrite markdown-embed" >embed note 渲染中...</section>`;
                     }
 
 
@@ -699,12 +696,14 @@ export class Embed extends WeWriteMarkedExtension {
         const index = this.excalidrawIndex;
         this.excalidrawIndex++;
 
-        const root = this.plugin.resourceManager.getMarkdownRenderedElement(index, '.excalidraw-svg.excalidraw-embedded-img')
+        // const root = this.plugin.resourceManager.getMarkdownRenderedElement(index, '.excalidraw-svg.excalidraw-embedded-img')
+        const root = ObsidianMarkdownRenderer.getInstance(this.plugin.app).queryElement(index, '.excalidraw-svg.excalidraw-embedded-img')
         if (!root) {
             return
         }
-        const dataUrl = await htmlToImage.toPng(root)
-        token.html = `<img src="${dataUrl}" >`
+        // const dataUrl = await htmlToImage.toPng(root)
+        // token.html = `<img src="${dataUrl}" >`
+        token.html = root.outerHTML
 
         // let svg = Embed.fileCache.get(href);
         // if (svg === undefined) {
@@ -733,24 +732,24 @@ export class Embed extends WeWriteMarkedExtension {
         // //else we have cached svg
         // token.html = `<section class="excalidraw-svg" >${svg}</section>`
     }
-    async renderNote(href: string, id: string) {
-        //TODO：we should remove the support of note embed.
+    // async renderNote(href: string, id: string) {
+    //     //TODO：we should remove the support of note embed.
 
-        console.log(`renderNote: ${href}`);
+    //     console.log(`renderNote: ${href}`);
 
-        const tf = ResourceManager.getInstance(this.plugin).getFileOfLink(href)
-        if (tf) {
-            const file = this.plugin.app.vault.getFileByPath(tf.path)
-            console.log(`file=>`, file);
-            if (file) {
-                const content = await this.plugin.app.vault.adapter.read(file.path);
-                const body = await this.marked.parse(content);
-                console.log(`body=>`, body);
-                this.previewRender.updateElementByID(id, body)
-            }
-        }
+    //     const tf = ResourceManager.getInstance(this.plugin).getFileOfLink(href)
+    //     if (tf) {
+    //         const file = this.plugin.app.vault.getFileByPath(tf.path)
+    //         console.log(`file=>`, file);
+    //         if (file) {
+    //             const content = await this.plugin.app.vault.adapter.read(file.path);
+    //             const body = await this.marked.parse(content);
+    //             console.log(`body=>`, body);
+    //             this.previewRender.updateElementByID(id, body)
+    //         }
+    //     }
 
-    }
+    // }
     async renderMarkdownEmbedAsync(token: Tokens.Generic) {
         //internal-embed markdown-embed inline-embed is-loaded
         // define default failed
@@ -761,18 +760,20 @@ export class Embed extends WeWriteMarkedExtension {
         const index = this.markdownEmbedIndex;
         this.markdownEmbedIndex++;
 
-        const root = this.plugin.resourceManager.getMarkdownRenderedElement(index, '.markdown-embed.inline-embed.is-loaded')
+        // const root = this.plugin.resourceManager.getMarkdownRenderedElement(index, '.markdown-embed.inline-embed.is-loaded')
+        const root = ObsidianMarkdownRenderer.getInstance(this.plugin.app).queryElement(index, '.markdown-embed.inline-embed.is-loaded')
         console.log(`emebed[${index}] root=>`, root);
         
         if (!root) {
             return
         }
-        const dataUrl = await htmlToImage.toPng(root)
-        token.html = `<img src="${dataUrl}" >`
+        // const dataUrl = await htmlToImage.toPng(root)
+        token.html = root.outerHTML;//`<img src="${dataUrl}" >`
     }
 
     renderPdfCrop(href: string): string | false | undefined {
-        const root = this.plugin.resourceManager.getMarkdownRenderedElement(this.pdfCropIndex, '.pdf-cropped-embed')
+        // const root = this.plugin.resourceManager.getMarkdownRenderedElement(this.pdfCropIndex, '.pdf-cropped-embed')
+        const root = ObsidianMarkdownRenderer.getInstance(this.plugin.app).queryElement(this.pdfCropIndex, '.pdf-cropped-embed')
         if (!root) {
             return '<span>Pdf-crop渲染失败</span>';
         }
@@ -780,7 +781,8 @@ export class Embed extends WeWriteMarkedExtension {
         this.pdfCropIndex++
         // return `<section id="${containerId}" class="admonition-parent admonition-${type}-parent">${root.outerHTML}</section>`;
         console.log(`pdf-crop root:`, root);
-        this.previewRender.addElementByID(containerId, root)
-        return `<section id="${containerId}" class="wewrite pdf-crop" ></section>`;
+        // this.previewRender.addElementByID(containerId, root)
+        // return `<section id="${containerId}" class="wewrite pdf-crop" ></section>`;
+        return root.outerHTML
     }
 }

@@ -8,6 +8,16 @@ declare module "obsidian" {
             plugins: InternalPlugins;
             getPluginById<T extends keyof InternalPlugins>(id: T): InternalPlugins[T];
         };
+        plugins: {
+            enabledPlugins: Set<string>;
+            plugins: {
+                ['obsidian-icon-folder']?: {
+                    // api: {
+                    //     getIconByName: (iconNameWithPrefix: string) => {}
+                    // };
+                };
+            };
+        };
     }
     interface InternalPlugin {
         disable(): void;

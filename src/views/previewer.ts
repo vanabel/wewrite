@@ -2,23 +2,20 @@
  * Define the right-side leaf of view as Previewer view
 */
 
-import { DropdownComponent, Editor, EventRef, ItemView, MarkdownView, Notice, sanitizeHTMLToDom, Setting, TFile, WorkspaceLeaf } from 'obsidian';
 import { EditorView } from "@codemirror/view";
-import { ResourceManager } from '../assets/resource-manager';
+import { DropdownComponent, Editor, EventRef, getIcon, ItemView, MarkdownView, sanitizeHTMLToDom, Setting, TFile, WorkspaceLeaf } from 'obsidian';
+import { applyCSS } from 'src/assets/theme-apply';
 import WeWritePlugin from 'src/main';
-import { WechatRender } from 'src/render/wechat-render';
+import { htmlRender } from 'src/render/image-render';
 import { PreviewRender } from 'src/render/marked-extensions/extension';
+import { uploadCanvas, uploadSVGs, uploadURLImage } from 'src/render/post-render';
+import { WechatRender } from 'src/render/wechat-render';
 import { SrcThumbList } from 'src/utils/src-thumb-list';
+import { ResourceManager } from '../assets/resource-manager';
 import { WechatClient } from '../wechat-api/wechat-client';
 import { MPArticleHeader } from './mp-article-header';
 import { ThemeManager } from './theme-manager';
 import { ThemeSelector } from './theme-selector';
-import { extractUniqueStyles, processStyle, setFullStyle, ThemeProcessor } from 'src/assets/theme-processor';
-import { uploadCanvas, uploadSVGs, uploadURLImage } from 'src/render/post-render';
-import { applyCSS } from 'src/assets/theme-apply';
-import { HtmlRender } from 'src/render/html-render';
-import { RenderCache } from 'src/render/render-cache';
-import { htmlRender } from 'src/render/image-render';
 
 export const VIEW_TYPE_NP_PREVIEW = 'wechat-np-article-preview';
 export interface ElectronWindow extends Window {
@@ -160,21 +157,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
                         .setTooltip('publish to MP directly.')
                     button.onClick(async () => {
                         console.log(`publish to MP directly.`);
-                        const activeFile = this.app.workspace.getActiveFile();
-                        // RenderCache.getInstance(this._plugin).seaarchResource(activeFile!.path)
-                        // // console.log(`activeFile =>`, activeFile);
-
-                        if (!activeFile) {
-                            console.log(`no active file`);
-                            return `<h1>No active file</h1>`
-                        }
-                        if (activeFile.extension !== 'md') {
-                            console.log(`not a markdown file`);
-                            return `<h1>Not a markdown file</h1>`
-                        }
-                        const md = await this.app.vault.adapter.read(activeFile!.path)
-                        this.articleDiv.empty();
-                        await htmlRender(this.app, md, activeFile.path, this.articleDiv)
+                       
                         // const renderer = new HtmlRender(this.app)
                         // // const node = await renderer.renderDocument(md, activeFile.path)
                         // const node = await renderer.renderMarkdown(md, activeFile.path)
@@ -182,6 +165,8 @@ export class PreviewPanel extends ItemView implements PreviewRender {
 
                         // this.articleDiv.empty();
                         // this.articleDiv.appendChild(node!);
+
+                        await this.renderHTML()
                         // const html = applyCSS(this.articleDiv.innerHTML, await this.getCSS())
                         // this.articleDiv.innerHTML = html
 
@@ -213,23 +198,15 @@ export class PreviewPanel extends ItemView implements PreviewRender {
         }
 
         this.containerDiv = shadowDom.createDiv({ cls: 'wewrite-article' });
-        // this.styleEl = this.containerDiv.createEl('style');
-        // this.styleEl.setAttr('title', 'wewrite-style');
-        // this.setStyle(await this.getCSS());
         this.articleDiv = this.containerDiv.createDiv({ cls: 'article-div' });
 
     }
     public getArticleContent() {
-        // return this.containerDiv.innerHTML
         return this.articleDiv.outerHTML
     }
     async getCSS() {
         return await ThemeManager.getInstance(this._plugin).getCSS()
     }
-    // setStyle(css: string) {
-    //     // this.styleEl.empty();
-    //     // this.styleEl.appendChild(document.createTextNode(css));
-    // }
 
     async onClose() {
         // Clean up our view
@@ -264,19 +241,20 @@ export class PreviewPanel extends ItemView implements PreviewRender {
             console.log(`not a markdown file`);
             return `<h1>Not a markdown file</h1>`
         }
-        const md = await this.app.vault.adapter.read(activeFile!.path)
+        // const md = await this.app.vault.adapter.read(activeFile!.path)
 
         // this.setStyle(await this.getCSS())
-        let html = await WechatRender.getInstance(this._plugin, this).parse(md)
+        let html = await WechatRender.getInstance(this._plugin, this).parseNote(activeFile.path, this.articleDiv, this)
 
 
         html = `<section class="wewrite-article-content" id="article-section">${html}</section>`;
-
         const doc = sanitizeHTMLToDom(html);
+        this.articleDiv.empty();
         if (doc.firstChild) {
             this.articleDiv.appendChild(doc.firstChild);
-        }
-
+            }
+            
+            /*
         // render the async part of the doc.
         // console.log(`this.elementMap=>`, this.elementMap);
         this.elementMap.forEach(async (node: HTMLElement | string, id: string) => {
@@ -291,8 +269,8 @@ export class PreviewPanel extends ItemView implements PreviewRender {
                     const file = this._plugin.app.vault.getFileByPath(tf.path)
                     // console.log(`file=>`, file);
                     if (file) {
-                        const content = await this._plugin.app.vault.adapter.read(file.path);
-                        const body = await WechatRender.getInstance(this._plugin, this).parse(content);
+                        // const content = await this._plugin.app.vault.adapter.read(file.path);
+                        const body = await WechatRender.getInstance(this._plugin, this).parseNote(file.path, this.articleDiv);
                         // console.log(`body=>`, body);
                         // console.log(`item=>`, item);
 
@@ -307,7 +285,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
             }
 
         })
-        return this.articleDiv.innerHTML
+        return this.articleDiv.innerHTML */
     }
     async renderDraft() {
 
@@ -318,6 +296,27 @@ export class PreviewPanel extends ItemView implements PreviewRender {
         // setFullStyle(this.articleDiv)
         const html = applyCSS(this.articleDiv.innerHTML, await this.getCSS())
         this.articleDiv.innerHTML = html
+
+    }
+    async renderHTML(){
+        const activeFile = this.app.workspace.getActiveFile();
+        // RenderCache.getInstance(this._plugin).seaarchResource(activeFile!.path)
+        // // console.log(`activeFile =>`, activeFile);
+
+        if (!activeFile) {
+            console.log(`no active file`);
+            return `<h1>No active file</h1>`
+        }
+        if (activeFile.extension !== 'md') {
+            console.log(`not a markdown file`);
+            return `<h1>Not a markdown file</h1>`
+        }
+        const md = await this.app.vault.adapter.read(activeFile!.path)
+        this.articleDiv.empty();
+        await htmlRender(this.app, md, activeFile.path, this.articleDiv)
+        console.log(`getIcon file`, getIcon('file'));
+        console.log(`getIcon LiAlignJustify`, getIcon('LiAlignJustify'));
+        
 
     }
     startListen() {
@@ -345,61 +344,6 @@ export class PreviewPanel extends ItemView implements PreviewRender {
     }
     stopListen() {
         this.listeners.forEach(e => this.app.workspace.offref(e))
-    }
-    startObserver() {
-        // const view = this.app.workspace.getActiveViewOfType(MarkdownView);
-        // // @ts-expect-error, not typed
-        // const editorView = view?.editor?.cm as EditorView;
-        // if (!editorView) return;
-
-        // if (this.editorView === editorView) {
-        //     return;
-        // }
-
-        // this.stopObserver();
-        // this.editorView = editorView;
-        // const targetElement = editorView.dom;
-
-        // const filterElement = (target: HTMLElement) => {
-        //     if (target.getAttribute('src')?.includes('.excalidraw')) {
-        //         const name = target.getAttribute('src') || '';
-        //         // if (LocalFile.fileCache.has(name)) {
-        //         //     return;
-        //         // }
-        //         // this.debouncedRenderMarkdown();
-        //     }
-        // };
-        // this.observer = new MutationObserver((mutationsList) => {
-        //     mutationsList.forEach((mutation) => {
-        //         // 遍历每个变化的节点，子节点
-        //         try {
-        //             const target = mutation.target as HTMLElement;
-        //             if (target.classList.contains('internal-embed')) {
-        //                 filterElement(target);
-        //             }
-        //             else {
-        //                 const items = target.getElementsByClassName('internal-embed');
-        //                 for (let i = 0; i < items.length; i++) {
-        //                     filterElement(items[i] as HTMLElement);
-        //                 };
-        //             }
-        //         } catch (error) {
-        //             console.error(error);
-        //         }
-        //     });
-        // });
-
-        // // 开始监听目标元素的 DOM 变化
-        // this.observer.observe(targetElement, {
-        //     attributes: true,       // 监听属性变化
-        //     childList: true,        // 监听子节点的变化
-        //     subtree: true,          // 监听子树中的节点变化
-        // });
-    }
-    stopObserver() {
-        // this.observer?.disconnect();
-        // this.observer = null;
-        // this.editorView = null;
     }
 
     onEditorChange(editor: Editor, info: MarkdownView) {

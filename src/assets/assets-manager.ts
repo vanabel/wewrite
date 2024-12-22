@@ -301,7 +301,7 @@ export class AssetsManager {
 
                     } else {
                         // the new has not themb_media_id, let's see what it is
-                        console.log(`bail id set for [${item.title}]:`, item.url);
+                        // console.log(`bail id set for [${item.title}]:`, item.url);
 
                     }
                     const content = item.content

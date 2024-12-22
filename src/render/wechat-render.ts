@@ -22,6 +22,8 @@ import { Heading } from './marked-extensions/heading'
 import { IconizeRender } from './marked-extensions/iconize'
 import { MathRenderer } from './marked-extensions/math'
 import { RemixIconRenderer } from './marked-extensions/remix-icon'
+import { ObsidianMarkdownRenderer } from './markdown-render'
+import { Component } from 'obsidian'
 
 
 const markedOptiones = {
@@ -88,11 +90,17 @@ export class WechatRender {
 
     }
     async parse(md:string){
+
         const { data, content } = matter(md)
         // console.log(`attributes`, data);
         for (const extension of this.extensions){
             await extension.prepare()
         }
-        return this.marked.parse(content)
+        return await this.marked.parse(content)
+    }
+    public async parseNote(path:string, container:HTMLElement, view:Component){
+        await ObsidianMarkdownRenderer.getInstance(this.plugin.app).render(path, container, view)
+        const md = await this.plugin.app.vault.adapter.read(path)
+        return await this.parse(md)
     }
 }

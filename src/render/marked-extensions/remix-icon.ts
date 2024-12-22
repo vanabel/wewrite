@@ -3,6 +3,7 @@
 import { MarkedExtension, Tokens } from "marked";
 import { WeWriteMarkedExtension } from "./extension";
 import { MathRenderer } from "./math";
+import { ObsidianMarkdownRenderer } from "../markdown-render";
 
 const remixIconRegex = /`(ris|fas):([a-z0-9-]+)`/i;
 const remixIconRegexTokenizer = /^`(ris|fas):([a-z0-9-]+)`/i;
@@ -23,15 +24,17 @@ export class RemixIconRenderer extends WeWriteMarkedExtension {
 		// console.log(`remixIconRenderer, match=>`, match);
 
 		// if (lang) {
-		const root = this.plugin.resourceManager.getMarkdownRenderedElement(this.remixIndex, '.obsidian-icon.react-icon')
+		// const root = this.plugin.resourceManager.getMarkdownRenderedElement(this.remixIndex, '.obsidian-icon.react-icon')
+		const root = ObsidianMarkdownRenderer.getInstance(this.plugin.app).queryElement(this.remixIndex, '.obsidian-icon.react-icon')
 		if (!root) {
 			return '<span>remix icon not found </span>';
 		}
-		const containerId = `remix-icon-${this.remixIndex}`;
+		// const containerId = `remix-icon-${this.remixIndex}`;
 		this.remixIndex++
 
-		this.previewRender.addElementByID(containerId, root)
-		return `<span id="${containerId}" class=" wewrite "></span>`;
+		// this.previewRender.addElementByID(containerId, root)
+		// return `<span id="${containerId}" class=" wewrite "></span>`;
+		return root.outerHTML;
 		// }
 		// return code 
 

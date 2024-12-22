@@ -64,28 +64,25 @@ export function svgToPng(svgData: string): Promise<Blob> {
 }
 
 // 如果需要将data URL转换为Blob对象以便上传
-function dataUrlToBlob(dataUrl: string): Blob {
-    const arr = dataUrl.split(',');
-    const matchResult = arr[0].match(/:(.*?);/);
-    if (!matchResult) {
-        throw new Error('Invalid data URL format');
-    }
-    const mime = matchResult[1];
-    const bstr = atob(arr[1]);
-    let n = bstr.length;
-    const u8arr = new Uint8Array(n);
+function dataURLtoBlob(dataUrl: string): Blob {
+    const parts = dataUrl.split(';base64,');
+    const contentType = parts[0].split(':')[1];
+    const raw = window.atob(parts[1]);
+    const rawLength = raw.length;
 
-    while (n--) {
-        u8arr[n] = bstr.charCodeAt(n);
+    const uInt8Array = new Uint8Array(rawLength);
+
+    for (let i = 0; i < rawLength; ++i) {
+        uInt8Array[i] = raw.charCodeAt(i);
     }
 
-    return new Blob([u8arr], { type: mime });
+    return new Blob([uInt8Array], { type: contentType });
 }
 export function getCanvasBlob(canvas: HTMLCanvasElement) {
     // 获取canvas内容的PNG图片数据URL
     const pngDataUrl = canvas.toDataURL('image/png');
     // 使用转换函数
-    const pngBlob = dataUrlToBlob(pngDataUrl);
+    const pngBlob = dataURLtoBlob(pngDataUrl);
     return pngBlob;
 }
 
@@ -153,20 +150,10 @@ export async function uploadURLImage(root:HTMLElement, wechatClient:WechatClient
             return;
         }
         else if (img.src.startsWith('data:image/')){
-            // const str = img.src.substring(0, img.src.indexOf(':base64'));
-            // const match = str.match(/data:image\/(.*?)/);
-            // console.log(`image type: ${match}`);
-            
-            // if(match){
-            //     const img_type = match[1];
-            //     //TODO 
-
-            // }
-            blob = dataUrlToBlob(img.src);
+            blob = dataURLtoBlob(img.src);
         }else{
             console.log(`try to fetch other image url:`, img.src);
             blob = await fetch(img.src).then(res => res.blob());
-            
         }
         
         if (blob === undefined){
