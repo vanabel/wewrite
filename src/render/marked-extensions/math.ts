@@ -35,8 +35,12 @@ export class MathRenderer extends WeWriteMarkedExtension {
             type = 'InlineMath'
         }
         const svg = parseMath(token.text) 
-        let className = inline? 'inline-math-svg' : 'block-math-svg';
-        return `<span  class="${className}">${svg}</span>`;
+        if (inline){
+            return `<span  class="inline-math-svg">${svg}</span>`;  
+        }else{
+
+            return `<div  class="block-math-svg">${svg}</div>`;
+        }
     }
 
     markedExtension(): MarkedExtension {

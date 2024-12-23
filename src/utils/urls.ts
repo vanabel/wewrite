@@ -1,4 +1,4 @@
-import { TFile, App, arrayBufferToBase64 } from 'obsidian';
+import { TFile, App, arrayBufferToBase64, sanitizeHTMLToDom } from 'obsidian';
 
 
 //<img alt="peony.jpg" src="app://835773f27df6823216a5d0be4a3ee5865ffb/D:/devobs/attachments/peony.jpg?1730297341089">
@@ -62,4 +62,28 @@ export class UrlUtils {
     }
     
     
+}
+
+export function DomToDom(node:HTMLElement, queies:string[]){
+    let index = 0;
+    const nodeMap = new Map<string, HTMLElement >();
+    for (const query of queies) {
+        const elements = node.querySelectorAll(query);
+        for (const element of elements) {
+            const replaceNode = createDiv()
+            replaceNode.id = `wewrite-replace-${index}`
+            nodeMap.set(replaceNode.id, element as HTMLElement)
+            element.replaceWith(replaceNode);
+            index++;
+        }
+    }
+    const html = node.innerHTML
+    const root = sanitizeHTMLToDom(html)
+    for (const [id, element] of nodeMap) {
+        const replaceNode = root.querySelector(`#${id}`)
+        if (replaceNode) {
+            replaceNode.replaceWith(element)
+        }
+    }
+    return root
 }

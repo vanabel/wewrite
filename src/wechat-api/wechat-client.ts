@@ -390,4 +390,33 @@ export class WechatClient {
       return total_count
     }
   }
+  public async getDraftById(accountName:string, meida_id: string) {
+
+    const accessToken = await this._plugin.refreshAccessToken(accountName);
+    if (!accessToken) {
+      return false;
+    }
+    // get all images by loop
+    const url = `${this.baseUrl}/draft/get?access_token=${accessToken}`
+    const body = {
+      media_id: meida_id,
+    };
+
+    const req: RequestUrlParam = {
+      url: url,
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify(body)
+    };
+    const resp = await requestUrl(req);
+
+    console.log(`resp=>`, resp);
+    const { errcode, news_item } = resp.json;
+    if (errcode !== undefined && errcode !== 0) {
+      new Notice(getErrorMessage(errcode), 0);
+      return false;
+    } else {
+      return news_item
+    }
+  }
 }

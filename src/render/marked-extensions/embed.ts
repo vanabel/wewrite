@@ -1,32 +1,17 @@
 /*
- * Copyright (c) 2024 Sun Booshi
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
+* marked extension for embed:
+  - image
+  - excalidraw
+  - note embedded
+  - pdf plus, crop
  */
 
-import { Token, Tokens, MarkedExtension } from "marked";
-import { Notice, TAbstractFile, TFile, Vault, MarkdownView, requestUrl, sanitizeHTMLToDom } from "obsidian";
-import { WeWriteMarkedExtension } from "./extension";
-import { ResourceManager } from "src/assets/resource-manager";
-import { handleRetriesFor } from "mathjax-full/js/util/Retries";
 import * as htmlToImage from 'html-to-image';
+import { MarkedExtension, Token, Tokens } from "marked";
+import { sanitizeHTMLToDom, TAbstractFile, TFile } from "obsidian";
+import { ResourceManager } from "src/assets/resource-manager";
 import { ObsidianMarkdownRenderer } from "../markdown-render";
+import { WeWriteMarkedExtension } from "./extension";
 
 declare module 'obsidian' {
     interface Vault {
@@ -47,7 +32,6 @@ interface ImageInfo {
 }
 
 function getEmbedType(link: string) {
-    //![[成方金信-爱赢管理沙盘a.pdf#page=2&rect=19,63,994,743|成方金信-爱赢管理沙盘a, p.2]]
     const reg_pdf_crop = /^pdf#page=(\d+)(&rect=.*?)$/
 
     const sep = link.lastIndexOf('|')
@@ -92,71 +76,53 @@ function getEmbedType(link: string) {
 
 }
 
-export class LocalImageManager {
-    private images: Map<string, ImageInfo>;
-    private static instance: LocalImageManager;
+// export class LocalImageManager {
+//     private images: Map<string, ImageInfo>;
+//     private static instance: LocalImageManager;
 
-    private constructor() {
-        this.images = new Map<string, ImageInfo>();
-    }
+//     private constructor() {
+//         this.images = new Map<string, ImageInfo>();
+//     }
 
-    // 静态方法，用于获取实例
-    public static getInstance(): LocalImageManager {
-        if (!LocalImageManager.instance) {
-            LocalImageManager.instance = new LocalImageManager();
-        }
-        return LocalImageManager.instance;
-    }
+//     // 静态方法，用于获取实例
+//     public static getInstance(): LocalImageManager {
+//         if (!LocalImageManager.instance) {
+//             LocalImageManager.instance = new LocalImageManager();
+//         }
+//         return LocalImageManager.instance;
+//     }
 
-    public setImage(path: string, info: ImageInfo): void {
-        if (!this.images.has(path)) {
-            this.images.set(path, info);
-        }
-    }
+//     public setImage(path: string, info: ImageInfo): void {
+//         if (!this.images.has(path)) {
+//             this.images.set(path, info);
+//         }
+//     }
 
-    // async uploadLocalImage(token: string, vault: Vault) {
-    //     const keys = this.images.keys();
-    //     for (let key of keys) {
-    //         const value = this.images.get(key);
-    //         if (value == null) continue;
-    //         if (value.url != null) continue;
-    //         const file = vault.getFileByPath(value.filePath);
-    //         if (file == null) continue;
-    //         const fileData = await vault.readBinary(file);
-    //         const res = await wxUploadImage(new Blob([fileData]), file.name, token);
-    //         if (res.errcode != 0) {
-    //             const msg = `上传图片失败: ${res.errcode} ${res.errmsg}`;
-    //             new Notice(msg);
-    //             console.error(msg);
-    //         }
-    //         value.url = res.url;
-    //     }
-    // }
 
-    replaceImages(root: HTMLElement) {
-        const images = root.getElementsByTagName('img');
-        const keys = this.images.keys();
-        for (let key of keys) {
-            const value = this.images.get(key);
-            if (value == null) continue;
-            if (value.url == null) continue;
-            for (let i = 0; i < images.length; i++) {
-                const img = images[i];
-                if (img.src.startsWith('http')) {
-                    continue;
-                }
-                if (img.src === key) {
-                    img.setAttribute('src', value.url);
-                    break;
-                }
-            }
-        }
-    }
+//     replaceImages(root: HTMLElement) {
+//         const images = root.getElementsByTagName('img');
+//         const keys = this.images.keys();
+//         for (let key of keys) {
+//             const value = this.images.get(key);
+//             if (value == null) continue;
+//             if (value.url == null) continue;
+//             for (let i = 0; i < images.length; i++) {
+//                 const img = images[i];
+//                 if (img.src.startsWith('http')) {
+//                     continue;
+//                 }
+//                 if (img.src === key) {
+//                     img.setAttribute('src', value.url);
+//                     break;
+//                 }
+//             }
+//         }
+//     }
 
-    async cleanup() {
-        this.images.clear();
-    }
-}
+//     async cleanup() {
+//         this.images.clear();
+//     }
+// }
 
 
 export class Embed extends WeWriteMarkedExtension {
@@ -267,7 +233,7 @@ export class Embed extends WeWriteMarkedExtension {
             filePath: file.path,
             url: null
         };
-        LocalImageManager.getInstance().setImage(resPath, info);
+        // LocalImageManager.getInstance().setImage(resPath, info);
         return resPath;
     }
 
@@ -383,40 +349,41 @@ export class Embed extends WeWriteMarkedExtension {
         return { path, head: header, block };
     }
 
-    async renderFile(link: string, id: string) {
-        // let { path, head: header, block} = this.parseFileLink(link);
-        // let file = null;
-        // if (path === '') {
-        //     file = this._plugin.app.workspace.getActiveFile();
-        // }
-        // else {
-        //     if (!path.endsWith('.md')) {
-        //         path = path + '.md';
-        //     }
-        //     file = this.assetsManager.searchFile(path);
-        // }
+    async renderFile(link: string) {
+        let { path, head: header, block } = this.parseFileLink(link);
+        let file = null;
+        if (path === '') {
+            file = this.plugin.app.workspace.getActiveFile();
+        }
+        else {
+            if (!path.endsWith('.md')) {
+                path = path + '.md';
+            }
+            file = this.searchFile(path);
+        }
 
-        // if (file == null) {
-        //     const msg = '找不到文件：' + path;
-        //     console.error(msg)
-        //     // this.callback.updateElementByID(id, msg);
-        //     return;
-        // }
+        if (file == null) {
+            const msg = '找不到文件：' + path;
+            console.error(msg)
+            // this.callback.updateElementByID(id, msg);
+            return;
+        }
 
-        // const content = await this.getFileContent(file, header, block);
-        // const body = await this.marked.parse(content);
+        const content = await this.getFileContent(file, header, block);
+        const body = await this.marked.parse(content);
+        return body
         // // this.callback.updateElementByID(id, body);
     }
 
-    async readBlob(src: string) {
-        return await fetch(src).then(response => response.blob())
-    }
+    // async readBlob(src: string) {
+    //     return await fetch(src).then(response => response.blob())
+    // }
 
-    async getExcalidrawUrl(data: string) {
-        const dom = sanitizeHTMLToDom(data);
-        const img = dom.querySelector('img');
-        return img?.getAttr("src")
-    }
+    // async getExcalidrawUrl(data: string) {
+    //     const dom = sanitizeHTMLToDom(data);
+    //     const img = dom.querySelector('img');
+    //     return img?.getAttr("src")
+    // }
 
     parseLinkStyle(link: string) {
         let filename = '';
@@ -462,82 +429,82 @@ export class Embed extends WeWriteMarkedExtension {
         return { filename, style, postion };
     }
 
-    parseExcalidrawLink(link: string) {
-        let classname = 'note-embed-excalidraw-left';
-        const postions = new Map<string, string>([
-            ['left', 'note-embed-excalidraw-left'],
-            ['center', 'note-embed-excalidraw-center'],
-            ['right', 'note-embed-excalidraw-right']
-        ])
+    // parseExcalidrawLink(link: string) {
+    //     let classname = 'note-embed-excalidraw-left';
+    //     const postions = new Map<string, string>([
+    //         ['left', 'note-embed-excalidraw-left'],
+    //         ['center', 'note-embed-excalidraw-center'],
+    //         ['right', 'note-embed-excalidraw-right']
+    //     ])
 
-        let { filename, style, postion } = this.parseLinkStyle(link);
-        classname = postions.get(postion) || classname;
+    //     let { filename, style, postion } = this.parseLinkStyle(link);
+    //     classname = postions.get(postion) || classname;
 
-        console.log(`parseExcalidrawLink:`, filename);
+    //     console.log(`parseExcalidrawLink:`, filename);
 
 
-        if (filename.endsWith('excalidraw') || filename.endsWith('excalidraw.md')) {
-            return { filename, style, classname };
-        }
+    //     if (filename.endsWith('excalidraw') || filename.endsWith('excalidraw.md')) {
+    //         return { filename, style, classname };
+    //     }
 
-        return null;
-    }
+    //     return null;
+    // }
 
-    async renderExcalidraw(name: string, id: string) {
-        try {
-            // let container: HTMLElement | null = null;
-            // const currentFile = this._plugin.app.workspace.getActiveFile();
-            // const leaves = this._plugin.app.workspace.getLeavesOfType('markdown');
-            // for (let leaf of leaves) {
-            //     const markdownView = leaf.view as MarkdownView;
-            //     console.log(`${markdownView.file?.path} == ${currentFile?.path}`);
+    // async renderExcalidraw(name: string, id: string) {
+    //     try {
+    //         // let container: HTMLElement | null = null;
+    //         // const currentFile = this._plugin.app.workspace.getActiveFile();
+    //         // const leaves = this._plugin.app.workspace.getLeavesOfType('markdown');
+    //         // for (let leaf of leaves) {
+    //         //     const markdownView = leaf.view as MarkdownView;
+    //         //     console.log(`${markdownView.file?.path} == ${currentFile?.path}`);
 
-            //     if (markdownView.file?.path === currentFile?.path) {
-            //         container = markdownView.containerEl;
-            //     }
-            // }
-            // if (container) {
-            {
-                // const containers = container.querySelectorAll('.internal-embed');
-                const containers = ResourceManager.getInstance(this.plugin).queryElements('.internal-embed');
+    //         //     if (markdownView.file?.path === currentFile?.path) {
+    //         //         container = markdownView.containerEl;
+    //         //     }
+    //         // }
+    //         // if (container) {
+    //         {
+    //             // const containers = container.querySelectorAll('.internal-embed');
+    //             const containers = ResourceManager.getInstance(this.plugin).queryElements('.internal-embed');
 
-                for (let container of containers) {
-                    console.log(`container:`, container);
-                    if (name !== container.getAttribute('src')) {
-                        continue;
-                    }
-                    console.log(`excalidraw: `, container.innerHTML);
+    //             for (let container of containers) {
+    //                 console.log(`container:`, container);
+    //                 if (name !== container.getAttribute('src')) {
+    //                     continue;
+    //                 }
+    //                 console.log(`excalidraw: `, container.innerHTML);
 
-                    const src = await this.getExcalidrawUrl(container.innerHTML);
-                    console.log(`excalidraw src: `, src);
+    //                 const src = await this.getExcalidrawUrl(container.innerHTML);
+    //                 console.log(`excalidraw src: `, src);
 
-                    let svg = '';
-                    if (src === undefined || !src) {
-                        svg = '渲染失败';
-                        console.log('Failed to get Excalidraw URL');
-                    }
-                    else {
-                        const blob = await this.readBlob(src);
-                        if (blob.type === 'image/svg+xml') {
-                            svg = await blob.text();
-                            Embed.fileCache.set(name, svg);
-                        }
-                        else {
-                            svg = '暂不支持' + blob.type;
-                        }
-                    }
-                    this.previewRender.updateElementByID(id, svg);
-                }
-            }
-            // else {
-            //     console.error('container is null ' + name);
-            //     // this.callback.updateElementByID(id, '渲染失败');
-            // }
-        } catch (error) {
-            console.error(error.message);
-            // this.callback.updateElementByID(id, '渲染失败:' + error.message);
-        }
-    }
+    //                 let svg = '';
+    //                 if (src === undefined || !src) {
+    //                     svg = '渲染失败';
+    //                     console.log('Failed to get Excalidraw URL');
+    //                 }
+    //                 else {
+    //                     const blob = await this.readBlob(src);
+    //                     if (blob.type === 'image/svg+xml') {
+    //                         svg = await blob.text();
+    //                         Embed.fileCache.set(name, svg);
+    //                     }
+    //                     else {
+    //                         svg = '暂不支持' + blob.type;
+    //                     }
+    //                 }
+    //                 this.previewRender.updateElementByID(id, svg);
+    //             }
+    //         }
+    //         // else {
+    //         //     console.error('container is null ' + name);
+    //         //     // this.callback.updateElementByID(id, '渲染失败');
+    //         // }
+    //     } catch (error) {
+    //         console.error(error.message);
+    //         // this.callback.updateElementByID(id, '渲染失败:' + error.message);
+    //     }
+    // }
 
     parseSVGLink(link: string) {
         let classname = 'note-embed-svg-left';
@@ -697,13 +664,33 @@ export class Embed extends WeWriteMarkedExtension {
         this.excalidrawIndex++;
 
         // const root = this.plugin.resourceManager.getMarkdownRenderedElement(index, '.excalidraw-svg.excalidraw-embedded-img')
-        const root = ObsidianMarkdownRenderer.getInstance(this.plugin.app).queryElement(index, '.excalidraw-svg.excalidraw-embedded-img')
+        const root = ObsidianMarkdownRenderer.getInstance(this.plugin.app).queryElement(index, 'div.excalidraw-svg')
         if (!root) {
             return
         }
-        // const dataUrl = await htmlToImage.toPng(root)
-        // token.html = `<img src="${dataUrl}" >`
-        token.html = root.outerHTML
+        root.removeAttribute('style');
+        try {
+
+            console.log(`root=>`, root);
+            
+            const image = root.querySelector('img')
+            if (image) {
+                image.setAttr('width', '100%')
+                image.setAttr('height', '100%')
+                image.setAttr('style', 'width:100%;height:100%')
+            }
+            const dataUrl = await htmlToImage.toPng(root)
+            console.log(`dataUrl:`, dataUrl);
+            // const blob = await domtoimage.toBlob(root)
+            // console.log(`blob:`, blob);
+            
+            // const dataUrl = URL.createObjectURL(blob)
+            token.html = `<img src="${dataUrl}" class="wewwrite-exclaidraw" >`
+        }
+        catch (e) {
+            console.log(`renderExcalidrawAsync error:`, e);
+        }
+        // token.html = root.outerHTML
 
         // let svg = Embed.fileCache.get(href);
         // if (svg === undefined) {
@@ -751,6 +738,13 @@ export class Embed extends WeWriteMarkedExtension {
 
     // }
     async renderMarkdownEmbedAsync(token: Tokens.Generic) {
+
+        const href = token.href;
+        console.log(`renderMarkdownEmbedAsync: ${href}`);
+        const content = await this.renderFile(href);
+        token.html = `<div class="markdown-embed inline-embed is-loaded">${content}</div>`
+    }
+    async renderMarkdownEmbedAsyncCopy(token: Tokens.Generic) {
         //internal-embed markdown-embed inline-embed is-loaded
         // define default failed
         token.html = '<span>markdown embed 渲染失败</span>';
@@ -763,7 +757,7 @@ export class Embed extends WeWriteMarkedExtension {
         // const root = this.plugin.resourceManager.getMarkdownRenderedElement(index, '.markdown-embed.inline-embed.is-loaded')
         const root = ObsidianMarkdownRenderer.getInstance(this.plugin.app).queryElement(index, '.markdown-embed.inline-embed.is-loaded')
         console.log(`emebed[${index}] root=>`, root);
-        
+
         if (!root) {
             return
         }

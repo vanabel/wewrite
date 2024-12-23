@@ -26,7 +26,7 @@ import { Tokens } from "marked";
 import { WeWriteMarkedExtension } from "./extension";
 import { MathRenderer } from "./math";
 // import { wxUploadImage } from "../weixin-api";
-// import * as htmlToImage from 'html-to-image';
+import * as htmlToImage from 'html-to-image';
 import domtoimage from 'dom-to-image'
 import { processStyle } from "src/assets/theme-processor";
 import { ObsidianMarkdownRenderer } from "../markdown-render";
@@ -254,6 +254,7 @@ export class CodeRenderer extends WeWriteMarkedExtension {
         const href = token.href;
         console.log(`renderMermaidAsync: ${href}`);
         const index = this.mermaidIndex;
+		const containerId = `mermaid-${this.mermaidIndex}`;
         this.mermaidIndex++;
 
         // const root = this.plugin.resourceManager.getMarkdownRenderedElement(index, '.mermaid')
@@ -261,36 +262,65 @@ export class CodeRenderer extends WeWriteMarkedExtension {
         if (!root) {
             return
         }
-		console.log(`mermaid root:`, root);
+		console.log(`mermaid root:`, root, root.outerHTML);
 		
-        // const dataUrl = await domtoimage.toBlob(root)
-		// console.log(`dataUrl:`, dataUrl);
+		const svg = root.querySelector('svg')
+		svg?.setAttr('width', '100%')
+		svg?.setAttr('height', '100%')
+
+        const blob = await domtoimage.toBlob(root)
+		// console.log(`blob:`, blob);
+		const dataUrl = URL.createObjectURL(blob)
+		// console.log(`dataUrl:`, dataUrl)
+
+        const dataUrl2 = await htmlToImage.toPng(root)
+		console.log(`dataUrl2:`, dataUrl2);
 		
-        token.html = root.outerHTML;// `<img src="${dataUrl}" >`
+        // const dataUrl3 = await domtoimage.toPng(root.parentElement!)
+		// console.log(`dataUrl3:`, dataUrl);
+		const style = root.querySelector('style')
+		console.log(`style=>`, style);
+		if (style) {
+			style.parentNode!.removeChild(style)
+		}
+
+		
+		// this.previewRender.addElementByID(containerId, root)
+        // token.html =  `<span id="${containerId}" class="wewrite wewrite-mermaid" >`
+		token.html = `<div id="wewrite-mermaid-${index}"> <img src="${dataUrl}" class="wewrite wewrite-mermaid"> </div>` +
+		 `<div id="wewrite-mermaid-2-{index}"> <img src="${dataUrl2}" class="wewrite wewrite-mermaid"> </div>`
+		
 	}
 
 	renderCharts(token: Tokens.Generic) {
-		// const root = this.plugin.resourceManager.getMarkdownRenderedElement(this.chartsIndex, '.block-language-chart')
-		const root = ObsidianMarkdownRenderer.getInstance(this.plugin.app).queryElement(this.chartsIndex, '.block-language-chart')
+		const root = this.plugin.resourceManager.getMarkdownRenderedElement(this.chartsIndex, '.block-language-chart')
+		const root2 = ObsidianMarkdownRenderer.getInstance(this.plugin.app).queryElement(this.chartsIndex, '.block-language-chart')
 		console.log(`renderCharts this.chartIndex:`, this.chartsIndex);
 
-		if (!root) {
+		if (!root || !root2) {
 			return '<span>charts渲染失败</span>';
 		}
 		const containerId = `charts-img-${this.chartsIndex}`;
 		this.chartsIndex++;
 		const canvas = root.querySelector('canvas')
-		if (canvas) {
+		const canvas2 = root2.querySelector('canvas')
+		if (canvas && canvas2) {
 			// this.chartsIndex++
 			// // return `<section id="${containerId}" class="admonition-parent admonition-${type}-parent">${root.outerHTML}</section>`;
-			// console.log(`chart root:`, root);
+			console.log(`chart root:`, root);
+			console.log(`chart canvas: {${canvas.width}, ${canvas.height}}` );
+			console.log(`chart canvas2: {${canvas2.width}, ${canvas2.height}}` );
 			// const svg =  this.canvasToSVG(containerId ,canvas)
 			const MIME_TYPE = "image/png";
 
 			const imgURL = canvas.toDataURL(MIME_TYPE);
+			const imgURL2 = canvas2.toDataURL(MIME_TYPE);
 
-			return `<section id="${containerId}" class="wewrite charts" ><img src="${imgURL}" ></section>`;
+			return `<section id="${containerId}" class="wewrite charts" >
+			<img src="${imgURL}" >
+			</section>`;
 		}
+		return '<span>charts渲染失败</span>';
 	}
 	// async canvasToSVG(containerId:string, canvas: HTMLCanvasElement) {
 	// 	const svg = new Canvg(canvas.getContext('2d')!, canvas.ownerDocument)

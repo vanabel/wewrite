@@ -31,9 +31,9 @@ function applyStyle(root: HTMLElement, cssRoot: postcss.Root) {
 	});
 
 	
-	if (root.tagName === 'svg') {
-		return;
-	}
+	// if (root.tagName === 'svg') {
+	// 	return;
+	// }
 
 	let element = root.firstElementChild;
 	while (element) {
@@ -48,19 +48,19 @@ function applyStyle(root: HTMLElement, cssRoot: postcss.Root) {
  * @param css, customized css content 
  * @returns 
  */
-export function applyCSS(html: string, css: string) {
-	const doc = sanitizeHTMLToDom(html);
-	const root = doc.firstChild as HTMLElement;
+export function applyCSS(root:Node|null, css: string) {
+	// const doc = sanitizeHTMLToDom(html);
+	// const root = doc.firstChild as HTMLElement;
     try{
 
         const cssRoot = compileCSS(css)// postcss.parse(css);
         // console.log(`applyCSS:`, root, cssRoot);
-        applyStyle(root, cssRoot);
+        applyStyle(root as HTMLElement, cssRoot);
     }catch(e){
         console.error(`applyCSS error:`, e);
     }
-	removeClassName(root);
-	return root.outerHTML;
+	removeClassName(root as HTMLElement);
+	// return root.outerHTML;
 }
 
 export function removeClassName(root:HTMLElement){

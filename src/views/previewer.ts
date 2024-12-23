@@ -146,8 +146,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
                     button.setIcon('notepad-text-dashed')
                         .setTooltip('send to draft box.')
                         .onClick(async () => {
-                            console.log(`send to draft box.`);
-                            this.wechatClient.sendArticleToDraftBox(this.draftHeader.getActiveLocalDraft()!, this.getArticleContent())
+                            this.sendArticleToDraftBox()
                         })
                 }
             )
@@ -157,7 +156,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
                         .setTooltip('publish to MP directly.')
                     button.onClick(async () => {
                         console.log(`publish to MP directly.`);
-                       
+
                         // const renderer = new HtmlRender(this.app)
                         // // const node = await renderer.renderDocument(md, activeFile.path)
                         // const node = await renderer.renderMarkdown(md, activeFile.path)
@@ -201,8 +200,38 @@ export class PreviewPanel extends ItemView implements PreviewRender {
         this.articleDiv = this.containerDiv.createDiv({ cls: 'article-div' });
 
     }
+    async sendArticleToDraftBox() {
+        console.log(`send article to draft box.`);
+
+        console.log('checking svg....')
+        await uploadSVGs(this.articleDiv, this._plugin.wechatClient)
+        console.log('checking svg.... done')
+
+        console.log('checking canvas....')
+        await uploadCanvas(this.articleDiv, this._plugin.wechatClient)
+        console.log('checking canvas.... done')
+
+        console.log('checking blob image....')
+        await uploadURLImage(this.articleDiv, this._plugin.wechatClient)
+        console.log('checking blob image.... done.')
+
+        console.log(`start uploading draft content:`, this.getArticleContent());
+        console.log(`images in articleDiv:`, this.articleDiv.querySelectorAll('img'));
+
+        const media_id = await this.wechatClient.sendArticleToDraftBox(this.draftHeader.getActiveLocalDraft()!, this.getArticleContent())
+        console.log(`sending article finished: media_id=${media_id}`);
+        
+        if (media_id) {
+            const news_item = await this.wechatClient.getDraftById(this._plugin.settings.selectedAccount!, media_id)
+            if (news_item) {
+                console.log(`news_item=>`, news_item[0]);
+
+                open(news_item[0].url)
+            }
+        }
+    }
     public getArticleContent() {
-        return this.articleDiv.outerHTML
+        return this.articleDiv.innerHTML
     }
     async getCSS() {
         return await ThemeManager.getInstance(this._plugin).getCSS()
@@ -225,10 +254,10 @@ export class PreviewPanel extends ItemView implements PreviewRender {
         const mode = (mview.currentMode as any).type
         console.log('markdown view mode:', mode)
         this.articleDiv.empty();
-        if (mode !== 'preview') {
-            this.articleDiv.innerHTML = `<h1>Please switch MarkdownView to preview mode</h1>`
-            return
-        }
+        // if (mode !== 'preview') {
+        //     this.articleDiv.innerHTML = `<h1>Please switch MarkdownView to preview mode</h1>`
+        //     return
+        // }
         this.elementMap = new Map<string, HTMLElement | string>()
         const activeFile = this.app.workspace.getActiveFile();
         console.log(`activeFile =>`, activeFile);
@@ -248,18 +277,20 @@ export class PreviewPanel extends ItemView implements PreviewRender {
 
 
         html = `<section class="wewrite-article-content" id="article-section">${html}</section>`;
-        const doc = sanitizeHTMLToDom(html);
-        this.articleDiv.empty();
-        if (doc.firstChild) {
-            this.articleDiv.appendChild(doc.firstChild);
-            }
-            
-            /*
+        this.articleDiv.innerHTML = html
+        // const doc = sanitizeHTMLToDom(html);
+        // this.articleDiv.empty();
+
+        // if (doc.firstChild) {
+        //     this.articleDiv.appendChild(doc.firstChild);
+        //     }
+        // this.articleDiv.innerHTML = html
+
         // render the async part of the doc.
         // console.log(`this.elementMap=>`, this.elementMap);
         this.elementMap.forEach(async (node: HTMLElement | string, id: string) => {
             const item = this.articleDiv.querySelector('#' + id) as HTMLElement;
-            // console.log(`id=${id}, item=>`, item);
+            console.log(`id=${id}, item=>`, item);
             // console.log(`node`);
 
             if (!item) return;
@@ -270,7 +301,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
                     // console.log(`file=>`, file);
                     if (file) {
                         // const content = await this._plugin.app.vault.adapter.read(file.path);
-                        const body = await WechatRender.getInstance(this._plugin, this).parseNote(file.path, this.articleDiv);
+                        const body = await WechatRender.getInstance(this._plugin, this).parseNote(file.path, this.articleDiv, this);
                         // console.log(`body=>`, body);
                         // console.log(`item=>`, item);
 
@@ -279,13 +310,13 @@ export class PreviewPanel extends ItemView implements PreviewRender {
                     }
                 }
             } else {
-                // console.log(`after rendering: node=>`, node, item);
+                console.log(`after rendering: node=>`, node, item);
 
                 item.appendChild(node)
             }
 
         })
-        return this.articleDiv.innerHTML */
+        return this.articleDiv.innerHTML
     }
     async renderDraft() {
 
@@ -294,11 +325,11 @@ export class PreviewPanel extends ItemView implements PreviewRender {
         // extractUniqueStyles(this.articleDiv)
         // processStyle(this.articleDiv)
         // setFullStyle(this.articleDiv)
-        const html = applyCSS(this.articleDiv.innerHTML, await this.getCSS())
-        this.articleDiv.innerHTML = html
+        const html = applyCSS(this.articleDiv.firstChild, await this.getCSS())
+        // this.articleDiv.innerHTML = html
 
     }
-    async renderHTML(){
+    async renderHTML() {
         const activeFile = this.app.workspace.getActiveFile();
         // RenderCache.getInstance(this._plugin).seaarchResource(activeFile!.path)
         // // console.log(`activeFile =>`, activeFile);
@@ -316,7 +347,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
         await htmlRender(this.app, md, activeFile.path, this.articleDiv)
         console.log(`getIcon file`, getIcon('file'));
         console.log(`getIcon LiAlignJustify`, getIcon('LiAlignJustify'));
-        
+
 
     }
     startListen() {

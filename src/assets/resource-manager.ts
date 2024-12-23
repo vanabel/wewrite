@@ -56,7 +56,10 @@ export class ResourceManager {
         const view = this.getCurrentMarkdownView();
         // console.log(`queryElements=>view`, view);
         if (!view) return [];
-        const preview = view.containerEl.querySelector('.markdown-reading-view')//('.markdown-preview-view')
+        console.log(`getViewMode=>`, view.getMode());
+        
+        const view_query = view.getMode() === 'preview' ? '.markdown-preview-view' : '.markdown-source-view';
+        const preview = view.containerEl.querySelector(view_query)//('.markdown-reading-view')//('.markdown-preview-view')
         // console.log(`queryElements=>preview`, preview);
         // console.log(`queryElements=>preview.outer`, preview?.outerHTML);
 

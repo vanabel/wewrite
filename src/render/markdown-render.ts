@@ -52,7 +52,7 @@ export class ObsidianMarkdownRenderer {
         )
         this.container.appendChild(this.el)
 
-        await delay(200);
+        await delay(100);
         this.rendering = false
     }
     public queryElement(index: number, query: string) {
@@ -76,9 +76,9 @@ export class ObsidianMarkdownRenderer {
         }
         const root = nodes[index]
         console.log(`queryElement:${query} [${index}]==>`, root);
-        if (root) {
-            return root.cloneNode(true) as HTMLElement
-        }
+        // if (root) {
+        //     return root.cloneNode(true) as HTMLElement
+        // }
         return root
     }
     private async loadComponents(view: Component) {

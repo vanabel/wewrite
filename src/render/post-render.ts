@@ -98,8 +98,8 @@ export async function uploadSVGs(root: HTMLElement, wechatClient: WechatClient){
             console.log(`svg size:${svgString.length} < 100000; skipped.`)
             return
         }
-        svgToPng(svgString).then(blob => {
-            wechatClient.uploadImage(blob, imageFileName(blob.type)).then(res => {
+        await svgToPng(svgString).then(async blob => {
+            await wechatClient.uploadImage(blob, imageFileName(blob.type)).then(res => {
                 if (res){
                     console.log(`upload svg to wechat server: ${res.media_id}`)
                     svg.outerHTML = `<img src="${res.url}" />`
@@ -121,7 +121,7 @@ export async function uploadCanvas(root:HTMLElement, wechatClient:WechatClient):
     
     const uploadPromises = canvases.map(async (canvas) => {
         const blob = getCanvasBlob(canvas);
-        wechatClient.uploadImage(blob, imageFileName(blob.type)).then(res => {
+        await wechatClient.uploadImage(blob, imageFileName(blob.type)).then(res => {
             if (res){
                 console.log(`upload canvas to wechat server: ${res.media_id}`)
                 canvas.outerHTML = `<img src="${res.url}" />`
@@ -145,14 +145,14 @@ export async function uploadURLImage(root:HTMLElement, wechatClient:WechatClient
         let blob:Blob|undefined 
         console.log(`img src: ${img.src}`);
         
-        if (img.src.startsWith('https://mmbiz.qpic.cn/')){
+        if (img.src.includes('://mmbiz.qpic.cn/')){
             console.log(`it is a wechat image. skipped.`);
             return;
         }
         else if (img.src.startsWith('data:image/')){
             blob = dataURLtoBlob(img.src);
         }else{
-            console.log(`try to fetch other image url:`, img.src);
+            console.log(`try to fetch other(blob) image url:`, img.src);
             blob = await fetch(img.src).then(res => res.blob());
         }
         
@@ -162,7 +162,7 @@ export async function uploadURLImage(root:HTMLElement, wechatClient:WechatClient
             
         }else{
 
-            wechatClient.uploadImage(blob, imageFileName(blob.type)).then(res => {
+            await wechatClient.uploadImage(blob, imageFileName(blob.type)).then(res => {
                 if (res){
                     console.log(`upload image to wechat server: `,res)
                     img.src = res.url
