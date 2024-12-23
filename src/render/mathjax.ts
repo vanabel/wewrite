@@ -1,10 +1,13 @@
-import { mathjax } from 'mathjax-full/js/mathjax'
-import { TeX } from 'mathjax-full/js/input/tex'
-import { SVG } from 'mathjax-full/js/output/svg'
-import { AllPackages } from 'mathjax-full/js/input/tex/AllPackages'
+/**
+ * new version os mathjax wrapper for render math LaTeX to svg
+ */
+
 import { LiteAdaptor } from 'mathjax-full/js/adaptors/liteAdaptor'
 import { RegisterHTMLHandler } from 'mathjax-full/js/handlers/html'
-import { parse } from 'path'
+import { TeX } from 'mathjax-full/js/input/tex'
+import { AllPackages } from 'mathjax-full/js/input/tex/AllPackages'
+import { mathjax } from 'mathjax-full/js/mathjax'
+import { SVG } from 'mathjax-full/js/output/svg'
 
 const adaptor = new LiteAdaptor()
 RegisterHTMLHandler(adaptor)
@@ -34,12 +37,9 @@ const inlineRule = /\$(.*)\$/g // /^(\${1,2})(?!\$)((?:\\.|[^\\\n])*?(?:\\.|[^\\
 const blockRule = /\$\$(?!<\$\$)([\s\S]*?)\$\$/g;  // /^(\${1,2})\n((?:\\[^]|[^\\])+?)\n\1(?:\n|$)/;
 
 export function parseHTML(html: string): string {
-    console.log(`parseHTML: ${html}`)
-    
     let matches = html.match(blockRule)
     if (matches) {
         matches.forEach(match => {
-            console.log(`match block：${match}`);
             const math = match.replace(/\$/g, '')
             const svg = parseMath(math)
             html = html.replace(match, svg)
@@ -50,17 +50,12 @@ export function parseHTML(html: string): string {
     console.log(`matches: ${matches}`)
     if (matches) {
       matches.forEach(match => {
-        console.log(`match inline：${match}`);
-        
         const math = match.replace(/\$/g, '')
         const svg = parseMath(math)
         html = html.replace(match, svg)
       })
     }
     return html
-
   }
 
-//   const svg = parseMath('a^2+b^2=c^2')
-//   console.log(`svg: ${svg}`);
   

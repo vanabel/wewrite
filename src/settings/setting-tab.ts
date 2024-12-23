@@ -2,13 +2,13 @@
  * tab for setting
  */
 
-import { App, Component, DropdownComponent, Notice, PluginSettingTab, Setting } from "obsidian";
+import { App, DropdownComponent, Notice, PluginSettingTab, Setting } from "obsidian";
 import WeWritePlugin from "src/main";
-import { WECHAT_MP_WEB_PAGE } from "./images";
 import { getPublicIpAddress } from "src/utils/ip-address";
-import { WeWriteAccountInfo } from "./wewrite-setting";
-import { FolderSuggest } from "./folder-suggester";
 import { ThemeManager } from "src/views/theme-manager";
+import { FolderSuggest } from "./folder-suggester";
+import { WECHAT_MP_WEB_PAGE } from "./images";
+import { WeWriteAccountInfo } from "./wewrite-setting";
 
 export class WeWriteSettingTab extends PluginSettingTab {
 	private _plugin: WeWritePlugin;
@@ -16,8 +16,6 @@ export class WeWriteSettingTab extends PluginSettingTab {
 	appSecretEl: Setting
 	accountEl: HTMLElement
 	accountDropdown: DropdownComponent
-
-
 	constructor(app: App, plugin: WeWritePlugin) {
 		super(app, plugin);
 		this._plugin = plugin;
@@ -28,10 +26,6 @@ export class WeWriteSettingTab extends PluginSettingTab {
 
 		containerEl.empty();
 
-		// header
-		// new Setting(containerEl)
-		// 	.setName('Settings - WeWrite ')
-		// 	.setHeading()
 		containerEl.createEl('h1', { text: "WeWrite Settings" })
 		containerEl.createEl('hr')
 		// external IP
@@ -60,8 +54,6 @@ export class WeWriteSettingTab extends PluginSettingTab {
 		const div = containerEl.createDiv({ cls: 'wechat-mp-web-image elevated-shadow' })
 		div.innerHTML = `<a href="https://mp.weixin.qq.com/cgi-bin/frame?t=pages/developsetting/page/developsetting_frame&nav=10141"><img src="${WECHAT_MP_WEB_PAGE}" alt="wechat-mp-web-page"></a> </p>`
 
-
-
 		new Setting(containerEl)
 			.setName('Select WeChat MP Account')
 			.setDesc('Choose the account you want to edit.')
@@ -74,17 +66,10 @@ export class WeWriteSettingTab extends PluginSettingTab {
 						this._plugin.settings.mpAccounts.forEach(account => {
 							dropdown.addOption(account.accountName, account.accountName)
 						})
-						// if (this._plugin.settings.selectedAccount === undefined || !this._plugin.settings.mpAccounts.some(account => account.accountName === this._plugin.settings.selectedAccount)){
-							
-						// }
 					}
 					dropdown
 						.setValue(this._plugin.settings.selectedAccount ?? 'Select WeChat MP Account')
 						.onChange(async (value) => {
-							//TODO: only update when the account has been tested successfully.
-							//TODO: should not update with every key press.
-							//TODO: if the acount is tested, we sync the data. 
-							
 							this._plugin.settings.selectedAccount = value;
 							this.updateAccountSettings(this._plugin.settings.selectedAccount, this.accountEl)
 							await this._plugin.saveSettings();
@@ -113,10 +98,8 @@ export class WeWriteSettingTab extends PluginSettingTab {
 					button.setIcon('download')
 						.setTooltip('Import account info')
 						.onClick(async () => {
-							// const json = await this._plugin.loadSettings()
-							// console.log(json)
+							//TODO import account info, to be implemented.
 							console.log(`import account info`);
-
 						})
 				}
 			)
@@ -125,14 +108,12 @@ export class WeWriteSettingTab extends PluginSettingTab {
 					button.setIcon('upload')
 						.setTooltip('Export account info')
 						.onClick(async () => {
-							// const json = await this._plugin.loadSettings()
-							// console.log(json)
+							//TODO export account info, to be implemented.
 							console.log(`export account info`);
 
 						})
 				}
 			)
-			
 			containerEl.createEl('hr')
 			this.newCSSStyleFolder()
 
@@ -150,8 +131,6 @@ export class WeWriteSettingTab extends PluginSettingTab {
 					this._plugin.settings.css_styles_folder = new_folder;
 					this._plugin.saveSettings(); 
 				});
-			// @ts-ignore
-			// cb.containerEl.addClass("templater_search");
 		}).addExtraButton(
 			(button) => {
 				button.setIcon("download")
@@ -184,7 +163,6 @@ export class WeWriteSettingTab extends PluginSettingTab {
 		this._plugin.settings.mpAccounts.push(newAccount)
 		this.accountDropdown.addOption(newName, newName)
 		this.accountDropdown.setValue(newName)
-		// this.updateAccountSettings(newName, containerEl)
 		this.updateAccountSettings(newName, this.accountEl)
 
 	}

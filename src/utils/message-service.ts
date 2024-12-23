@@ -1,3 +1,4 @@
+/** message slot for internal communication */
 import { SrcThumbList } from "./src-thumb-list";
 
 export type MSG_TYPE  = 

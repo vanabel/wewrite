@@ -1,3 +1,6 @@
+/**
+ * the panel to show wechat materials
+ */
 import { Menu, Notice, setIcon } from "obsidian";
 import WeWritePlugin from "src/main";
 import { MaterialMeidaItem, MediaType } from "src/wechat-api/wechat-types";
@@ -183,9 +186,6 @@ export class MaterialPanel {
     this.setTotal(this.items.length)
   }
   async initContent(): Promise<any> {
-    // throw new Error("Method not implemented.");
-    //TODO: disable click avoid multiple refresh
-    // console.log(`load content from local db `);
     this.content.innerHTML = '';
     this.setTotal(0);
     let total = 0;
@@ -199,40 +199,5 @@ export class MaterialPanel {
     items.forEach((item: any) => {
       this.addItem(item)
     })
-    // if (this.type === 'draft' || this.type === 'news') {
-    //   items.forEach((item: any) => {
-    //     total += 1;
-    //     const itemDiv = this.content.createDiv({ cls: 'collapsible-item' });
-    //     itemDiv.style.cursor = 'pointer';
-    //     itemDiv.innerHTML = `<a href=${item.content.news_item[0].url}> ${item.content.news_item[0].title}</a>`
-    //     itemDiv.addEventListener('click', () => { })
-    //   })
-    // } else {
-    //   items.forEach((item: any) => {
-    //     total += 1;
-    //     const itemDiv = this.content.createDiv({ cls: 'collapsible-item' });
-    //     itemDiv.style.cursor = 'pointer';
-    //     if (this.type === 'image') {
-
-    //       itemDiv.innerHTML = '<img src="' + item.url + '" alt="' + item.name + '" />'
-    //       itemDiv.addEventListener('click', () => {
-    //         console.log(`click ${item.used}`)
-    //       })
-    //       itemDiv.addEventListener('contextmenu', (event) => {
-    //         event.preventDefault();
-    //         this.showContextMenu(item, event)
-    //       })
-    //     } else if (this.type === 'news') {
-    //       itemDiv.innerHTML = `<a href=${item.content.news_item[0].url}> ${item.content.news_item[0].title}</a>`
-    //       itemDiv.addEventListener('click', () => {
-    //         console.log(`click ${item.media_id}`)
-    //       })
-    //     }
-    //   })
-
-    // }
-    // console.log(`type: ${this.type}, total: ${total}`);
-
-    // this.setTotal(total)
   }
 }

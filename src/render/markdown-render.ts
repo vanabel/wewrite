@@ -1,5 +1,9 @@
+/**
+ * MarkdownRender of obsidian. 
+ * credits to author of export as image plugin
+ */
+
 import { App, Component, MarkdownRenderChild, MarkdownRenderer, MarkdownView } from "obsidian";
-// import {createRoot} from 'react-dom/client';
 
 async function delay(milliseconds: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, milliseconds));
@@ -28,10 +32,6 @@ export class ObsidianMarkdownRenderer {
             console.log(`invalid note path for rendering: ${path}`);
             return;
         }
-        // if (this.path === path) {
-        //     console.log(`already rendered: ${path}`);
-        //     return;
-        // }
         this.container = container
         this.view = view
         this.path = path
@@ -64,22 +64,11 @@ export class ObsidianMarkdownRenderer {
             console.log(`markdown render is still rendering`);
             return null
         }
-        console.log(`el=>`, this.el);
-        console.log(`el1=>`, this.el1);
-        console.log(`mdv=>`, this.mdv);
-
         const nodes = this.el.querySelectorAll<HTMLElement>(query)
-        console.log(`queryElement:${query} [${index}] nodes ==>`, nodes);
-
         if (nodes.length < index) {
             return null
         }
-        const root = nodes[index]
-        console.log(`queryElement:${query} [${index}]==>`, root);
-        // if (root) {
-        //     return root.cloneNode(true) as HTMLElement
-        // }
-        return root
+        return nodes[index]
     }
     private async loadComponents(view: Component) {
 		type InternalComponent = Component & {
@@ -107,7 +96,6 @@ export class ObsidianMarkdownRenderer {
 					await loadChildren(child, visited);
 				}
 			}
-
 			try {
 				// relies on the Sheet plugin (advanced-table-xt) not to be minified
 				if (component?.constructor?.name === 'SheetElement') {
@@ -117,7 +105,6 @@ export class ObsidianMarkdownRenderer {
 				console.error(`Error calling onload()`, error);
 			}
 		};
-
 		await loadChildren(internalView);
 	}
 }

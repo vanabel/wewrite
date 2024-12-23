@@ -1,3 +1,4 @@
+/** process custom theme content */
 import matter from "gray-matter";
 import { TFile, TFolder } from "obsidian";
 import WeWritePlugin from "src/main";
@@ -15,6 +16,7 @@ export type WeChatTheme = {
 
 export class ThemeManager {
 	downloadThemes() {
+        //TODO, implement themes template download.
 		throw new Error("Method not implemented.");
 	}
     private _plugin: WeWritePlugin;

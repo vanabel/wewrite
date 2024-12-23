@@ -1,3 +1,6 @@
+/**
+ * dialog to pick picture for article cover
+ */
 import { Modal, App } from "obsidian";
 
 export interface ICoverImageModalData {

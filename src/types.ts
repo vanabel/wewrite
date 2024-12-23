@@ -1,4 +1,5 @@
 
+/** define some internal usage of obsidian api */
 declare module "obsidian" {
     interface App {
         dom: {

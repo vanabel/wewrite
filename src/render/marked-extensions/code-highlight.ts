@@ -1,25 +1,8 @@
-/*
- * Copyright (c) 2024 Sun Booshi
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
+/**
+ * Marked extension for code highlighting
+ *  credits to Sun BooShi, author of note-to-mp plugin
  */
-
+ 
 import { MarkedExtension } from "marked";
 import { WeWriteMarkedExtension } from "./extension";
 import { markedHighlight } from "marked-highlight";
@@ -37,7 +20,6 @@ export class CodeHighlight extends WeWriteMarkedExtension {
         if (lang && lang.trim().toLocaleLowerCase() == 'mermaid') return code;
 
         if (lang && hljs.getLanguage(lang)) {
-          // 有语言的名称，或者可识别的语言
           try {
             const result = hljs.highlight(code, { language: lang });
             console.log(`result: ${result.value}`);
@@ -46,13 +28,12 @@ export class CodeHighlight extends WeWriteMarkedExtension {
           } catch (err) { }
         }
 
-        // 没有语言，或语言定义不能识别，自动检测
         try {
           const result = hljs.highlightAuto(code);
           return result.value;
         } catch (err) { }
 
-        return ''; // use external default escaping
+        return ''; 
       }
     })
   }

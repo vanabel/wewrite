@@ -1,9 +1,10 @@
-import WeWritePlugin from 'src/main';
-import { MarkdownView, Setting, TextAreaComponent, TextComponent, TFile, ToggleComponent } from "obsidian";
-import { placeholder } from '@codemirror/view';
-import { UrlUtils } from 'src/utils/urls';
+/** 
+ *  WeChat MP Article Header settings 
+ */
+import { Setting, TextComponent, TFile, ToggleComponent } from "obsidian";
 import { LocalDraftItem, LocalDraftManager } from 'src/assets/draft-manager';
-import { timeStamp } from 'console';
+import WeWritePlugin from 'src/main';
+import { UrlUtils } from 'src/utils/urls';
 
 export class MPArticleHeader {
     
@@ -289,53 +290,6 @@ export class MPArticleHeader {
         this.activeLocalDraft = await this.localDraftmanager.getDrafOfActiveNote()
         this.updateHeaderProporties()
         return true;
-        // const activeView = this._plugin.app.workspace.getActiveViewOfType(MarkdownView);
-
-        // if (activeView === undefined || activeView === null) {
-        //     console.log(`not a markdown view`);
-        //     this.activeLocalDraft = undefined
-        //     this.updateHeaderProporties()
-        //     return false;
-
-        // }
-
-        // const activeFile = this._plugin.app.workspace.getActiveFile();
-        // console.log(`updateLocalDraft activeFile=>`, activeFile?.path);
-        // if (activeFile === undefined || activeFile === null) {
-        //     console.log(`no activeFile`);
-        //     this.activeLocalDraft = undefined
-        //     this.updateHeaderProporties()
-        //     return false
-        // }
-        // const notePath = activeFile.path;
-        // if (this.activeLocalDraft !== undefined &&
-        //     this.activeLocalDraft.notePath === notePath &&
-        //     this.activeLocalDraft.accountName === this._plugin.settings.selectedAccount) {
-        //     //the same file
-        //     console.log(`updateLocalDraft, same account and same file `);
-        //     return false;
-
-        // } else {
-        //     const dm = LocalDraftManager.getInstance(this._plugin)
-        //     const draft = await dm.getDraft(this._plugin.settings.selectedAccount!, notePath)
-        //     console.log(`get draft=>`, draft);
-
-        //     if (draft !== undefined) {
-        //         this.activeLocalDraft = draft
-        //     } else {
-        //         console.log(`new draft`);
-
-        //         this.activeLocalDraft = {
-        //             accountName: this._plugin.settings.selectedAccount!,
-        //             notePath: notePath,
-        //             title: activeFile?.basename || "",
-        //             content: ""
-        //         }
-        //         dm.setDraft(this.activeLocalDraft)
-        //     }
-        //     this.updateHeaderProporties()
-        //     return true
-        // }
     }
     updateHeaderProporties() {
         if (this.activeLocalDraft !== undefined) {

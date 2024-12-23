@@ -1,4 +1,7 @@
-// 返回码	说明'],
+/**
+ * 微信公众平台接口错误码
+ *
+ */
 export const WECHAT_API_ERROR_CODE = new Map(
     [
         [-1, '系统繁忙，此时请开发者稍候再试'],

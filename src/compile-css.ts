@@ -1,3 +1,6 @@
+/**
+ * CSS compiling for custom theme 
+ */
 import postcss from 'postcss';
 
 

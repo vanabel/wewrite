@@ -1,3 +1,4 @@
+/** view template for different types of material */
 import { ItemView, WorkspaceLeaf } from "obsidian";
 import WeWritePlugin from "src/main";
 import { WeChatMPAccountSwitcher } from "src/settings/account-switcher";

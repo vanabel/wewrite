@@ -1,4 +1,3 @@
-import { marked } from 'marked';
 /**
  * This is the base class for all marked extensions. which will handle different types of markdown blocks
  * 
@@ -11,9 +10,8 @@ import { marked } from 'marked';
  * @category Extensions
  */
 
-import { App, MarkdownView } from "obsidian"
-import WeWritePlugin from "src/main"
-import { Marked, MarkedExtension } from "marked"
+import { Marked, MarkedExtension } from "marked";
+import WeWritePlugin from "src/main";
 
 // type RenderBLock = 'space'| 'code'| 'blockquote'| 'html'| 'heading'| 'hr'| 'list'| 'listitem'| 'checkbox'| 'paragraph'| 'table'| 'tablerow'| 'tablecell'
 // type RenderInline = 'strong'| 'em'| 'codespan'| 'br'| 'del'| 'link'| 'image'| 'text'

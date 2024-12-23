@@ -1,3 +1,7 @@
+/**
+ * wewrite plugin for Obsidian
+ * author: Learner Chen.
+ */
 import { EventRef, Notice, Plugin, WorkspaceLeaf } from 'obsidian';
 import { getPublicIpAddress } from "src/utils/ip-address";
 import { AssetsManager } from './assets/assets-manager';
@@ -21,7 +25,6 @@ const DEFAULT_SETTINGS: WeWriteSetting = {
 	ipAddress: '',
 	css_styles_folder: 'wewrite-css-styles',
 	codeLineNumber: true,
-	icons: ['rpg', 'octicons'],
 	useFontAwesome: true,
     rpgDownloadedOnce: false,
 	

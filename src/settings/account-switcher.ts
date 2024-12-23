@@ -1,3 +1,6 @@
+/**
+ * Support for WeChat MP Account selection
+ */
 import { DropdownComponent, Setting } from "obsidian";
 import WeWritePlugin from "src/main";
 

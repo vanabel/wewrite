@@ -3,7 +3,6 @@ manage the wechat account settings
 
 */
 import PouchDB from 'pouchdb';
-import { DownloadableIconPack } from 'src/render/admonition';
 
 export type WeWriteAccountInfo = {
     _id?: string;
@@ -25,7 +24,6 @@ export type WeWriteSetting = {
     ipAddress?: string;
     selectedAccount?: string;
     mpAccounts: Array<WeWriteAccountInfo>;
-    icons: Array<DownloadableIconPack>;
     useFontAwesome: boolean;
     rpgDownloadedOnce: boolean;
 }

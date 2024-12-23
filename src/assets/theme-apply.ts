@@ -1,4 +1,7 @@
-import { sanitizeHTMLToDom } from "obsidian";
+/**
+ * Apply customer css to article
+ * 
+ */
 import postcss from "postcss";
 import { compileCSS } from "src/compile-css";
 
@@ -15,13 +18,10 @@ export function ruleToStyle(rule: postcss.Rule) {
 }
 
 function applyStyle(root: HTMLElement, cssRoot: postcss.Root) {
-    // console.log(`applyStyle`, root, cssRoot);
-    
 	const cssText = root.style.cssText;
 	cssRoot.walkRules(rule => {
 		if (root.matches(rule.selector)) {
 			rule.walkDecls(decl => {
-				// 如果已经设置了，则不覆盖
 				const setted = cssText.includes(decl.prop);
 				if (!setted || decl.important) {
 					root.style.setProperty(decl.prop, decl.value);
@@ -30,11 +30,6 @@ function applyStyle(root: HTMLElement, cssRoot: postcss.Root) {
 		}
 	});
 
-	
-	// if (root.tagName === 'svg') {
-	// 	return;
-	// }
-
 	let element = root.firstElementChild;
 	while (element) {
 		applyStyle(element as HTMLElement, cssRoot);
@@ -42,25 +37,15 @@ function applyStyle(root: HTMLElement, cssRoot: postcss.Root) {
 	}
 }
 
-/**
- * 
- * @param html, the content of aritile 
- * @param css, customized css content 
- * @returns 
- */
 export function applyCSS(root:Node|null, css: string) {
-	// const doc = sanitizeHTMLToDom(html);
-	// const root = doc.firstChild as HTMLElement;
     try{
 
-        const cssRoot = compileCSS(css)// postcss.parse(css);
-        // console.log(`applyCSS:`, root, cssRoot);
+        const cssRoot = compileCSS(css)
         applyStyle(root as HTMLElement, cssRoot);
     }catch(e){
         console.error(`applyCSS error:`, e);
     }
 	removeClassName(root as HTMLElement);
-	// return root.outerHTML;
 }
 
 export function removeClassName(root:HTMLElement){

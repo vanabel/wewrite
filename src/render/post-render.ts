@@ -1,44 +1,26 @@
+/** 
+ * Procesing the image data for a valid WeChat MP article for upload.
+ * 
+ */
 import { WechatClient } from './../wechat-api/wechat-client';
-/* 在obsidian中会出现各种新的图形的格式，或者复杂的SVG，都会导致内容过于大：
-
-- 复杂的svg，内嵌了图片之类的。
-- canvas，比如chats
-- 大型的文本格式的图片src
-- mermaid的svg出现一些线条和箭头的格式有问题。
-
-这些类型的文件都需要处理为上传的图片，简化在现在的页面结构 */
-
 function imageFileName(mime:string){
     const type = mime.split('/')[1]
     return `image-${new Date().getTime()}.${type}`
 }
 export function svgToPng(svgData: string): Promise<Blob> {
     return new Promise((resolve, reject) => {
-        // 创建一个Image对象
         const img = new Image();
-
-        // 当Image加载完成后
         img.onload = () => {
-            // 创建canvas元素
             const canvas = document.createElement('canvas');
             const dpr = window.devicePixelRatio || 1;
-
-            // 设置canvas的分辨率
             canvas.width = img.width * dpr;
             canvas.height = img.height * dpr;
-
-
-            // 获取2D渲染上下文
             const ctx = canvas.getContext('2d');
             if (!ctx) {
                 reject(new Error('Failed to get canvas context'));
                 return;
             }
-
-            // 将Image绘制到canvas上
             ctx.drawImage(img, 0, 0);
-
-            // 将canvas内容转换为Blob对象
             canvas.toBlob((blob) => {
                 if (blob) {
                     resolve(blob);
@@ -48,22 +30,17 @@ export function svgToPng(svgData: string): Promise<Blob> {
             }, 'image/png');
         };
 
-        // 当Image加载失败
         img.onerror = (error) => {
             reject(error);
         };
 
-         // 将字符串转换为 Latin1 编码
          const encoder = new TextEncoder();
          const uint8Array = encoder.encode(svgData);
          const latin1String = String.fromCharCode.apply(null, uint8Array);
- 
-         // 设置Image的源为SVG数据
          img.src = `data:image/svg+xml;base64,${btoa(latin1String)}`;
     });
 }
 
-// 如果需要将data URL转换为Blob对象以便上传
 function dataURLtoBlob(dataUrl: string): Blob {
     const parts = dataUrl.split(';base64,');
     const contentType = parts[0].split(':')[1];
@@ -79,9 +56,7 @@ function dataURLtoBlob(dataUrl: string): Blob {
     return new Blob([uInt8Array], { type: contentType });
 }
 export function getCanvasBlob(canvas: HTMLCanvasElement) {
-    // 获取canvas内容的PNG图片数据URL
     const pngDataUrl = canvas.toDataURL('image/png');
-    // 使用转换函数
     const pngBlob = dataURLtoBlob(pngDataUrl);
     return pngBlob;
 }
@@ -101,7 +76,7 @@ export async function uploadSVGs(root: HTMLElement, wechatClient: WechatClient){
         await svgToPng(svgString).then(async blob => {
             await wechatClient.uploadImage(blob, imageFileName(blob.type)).then(res => {
                 if (res){
-                    console.log(`upload svg to wechat server: ${res.media_id}`)
+                    // console.log(`upload svg to wechat server: ${res.media_id}`)
                     svg.outerHTML = `<img src="${res.url}" />`
                 }else{
                     console.log(`upload svg failed.`);
@@ -123,7 +98,7 @@ export async function uploadCanvas(root:HTMLElement, wechatClient:WechatClient):
         const blob = getCanvasBlob(canvas);
         await wechatClient.uploadImage(blob, imageFileName(blob.type)).then(res => {
             if (res){
-                console.log(`upload canvas to wechat server: ${res.media_id}`)
+                // console.log(`upload canvas to wechat server: ${res.media_id}`)
                 canvas.outerHTML = `<img src="${res.url}" />`
             }else{
                 console.log(`upload canvas failed.`);
@@ -143,16 +118,15 @@ export async function uploadURLImage(root:HTMLElement, wechatClient:WechatClient
     
     const uploadPromises = images.map(async (img) => {
         let blob:Blob|undefined 
-        console.log(`img src: ${img.src}`);
+        // console.log(`img src: ${img.src}`);
         
         if (img.src.includes('://mmbiz.qpic.cn/')){
-            console.log(`it is a wechat image. skipped.`);
+            // console.log(`it is a wechat image. skipped.`);
             return;
         }
         else if (img.src.startsWith('data:image/')){
             blob = dataURLtoBlob(img.src);
         }else{
-            console.log(`try to fetch other(blob) image url:`, img.src);
             blob = await fetch(img.src).then(res => res.blob());
         }
         
@@ -164,7 +138,6 @@ export async function uploadURLImage(root:HTMLElement, wechatClient:WechatClient
 
             await wechatClient.uploadImage(blob, imageFileName(blob.type)).then(res => {
                 if (res){
-                    console.log(`upload image to wechat server: `,res)
                     img.src = res.url
                 }else{
                     console.log(`upload image failed.`);

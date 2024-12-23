@@ -1,3 +1,6 @@
+/**
+ * Theme Selector
+ */
 import { DropdownComponent, TFile } from "obsidian";
 import WeWritePlugin from "src/main";
 import { ThemeManager } from "./theme-manager";

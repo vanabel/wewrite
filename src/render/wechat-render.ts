@@ -10,9 +10,11 @@
  */
 
 import matter from 'gray-matter'
-import { Marked, Token, Tokens } from 'marked'
+import { Marked, Tokens } from 'marked'
+import { Component } from 'obsidian'
 import WeWritePlugin from 'src/main'
 import { WechatClient } from '../wechat-api/wechat-client'
+import { ObsidianMarkdownRenderer } from './markdown-render'
 import { BlockquoteRenderer } from './marked-extensions/blockquote'
 import { CodeRenderer } from './marked-extensions/code'
 import { CodeHighlight } from './marked-extensions/code-highlight'
@@ -22,8 +24,6 @@ import { Heading } from './marked-extensions/heading'
 import { IconizeRender } from './marked-extensions/iconize'
 import { MathRenderer } from './marked-extensions/math'
 import { RemixIconRenderer } from './marked-extensions/remix-icon'
-import { ObsidianMarkdownRenderer } from './markdown-render'
-import { Component } from 'obsidian'
 
 
 const markedOptiones = {
@@ -33,23 +33,11 @@ const markedOptiones = {
 
 const customRenderer = {
 	heading(token:Tokens.Heading): string {
-		// ignore IDs
-		// return `<h${token.depth}><span class="h-prefix"></span><span class="h-content">${token.text}</span><span class="h-suffix"></span></h${token.depth}>`;
-        console.log(`render heading`, token);
-        
 		return `<h${token.depth}><span class="h-content">${token.text}++</span></h${token.depth}>`;
 	},
 	hr(): string {
 		return '<hr>';
 	},
-	// list(token:Tokens.List): string {
-	// 	const type = token.ordered ? 'ol' : 'ul';
-	// 	const startatt = (token.ordered && token.start !== 1) ? (' start="' + token.start + '"') : '';
-	// 	return '<' + type + startatt + '>' + '' + '</' + type + '>';
-	// },
-	// listitem(token:Tokens.ListItem): string {
-	// 	return `<li>${token.text}</li>`;
-	// }
 };
 
 export class WechatRender {
@@ -92,7 +80,6 @@ export class WechatRender {
     async parse(md:string){
 
         const { data, content } = matter(md)
-        // console.log(`attributes`, data);
         for (const extension of this.extensions){
             await extension.prepare()
         }
