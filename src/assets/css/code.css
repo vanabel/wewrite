@@ -1,0 +1,18 @@
+:root{
+    /* Code */
+    --code-white-space: pre-wrap;
+    --code-radius: var(--radius-s);
+    --code-size: var(--font-smaller);
+    --code-background: var(--background-primary-alt);
+    --code-normal: var(--text-muted);
+    --code-comment: var(--text-faint);
+    --code-function: var(--color-yellow);
+    --code-important: var(--color-orange);
+    --code-keyword: var(--color-pink);
+    --code-operator: var(--color-red);
+    --code-property: var(--color-cyan);
+    --code-punctuation: var(--text-muted);
+    --code-string: var(--color-green);
+    --code-tag: var(--color-red);
+    --code-value: var(--color-purple);
+}
