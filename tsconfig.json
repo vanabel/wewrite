@@ -21,12 +21,13 @@
     ]
   },
   "include": [
-    "**/*.ts" 
+    "**/*.ts"
   ],
   "exclude": [
     "node_modules",
     "test",
-    "icons"
+    "icons",
+    "src/assets/css/build-template-css.js"
     
   ]
 }

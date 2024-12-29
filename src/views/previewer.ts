@@ -3,8 +3,7 @@
 */
 
 import { EditorView } from "@codemirror/view";
-import { DropdownComponent, Editor, EventRef, getIcon, ItemView, MarkdownView, sanitizeHTMLToDom, Setting, TFile, WorkspaceLeaf } from 'obsidian';
-import { applyCSS } from 'src/assets/theme-apply';
+import { DropdownComponent, Editor, EventRef, ItemView, MarkdownView, sanitizeHTMLToDom, Setting, TFile, WorkspaceLeaf } from 'obsidian';
 import WeWritePlugin from 'src/main';
 import { PreviewRender } from 'src/render/marked-extensions/extension';
 import { uploadCanvas, uploadSVGs, uploadURLImage } from 'src/render/post-render';
@@ -235,7 +234,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
         }
         let html = await WechatRender.getInstance(this._plugin, this).parseNote(activeFile.path, this.articleDiv, this)
 
-        html = `<section class="wewrite-article-content" id="article-section">${html}</section>`;
+        html = `<section class="wewrite-article-content wewrite" id="article-section">${html}</section>`;
         this.articleDiv.innerHTML = html
 
         this.elementMap.forEach(async (node: HTMLElement | string, id: string) => {
@@ -260,7 +259,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
     }
     async renderDraft() {
         await this.parseActiveMarkdown();
-        applyCSS(this.articleDiv.firstChild, await this.getCSS())
+        await ThemeManager.getInstance(this._plugin).applyTheme(this.articleDiv.firstChild as HTMLElement)
     }
     startListen() {
         this.registerEvent(

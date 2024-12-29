@@ -1,36 +1,39 @@
 /** process custom theme content */
 import matter from "gray-matter";
 import { TFile, TFolder } from "obsidian";
+import postcss from "postcss";
+import { combinedCss } from "src/assets/css/template-css";
 import WeWritePlugin from "src/main";
-import { DEFAULT_STYLE } from "src/render/default-css";
-import {TEMPLATE_CSS} from "src/assets/css/template-css";
-import {CORE_CSS} from "src/assets/css/core-css";
-
-// import * as STYLE from 'src/render/styles.css'
 
 export type WeChatTheme = {
     name: string;
     path: string;
     content?: string;
-}
 
+}
+console.log('combinedCSS=>', combinedCss)
 export class ThemeManager {
-	downloadThemes() {
+    downloadThemes() {
         //TODO, implement themes template download.
-		throw new Error("Method not implemented.");
-	}
+        throw new Error("Method not implemented.");
+    }
     private _plugin: WeWritePlugin;
+    defaultCssRoot: postcss.Root;
     themes: WeChatTheme[] = [];
-    static template_css:string = TEMPLATE_CSS;
-    static core_css:string = CORE_CSS;
+    static template_css: string = combinedCss;
 
     private constructor(plugin: WeWritePlugin) {
         this._plugin = plugin;
+        // const { vars, root } = this.pickoutCssVars(combinedCss)
+        // console.log(`vars:`, vars);
+        // console.log(`root=>`, root);
+        // this.defaultCssRoot = root;
+
 
     }
-
     static getInstance(plugin: WeWritePlugin): ThemeManager {
         return new ThemeManager(plugin);
+
     }
 
     async loadThemes() {
@@ -40,8 +43,6 @@ export class ThemeManager {
         if (folder instanceof TFolder) {
             this.themes = await this.getAllThemesInFolder(folder);
         }
-        // console.log(`themes:`, this.themes);
-
         return this.themes;
     }
     public cleanCSS(css: string): string {
@@ -70,7 +71,7 @@ export class ThemeManager {
 
         const file = this._plugin.app.vault.getFileByPath(path);
         if (!file) {
-            return DEFAULT_STYLE;
+            return ThemeManager.template_css; //DEFAULT_STYLE;
         }
         const fileContent = await this._plugin.app.vault.cachedRead(file);
         // console.log(`fileContent:`, fileContent);
@@ -90,15 +91,14 @@ export class ThemeManager {
         return cssBlocks.join('\n'); // 将所有 CSS 代码块合并成一个字符串
 
     }
-    public async getCSS(){
-        let custom_css = ''
-        if (this._plugin.settings.custom_theme === undefined || !this._plugin.settings.custom_theme){
+    public async getCSS() {
+        let custom_css = '' //this.defaultCssRoot.toString() //''
+        if (this._plugin.settings.custom_theme === undefined || !this._plugin.settings.custom_theme) {
 
         } else {
             custom_css = await this.getThemeContent(this._plugin.settings.custom_theme)
         }
 
-        // return `${ThemeManager.template_css}\n${ThemeManager.core_css}\n${custom_css}`
         return custom_css
 
     }
@@ -146,4 +146,100 @@ export class ThemeManager {
             path: file.path,
         };
     }
+    public async applyTheme(htmlRoot: HTMLElement) {
+        const customCss = await this.getCSS()
+        const customCssRoot = postcss.parse(customCss)
+        const defaultCssRooot = postcss.parse(combinedCss)
+        const mergedRoot = this.mergeRoot(defaultCssRooot, customCssRoot)
+
+        this.applyStyle(htmlRoot, mergedRoot)
+        this.removeClassName(htmlRoot as HTMLElement);
+    }
+    private removeVarablesInStyleText(root: HTMLElement){
+            for (let i = 0; i < root.style.length; i++) {
+                const property = root.style[i];
+                if (property.startsWith('--')){
+                    const value = root.style.getPropertyValue(property);
+                    root.style.removeProperty(property);
+                    console.log(`remove:`, property, value);
+                    
+                }
+        }
+    }
+    private applyStyle(root: HTMLElement, cssRoot: postcss.Root) {
+        // iterative walk through the Dom tree
+        // for every node:
+        // walk through all the rules in the cssRoot, 
+        // for each matched rule, 
+        // for each decl in the rule,
+        // 1. set? is decl include !important, set. else keep original one
+        // 2. check if the value include var(--xxx), if yes, replace with the value of the variable
+        // 2.1. the variable is defined inside the rule?
+        // 2.2. the variable is defined in the root?
+
+        const cssText = root.style.cssText;
+        cssRoot.walkRules(rule => {
+            //for every rule in css tree, check the currect node (root), 
+            // every decl in the rule, 
+            // console.log(`rule.selector:`, rule.selector, ruleToStyle(rule));
+            
+            if (root.matches(rule.selector)) {
+                this.removeVarablesInStyleText(root)
+                rule.walkDecls(decl => {
+                    // for every decl in the rule, check if the decl is already setted in the root's style, 
+                    console.log(`cssText:`, cssText);
+                    console.log(`decl:`, decl.prop, decl.value);
+                    
+                    const setted = cssText.includes(decl.prop);
+                    // decl = replaceVariableInDecl( ruleVars, decl)
+                    // decl = replaceVariableInDecl( variables, decl)
+                    // console.info(`decl.value:`, decl.value)
+                    // if the rule.decl is not included the root's style, or the rule.decl is important. 
+                    if (!setted || decl.important) {
+                        // root.style.setProperty(decl.prop, decl.value);
+                        root.style.setProperty(decl.prop, decl.value);
+                    }
+                })
+            }
+        });
+    
+        let element = root.firstElementChild;
+        while (element) {
+            this.applyStyle(element as HTMLElement, cssRoot);
+              element = element.nextElementSibling;
+        }
+    }
+    mergeRoot(root1: postcss.Root, root2: postcss.Root) {
+        const mergedRoot = postcss.root()
+        root1.walkAtRules(rule => {
+            rule.remove()
+        })
+        root2.walkAtRules(rule => {
+            rule.remove()
+        })
+        root1.walkRules(rule => {
+            mergedRoot.append(rule)
+        })
+    
+        root2.walkRules(rule => {
+            
+            mergedRoot.append(rule)
+        })
+        mergedRoot.walkAtRules(rule => {
+            rule.remove()
+        })
+        console.log(`mergedroot=>`,mergedRoot.toString());
+         
+        return mergedRoot
+    }
+    removeClassName(root:HTMLElement){
+        root.className = '';
+        root.removeAttribute('class')
+        let element = root.firstElementChild;
+        while (element) {
+            this.removeClassName(element as HTMLElement);
+              element = element.nextElementSibling;
+        }
+    }
 }
+
