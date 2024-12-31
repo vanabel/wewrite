@@ -232,11 +232,11 @@ export const combinedCss = `.admonition {
     border-bottom: none;
     border-left: none;
     border-right: none;
-    margin-top: 32px;
-    margin-bottom: 32px;
+    margin-top: 2px;
+    margin-bottom: 2px;
   }
-  .wewrite .footnotes hr {
-    margin-top: 4em;
+  .wewrite .foot-links hr {
+    margin-top: 2em;
     margin-bottom: 0.5em;
   }
 
@@ -584,14 +584,15 @@ export const combinedCss = `.admonition {
   /* footnote */
   .wewrite .footnote-id{
     color: gray;
-    margin-right:1em;
+    margin-right:0.5em;
 
   }
   .wewrite .footnote{
     font-size: 0.9em;
     font-weight: 300;
-    margin-left: 2em;
+    margin-left: 0.5em;
   }
+  
 /* Callout Styles */
 
 .callout {

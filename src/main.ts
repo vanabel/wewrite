@@ -88,7 +88,7 @@ export default class WeWritePlugin extends Plugin {
 		  );
 
 		// This creates an icon in the left ribbon.
-		const ribbonIconEl = this.addRibbonIcon('scan-eye', 'Sample Plugin', (evt: MouseEvent) => {
+		const ribbonIconEl = this.addRibbonIcon('scan-eye', 'WeWrite', (evt: MouseEvent) => {
 			this.activateView();
 		});
 		// Perform additional things with the ribbon

@@ -34,7 +34,7 @@ export class Footnote extends WeWriteMarkedExtension {
                     },
                     renderer: (token) => {
                         if (token.type === 'footnote') {
-                            return `<div id="footnote-${token.id}" class="footnote"><span class="footnote-id">脚注${token.id}.</span>${token.text}</div>`;
+                            return `<div id="footnote-${token.id}" class="footnote"><span class="footnote-id">【${token.id}】 </span>${token.text}</div>`;
                         }
                     }
                 },
@@ -59,7 +59,7 @@ export class Footnote extends WeWriteMarkedExtension {
                     },
                     renderer: (token) => {
                         if (token.type === 'footnoteMark') {
-                            return `<a>${token.text}<sup>脚注-[${token.id}]</sup></a>`
+                            return `<a>${token.text}<sup>【${token.id}】</sup></a>`
                         }
                     }
                 }

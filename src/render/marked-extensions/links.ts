@@ -16,12 +16,14 @@ export class Links extends WeWriteMarkedExtension {
     }
 
     async postprocess(html: string) {
-        console.log(`links postprocess:`, this.allLinks);
-        
+        // console.log(`links postprocess:`, this.allLinks);
+        if (!this.allLinks.length) {
+            return html;
+        }
         const links = this.allLinks.map((href, i) => {
             return `<li>${href}&nbsp;↩</li>`;
         });
-        return `${html}<seciton class="footnotes"><hr><ol>${links.join('')}</ol></section>`;
+        return `${html}<seciton class="foot-links"><hr><ol>${links.join('')}</ol></section>`;
     }
 
     markedExtension(): MarkedExtension {
@@ -32,7 +34,8 @@ export class Links extends WeWriteMarkedExtension {
                 renderer: (token: Tokens.Link) => {
                     if (token.text.indexOf(token.href) === 0
                         || (token.href.indexOf('https://mp.weixin.qq.com/mp') === 0)
-                        || (token.href.indexOf('https://mp.weixin.qq.com/s') === 0)) {
+                        || (token.href.indexOf('https://mp.weixin.qq.com/s') === 0) 
+                        ) {
                         return `<a href="${token.href}">${token.text}</a>`;
                     }
                     this.allLinks.push(token.href);

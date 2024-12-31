@@ -1,13 +1,15 @@
 /** 
  *  WeChat MP Article Header settings 
  */
-import { Setting, TextComponent, TFile, ToggleComponent } from "obsidian";
+import { Notice, Setting, TextComponent, TFile, ToggleComponent } from "obsidian";
 import { LocalDraftItem, LocalDraftManager } from 'src/assets/draft-manager';
 import WeWritePlugin from 'src/main';
 import { UrlUtils } from 'src/utils/urls';
+import { WechatClient } from "src/wechat-api/wechat-client";
 
 export class MPArticleHeader {
-    
+
+
     private _plugin: WeWritePlugin;
     private panning: boolean = false
     private origin_x: number
@@ -48,7 +50,7 @@ export class MPArticleHeader {
             return;
         }
         console.log(`on note rename, update local draft`);
-        
+
         if (this.activeLocalDraft !== undefined) {
             this.activeLocalDraft.notePath = file.path
             const dm = LocalDraftManager.getInstance(this._plugin)
@@ -61,7 +63,7 @@ export class MPArticleHeader {
         return this.activeLocalDraft
     }
     private BuildUI(containerEl: HTMLElement) {
-        const details = containerEl.createEl('details', { cls: 'wechat-mp-article-preview', attr: {  } })
+        const details = containerEl.createEl('details', { cls: 'wechat-mp-article-preview', attr: {} })
         const summary = details.createEl('summary', { cls: 'wechat-mp-article-preview-summary', text: 'WeChat MP Article Properties' })
         new Setting(details).setName('Title')
             .addText(text => {
@@ -188,15 +190,15 @@ export class MPArticleHeader {
                     this.cover_image = url;
                     // coverframe.setAttr('style', `background-image: url('${this.cover_image}'); background-size:cover; backgroup-repeat:none; background-position:  ${this.current_x}px ${this.current_y}px;`);
                     this.setCoverImage()
-
-                    // coverframe.setAttr('style', `background-image: url('${url}'); background-size:cover; background-position: 0px 0px;`);
-                    const media_id = this._plugin.findImageMediaId(url)
+                    const media_id = await this.getCoverImageMediaId(url)
                     coverframe.setAttr('data-media_id', media_id)
                     if (this.activeLocalDraft !== undefined) {
                         this.activeLocalDraft.thumb_media_id = media_id
                     }
-                    console.log(`media_id: ${media_id}`);
-                    
+
+                    // coverframe.setAttr('style', `background-image: url('${url}'); background-size:cover; background-position: 0px 0px;`);
+
+
                 }
                 this.localDraftmanager.setDraft(this.activeLocalDraft!)
             }
@@ -271,6 +273,48 @@ export class MPArticleHeader {
             this.activeLocalDraft.cover_image_url = this.cover_image!
         }
     }
+
+    async checkCoverImage() {
+        // console.log(`checkCoverImage:${this.cover_image}`, this.activeLocalDraft);
+        
+        if (this.activeLocalDraft !== undefined){
+            if (this.activeLocalDraft.thumb_media_id === undefined || !this.activeLocalDraft.thumb_media_id){
+                if (this.cover_image){
+                    const media_id = await this.getCoverImageMediaId(this.cover_image)
+                    this.activeLocalDraft.thumb_media_id = media_id
+                    console.log(`checkCoverImage thumb_media_id:${media_id}`);
+                    
+                    return true;
+                }
+            }else{
+                return true;
+            }
+        }
+        return false
+    }
+    async getCoverImageMediaId(url: string) {
+        let _media_id = this._plugin.findImageMediaId(url)
+        if (_media_id === undefined) {
+            console.log('media_id is undefined')
+            const blob = await fetch(url).then(res => res.blob());
+            const res = await WechatClient.getInstance(this._plugin).uploadImage(blob, 'banner-cover.png', 'image')
+            console.log(`upload banner image:res=>`, res);
+            
+            if (res) {
+                const { errcode, media_id } = res
+
+                if (errcode !== 0) {
+                    console.log(`upload image error: ${errcode}`)
+                    new Notice('upload cover image error')
+                    return
+                } else {
+                    _media_id = media_id
+                }
+            }
+        }
+        return _media_id
+
+    }
     private setCoverImageXY(x: number, y: number) {
 
         this.coverframe.setAttr('style', `background-image: url('${this.cover_image}'); background-size:cover; background-repeat: no-repeat; background-position:  ${x}px ${y}px;`);
@@ -281,9 +325,9 @@ export class MPArticleHeader {
     }
     async updateLocalDraft() {
 
-        if (this.localDraftmanager.isActiveNoteDraft(this.activeLocalDraft)){
+        if (this.localDraftmanager.isActiveNoteDraft(this.activeLocalDraft)) {
             console.log(`no real change on the active note. `);
-            
+
             return;
         }
         //could be called when switch account name

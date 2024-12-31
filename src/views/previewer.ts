@@ -3,7 +3,7 @@
 */
 
 import { EditorView } from "@codemirror/view";
-import { DropdownComponent, Editor, EventRef, ItemView, MarkdownView, sanitizeHTMLToDom, Setting, TFile, WorkspaceLeaf } from 'obsidian';
+import { DropdownComponent, Editor, EventRef, ItemView, MarkdownView, Notice, sanitizeHTMLToDom, Setting, TFile, WorkspaceLeaf } from 'obsidian';
 import WeWritePlugin from 'src/main';
 import { PreviewRender } from 'src/render/marked-extensions/extension';
 import { uploadCanvas, uploadSVGs, uploadURLImage } from 'src/render/post-render';
@@ -138,7 +138,11 @@ export class PreviewPanel extends ItemView implements PreviewRender {
                     button.setIcon('notepad-text-dashed')
                         .setTooltip('send to draft box.')
                         .onClick(async () => {
-                            this.sendArticleToDraftBox()
+                            if (await this.checkCoverImage()){
+                                this.sendArticleToDraftBox()
+                            }else{
+                                new Notice('Cover image is required.')
+                            }
                         })
                 }
             )
@@ -178,6 +182,9 @@ export class PreviewPanel extends ItemView implements PreviewRender {
         this.containerDiv = shadowDom.createDiv({ cls: 'wewrite-article' });
         this.articleDiv = this.containerDiv.createDiv({ cls: 'article-div' });
 
+    }
+    async checkCoverImage() {
+        return this.draftHeader.checkCoverImage()
     }
     async sendArticleToDraftBox() {
         console.log(`send article to draft box.`);
