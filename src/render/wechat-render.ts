@@ -24,6 +24,9 @@ import { Heading } from './marked-extensions/heading'
 import { IconizeRender } from './marked-extensions/iconize'
 import { MathRenderer } from './marked-extensions/math'
 import { RemixIconRenderer } from './marked-extensions/remix-icon'
+import { Table } from './marked-extensions/table'
+import { Footnote } from './marked-extensions/footnote'
+import { Links } from './marked-extensions/links'
 
 
 const markedOptiones = {
@@ -31,14 +34,14 @@ const markedOptiones = {
     breaks: true,
 };
 
-const customRenderer = {
-	heading(token:Tokens.Heading): string {
-		return `<h${token.depth}><span class="h-content">${token.text}++</span></h${token.depth}>`;
-	},
-	hr(): string {
-		return '<hr>';
-	},
-};
+// const customRenderer = {
+// 	heading(token:Tokens.Heading): string {
+// 		return `<h${token.depth}><span class="h-content">${token.text}++</span></h${token.depth}>`;
+// 	},
+// 	hr(): string {
+// 		return '<hr>';
+// 	},
+// };
 
 export class WechatRender {
     plugin: WeWritePlugin;
@@ -53,8 +56,10 @@ export class WechatRender {
         this.client = WechatClient.getInstance(plugin);
         this.marked = new Marked()
         this.marked.use(markedOptiones)
+        // this.marked.use(extendedTables())
         this.useExtensions()
-        this.marked.use({renderer: customRenderer});
+    
+        // this.marked.use({renderer: customRenderer});
     }
     static getInstance(plugin: WeWritePlugin, previewRender: PreviewRender) {
         if (!WechatRender.instance) {
@@ -67,6 +72,7 @@ export class WechatRender {
         this.marked.use(extension.markedExtension())
     }
     useExtensions() {
+        this.addExtension(new Footnote(this.plugin, this.previewRender, this.marked))
         this.addExtension(new IconizeRender(this.plugin, this.previewRender, this.marked))
         this.addExtension(new Heading(this.plugin, this.previewRender, this.marked))
         this.addExtension(new Embed(this.plugin, this.previewRender, this.marked))
@@ -75,6 +81,8 @@ export class WechatRender {
         this.addExtension(new MathRenderer(this.plugin, this.previewRender, this.marked))
         this.addExtension(new RemixIconRenderer(this.plugin, this.previewRender, this.marked))
         this.addExtension(new BlockquoteRenderer(this.plugin, this.previewRender, this.marked))
+        this.addExtension(new Table(this.plugin, this.previewRender, this.marked))
+        this.addExtension(new Links(this.plugin, this.previewRender, this.marked))
 
     }
     async parse(md:string){
@@ -85,9 +93,19 @@ export class WechatRender {
         }
         return await this.marked.parse(content)
     }
+    async postprocess(html: string) {
+		let result = html;
+		for (let ext of this.extensions) {
+			result = await ext.postprocess(result);
+		}
+		return result;
+	}
+
     public async parseNote(path:string, container:HTMLElement, view:Component){
         await ObsidianMarkdownRenderer.getInstance(this.plugin.app).render(path, container, view)
         const md = await this.plugin.app.vault.adapter.read(path)
-        return await this.parse(md)
+        let html = await this.parse(md)
+        html = await this.postprocess(html)
+        return html
     }
 }

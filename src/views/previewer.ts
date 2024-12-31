@@ -235,6 +235,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
         let html = await WechatRender.getInstance(this._plugin, this).parseNote(activeFile.path, this.articleDiv, this)
 
         html = `<section class="wewrite-article-content wewrite" id="article-section">${html}</section>`;
+        
         this.articleDiv.innerHTML = html
 
         this.elementMap.forEach(async (node: HTMLElement | string, id: string) => {

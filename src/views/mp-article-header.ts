@@ -140,7 +140,8 @@ export class MPArticleHeader {
                         this._plugin.showLeftView()
                     })
             )
-        const coverframe = details.createDiv({ cls: 'wechat-mp-article-preview-cover', attr: { droppable: true } })
+        const container = details.createDiv({ cls: 'wechat-mp-article-preview-cover-container' })
+        const coverframe = container.createDiv({ cls: 'wechat-mp-article-preview-cover', attr: { droppable: true } })
 
         // const img = coverframe.createEl('img', {attr:{dragable:false}})
 

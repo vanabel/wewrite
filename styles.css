@@ -158,15 +158,40 @@ details[open] summary::before {
   content: "";
 }
 
-.wechat-mp-article-preview-cover {
+.wechat-mp-article-preview-cover-container {
+  max-width: 500px;
+  position: relative;
+  width: 100%; /* 使容器宽度适应父元素 */
+  overflow: hidden; /* 隐藏溢出的内容 */
+  margin: auto;
+}
+.wechat-mp-article-preview-cover-container::before {
+  content: "";
+  display: block;
+  padding-top: 42.55%; /* 1 / 2.35 * 100%，计算得到的百分比 */
+}
+.wechat-mp-article-preview-cover-old {
+  margin: auto;
   border: 1px dashed #ccc;
   border-radius: 4px;
+  /* height: 900px; */
+  max-width: 500px;
   width: 100%;
   padding-top: 42.55%;
   overflow: hidden;
   position: relative;
   /* 确保子元素可以相对于此容器定位 */
 }
+.wechat-mp-article-preview-cover {
+  margin: auto;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #f0f0f0; /* 示例背景颜色 */
+}
+
 
 .wechat-mp-article-preview-cover>* {
   position: absolute;

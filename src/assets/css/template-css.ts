@@ -1,7 +1,7 @@
 export const combinedCss = `.admonition {
-    margin-top: 1.5rem;
-    margin-bottom: 1.5rem;
-    box-shadow: 0 .2rem .5rem rgba(0,0,0, 0.1);
+    margin-top: 1.5em;
+    margin-bottom: 1.5em;
+    box-shadow: 0 .2em .5em rgba(0,0,0, 0.1);
 }
 
 .admonition.no-title .admonition-content {
@@ -24,23 +24,23 @@ export const combinedCss = `.admonition {
 }
 
 .admonition.no-drop .admonition .admonition-content {
-    border-right: .0625rem solid rgba(233, 233,123, .2);
-    border-bottom: .0625rem solid rgba(233, 233,123, .2);
+    border-right: .0625em solid rgba(233, 233,123, .2);
+    border-bottom: .0625em solid rgba(233, 233,123, .2);
 }
 
 .admonition.no-drop .admonition .admonition-title.no-title+.admonition-content {
-    border-top: .0625rem solid rgba(233, 233,123, .2);
+    border-top: .0625em solid rgba(233, 233,123, .2);
 }
 
 :is(.markdown-source-view.mod-cm6) .admonition .math-block>mjx-container,
 :is(.markdown-reading-view) .admonition .math-block>mjx-container {
     display: block;
     text-align: center;
-    padding: 1rem;
+    padding: 1em;
 }
 
 :is(.markdown-reading-view) .admonition .math-block>mjx-container {
-    padding: .0625rem;
+    padding: .0625em;
 }
 
 *:not(.is-live-preview) .admonition.no-content {
@@ -49,7 +49,7 @@ export const combinedCss = `.admonition {
 
 .admonition {
     margin-top: 0px;
-    margin-bottom: .75rem;
+    margin-bottom: .75em;
 }
 
 .admonition.no-content {
@@ -72,11 +72,11 @@ export const combinedCss = `.admonition {
 }
 
 .admonition-content:first-child {
-    margin-top: .8rem;
+    margin-top: .8em;
 }
 
 .admonition-content:last-child {
-    margin-bottom: .8rem;
+    margin-bottom: .8em;
 }
 
 .admonition-title.no-title {
@@ -97,7 +97,7 @@ export const combinedCss = `.admonition {
     cursor: pointer;
     opacity: 0;
     position: absolute;
-    margin: .375rem;
+    margin: .375em;
     right: 0;
     top: 0;
     transition: .3s opacity ease-in;
@@ -128,14 +128,16 @@ export const combinedCss = `.admonition {
 .wewrite {
     min-width: 200px;
     max-width: 760px;
-    padding: 3rem 1em 1em;
+    padding: 1em 1em 1em 1em;
     font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji;
     word-break: break-word;
     line-height: 1.75;
     font-weight: 400;
-    font-size: 15px;
+    font-size: 16px;
     overflow-x: hidden;
     color: #333;
+    margin:0px;
+
 }
 /* headings */
 .wewrite h1,
@@ -145,7 +147,7 @@ export const combinedCss = `.admonition {
 .wewrite h5,
 .wewrite h6 {
   line-height: 1.5;
-  margin-top: 35px;
+  margin-top: 20px;
   margin-bottom: 10px;
   padding-bottom: 5px;
 }
@@ -155,8 +157,8 @@ export const combinedCss = `.admonition {
 .wewrite h4:first-child,
 .wewrite h5:first-child,
 .wewrite h6:first-child {
-  margin-top: -1.5rem;
-  margin-bottom: 1rem;
+  margin-top: 1.5em;
+  margin-bottom: 1em;
 }
 .wewrite h1::before,
 .wewrite h2::before,
@@ -171,31 +173,32 @@ export const combinedCss = `.admonition {
 }
 .wewrite h1 {
   position: relative;
-  font-size: 2.5rem;
-  margin-bottom: 5px;
+  font-size: 2.5em;
+  margin-bottom: 0.5em;
 }
 .wewrite h1::before {
-  font-size: 2.5rem;
+  font-size: 1.5em;
 }
 .wewrite h2 {
-  padding-bottom: 0.5rem;
-  font-size: 2.2rem;
-  border-bottom: 1px solid #ececec;
+  font-size: 2.2em;
+  padding-bottom: 0.5em;
+  /* border-bottom: 1px solid #ececec; */
 }
 .wewrite h3 {
-  font-size: 1.5rem;
+  font-size: 1.5em;
   padding-bottom: 0;
 }
 .wewrite h4 {
-  font-size: 1.25rem;
+  font-size: 1.25em;
 }
 .wewrite h5 {
-  font-size: 1rem;
+  font-size: 1.15em;
 }
 .wewrite h6 {
-  margin-top: 5px;
+  font-size: 1.05em;
+  font-weight: 500;
 }
-@media (max-width: 720px) {
+/* @media (max-width: 720px) {
     .wewrite h1 {
       font-size: 24px;
     }
@@ -205,7 +208,7 @@ export const combinedCss = `.admonition {
     .wewrite h3 {
       font-size: 18px;
     }
-  }
+  } */
   
 /* paragraph */
 .wewrite p {
@@ -214,14 +217,15 @@ export const combinedCss = `.admonition {
     margin-bottom: 22px;
   }
   .wewrite strong {
-    color: #3eaf7c;
+    /* color: #3eaf7c; */
+    font-weight: 600;
   }
   .wewrite img {
     max-width: 100%;
     border-radius: 2px;
     display: block;
     margin: auto;
-    border: 3px solid rgba(62, 175, 124, 0.2);
+    /* border: 3px solid rgba(62, 175, 124, 0.2); */
   }
   .wewrite hr {
     border-top: 1px solid #3eaf7c;
@@ -251,13 +255,18 @@ export const combinedCss = `.admonition {
 
 
 /* table */
+.table-container {
+  display: flex;
+  justify-content: center;
+}
 .wewrite table {
-    display: inline-block !important;
+    /* display: inline-block !important; */
     font-size: 12px;
-    width: auto;
-    max-width: 100%;
+    width: auto !important;
+    /* max-width: 100%; */
     overflow: auto;
     border: solid 1px #3eaf7c;
+    margin: auto;
   }
   .wewrite thead {
     background: #3eaf7c!important;
@@ -269,6 +278,7 @@ export const combinedCss = `.admonition {
   }
   .wewrite th {
     background: #3eaf7c!important;
+    color: #fff;
   }
   .wewrite th,
   .wewrite td {
@@ -284,7 +294,7 @@ export const combinedCss = `.admonition {
     color: #666;
     padding: 1px 23px;
     margin: 22px 0;
-    border-left: 0.5rem solid rgba(62, 175, 124, 0.6);
+    border-left: 0.5em solid rgba(62, 175, 124, 0.6);
     border-color: #42b983;
     background-color: #f8f8f8;
   }
@@ -356,7 +366,7 @@ export const combinedCss = `.admonition {
     word-break: break-word;
     overflow-x: auto;
   
-    padding: 0.2rem 0.5rem;
+    padding: 0.2em 0.5em;
     margin: 0;
     color: #3eaf7c;
     font-size: 1em;
@@ -557,18 +567,30 @@ export const combinedCss = `.admonition {
 .obsidian-icon {
     font-size: inherit;
     display: inline-block;
-    width: 2rem !important;
+    width: 2em !important;
     text-align: center;
-    /* margin-right: -0.5rem !important; */
+    /* margin-right: -0.5em !important; */
   }
   
   p .obsidian-icon {
-    width: 1.75rem !important;
+    width: 1.75em !important;
   }
   
   .obsidian-icon.react-icon > svg {
     vertical-align: middle;
     margin-bottom: 3px;
+  }
+
+  /* footnote */
+  .wewrite .footnote-id{
+    color: gray;
+    margin-right:1em;
+
+  }
+  .wewrite .footnote{
+    font-size: 0.9em;
+    font-weight: 300;
+    margin-left: 2em;
   }
 /* Callout Styles */
 
@@ -584,7 +606,7 @@ export const combinedCss = `.admonition {
 }
 
 .callout:not(.admonition).drop-shadow {
-    box-shadow: 0 .2rem .5rem rgba(0, 0, 0, 0.3);
+    box-shadow: 0 .2em .5em rgba(0, 0, 0, 0.3);
 }
 
 .callout:not(.admonition) .no-title {
@@ -613,7 +635,7 @@ export const combinedCss = `.admonition {
 
 .callout {
     background-color: rgba(8, 109, 221, 0.1);
-    box-shadow: 0 .2rem .5rem rgba(0, 0, 0, 0.3);
+    box-shadow: 0 .2em .5em rgba(0, 0, 0, 0.3);
 }
 
 

@@ -2,14 +2,16 @@
 .wewrite {
     min-width: 200px;
     max-width: 760px;
-    padding: 3rem 1em 1em;
+    padding: 1em 1em 1em 1em;
     font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji;
     word-break: break-word;
     line-height: 1.75;
     font-weight: 400;
-    font-size: 15px;
+    font-size: 16px;
     overflow-x: hidden;
     color: #333;
+    margin:0px;
+
 }
 /* headings */
 .wewrite h1,
@@ -19,7 +21,7 @@
 .wewrite h5,
 .wewrite h6 {
   line-height: 1.5;
-  margin-top: 35px;
+  margin-top: 20px;
   margin-bottom: 10px;
   padding-bottom: 5px;
 }
@@ -29,8 +31,8 @@
 .wewrite h4:first-child,
 .wewrite h5:first-child,
 .wewrite h6:first-child {
-  margin-top: -1.5rem;
-  margin-bottom: 1rem;
+  margin-top: 1.5em;
+  margin-bottom: 1em;
 }
 .wewrite h1::before,
 .wewrite h2::before,
@@ -45,31 +47,32 @@
 }
 .wewrite h1 {
   position: relative;
-  font-size: 2.5rem;
-  margin-bottom: 5px;
+  font-size: 2.5em;
+  margin-bottom: 0.5em;
 }
 .wewrite h1::before {
-  font-size: 2.5rem;
+  font-size: 1.5em;
 }
 .wewrite h2 {
-  padding-bottom: 0.5rem;
-  font-size: 2.2rem;
-  border-bottom: 1px solid #ececec;
+  font-size: 2.2em;
+  padding-bottom: 0.5em;
+  /* border-bottom: 1px solid #ececec; */
 }
 .wewrite h3 {
-  font-size: 1.5rem;
+  font-size: 1.5em;
   padding-bottom: 0;
 }
 .wewrite h4 {
-  font-size: 1.25rem;
+  font-size: 1.25em;
 }
 .wewrite h5 {
-  font-size: 1rem;
+  font-size: 1.15em;
 }
 .wewrite h6 {
-  margin-top: 5px;
+  font-size: 1.05em;
+  font-weight: 500;
 }
-@media (max-width: 720px) {
+/* @media (max-width: 720px) {
     .wewrite h1 {
       font-size: 24px;
     }
@@ -79,7 +82,7 @@
     .wewrite h3 {
       font-size: 18px;
     }
-  }
+  } */
   
 /* paragraph */
 .wewrite p {
@@ -88,14 +91,15 @@
     margin-bottom: 22px;
   }
   .wewrite strong {
-    color: #3eaf7c;
+    /* color: #3eaf7c; */
+    font-weight: 600;
   }
   .wewrite img {
     max-width: 100%;
     border-radius: 2px;
     display: block;
     margin: auto;
-    border: 3px solid rgba(62, 175, 124, 0.2);
+    /* border: 3px solid rgba(62, 175, 124, 0.2); */
   }
   .wewrite hr {
     border-top: 1px solid #3eaf7c;
@@ -125,13 +129,18 @@
 
 
 /* table */
+.table-container {
+  display: flex;
+  justify-content: center;
+}
 .wewrite table {
-    display: inline-block !important;
+    /* display: inline-block !important; */
     font-size: 12px;
-    width: auto;
-    max-width: 100%;
+    width: auto !important;
+    /* max-width: 100%; */
     overflow: auto;
     border: solid 1px #3eaf7c;
+    margin: auto;
   }
   .wewrite thead {
     background: #3eaf7c!important;
@@ -143,6 +152,7 @@
   }
   .wewrite th {
     background: #3eaf7c!important;
+    color: #fff;
   }
   .wewrite th,
   .wewrite td {
@@ -158,7 +168,7 @@
     color: #666;
     padding: 1px 23px;
     margin: 22px 0;
-    border-left: 0.5rem solid rgba(62, 175, 124, 0.6);
+    border-left: 0.5em solid rgba(62, 175, 124, 0.6);
     border-color: #42b983;
     background-color: #f8f8f8;
   }
@@ -230,7 +240,7 @@
     word-break: break-word;
     overflow-x: auto;
   
-    padding: 0.2rem 0.5rem;
+    padding: 0.2em 0.5em;
     margin: 0;
     color: #3eaf7c;
     font-size: 1em;
@@ -431,16 +441,28 @@
 .obsidian-icon {
     font-size: inherit;
     display: inline-block;
-    width: 2rem !important;
+    width: 2em !important;
     text-align: center;
-    /* margin-right: -0.5rem !important; */
+    /* margin-right: -0.5em !important; */
   }
   
   p .obsidian-icon {
-    width: 1.75rem !important;
+    width: 1.75em !important;
   }
   
   .obsidian-icon.react-icon > svg {
     vertical-align: middle;
     margin-bottom: 3px;
+  }
+
+  /* footnote */
+  .wewrite .footnote-id{
+    color: gray;
+    margin-right:1em;
+
+  }
+  .wewrite .footnote{
+    font-size: 0.9em;
+    font-weight: 300;
+    margin-left: 2em;
   }

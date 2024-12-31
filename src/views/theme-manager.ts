@@ -155,58 +155,37 @@ export class ThemeManager {
         this.applyStyle(htmlRoot, mergedRoot)
         this.removeClassName(htmlRoot as HTMLElement);
     }
-    private removeVarablesInStyleText(root: HTMLElement){
-            for (let i = 0; i < root.style.length; i++) {
-                const property = root.style[i];
-                if (property.startsWith('--')){
-                    const value = root.style.getPropertyValue(property);
-                    root.style.removeProperty(property);
-                    console.log(`remove:`, property, value);
-                    
-                }
+    private removeVarablesInStyleText(root: HTMLElement) {
+        for (let i = 0; i < root.style.length; i++) {
+            const property = root.style[i];
+            if (property.startsWith('--')) {
+                const value = root.style.getPropertyValue(property);
+                root.style.removeProperty(property);
+                console.log(`remove:`, property, value);
+
+            }
         }
     }
     private applyStyle(root: HTMLElement, cssRoot: postcss.Root) {
-        // iterative walk through the Dom tree
-        // for every node:
-        // walk through all the rules in the cssRoot, 
-        // for each matched rule, 
-        // for each decl in the rule,
-        // 1. set? is decl include !important, set. else keep original one
-        // 2. check if the value include var(--xxx), if yes, replace with the value of the variable
-        // 2.1. the variable is defined inside the rule?
-        // 2.2. the variable is defined in the root?
-
         const cssText = root.style.cssText;
         cssRoot.walkRules(rule => {
-            //for every rule in css tree, check the currect node (root), 
-            // every decl in the rule, 
-            // console.log(`rule.selector:`, rule.selector, ruleToStyle(rule));
-            
             if (root.matches(rule.selector)) {
                 this.removeVarablesInStyleText(root)
                 rule.walkDecls(decl => {
-                    // for every decl in the rule, check if the decl is already setted in the root's style, 
-                    console.log(`cssText:`, cssText);
-                    console.log(`decl:`, decl.prop, decl.value);
-                    
-                    const setted = cssText.includes(decl.prop);
-                    // decl = replaceVariableInDecl( ruleVars, decl)
-                    // decl = replaceVariableInDecl( variables, decl)
-                    // console.info(`decl.value:`, decl.value)
-                    // if the rule.decl is not included the root's style, or the rule.decl is important. 
-                    if (!setted || decl.important) {
-                        // root.style.setProperty(decl.prop, decl.value);
-                        root.style.setProperty(decl.prop, decl.value);
-                    }
+                    // always replace the property
+                    root.style.setProperty(decl.prop, decl.value);
+                    // const setted = cssText.includes(decl.prop);
+                    // if (!setted || decl.important) {
+                    //     root.style.setProperty(decl.prop, decl.value);
+                    // }
                 })
             }
         });
-    
+
         let element = root.firstElementChild;
         while (element) {
             this.applyStyle(element as HTMLElement, cssRoot);
-              element = element.nextElementSibling;
+            element = element.nextElementSibling;
         }
     }
     mergeRoot(root1: postcss.Root, root2: postcss.Root) {
@@ -220,25 +199,24 @@ export class ThemeManager {
         root1.walkRules(rule => {
             mergedRoot.append(rule)
         })
-    
+
         root2.walkRules(rule => {
-            
+
             mergedRoot.append(rule)
         })
         mergedRoot.walkAtRules(rule => {
             rule.remove()
         })
-        console.log(`mergedroot=>`,mergedRoot.toString());
-         
+
         return mergedRoot
     }
-    removeClassName(root:HTMLElement){
+    removeClassName(root: HTMLElement) {
         root.className = '';
         root.removeAttribute('class')
         let element = root.firstElementChild;
         while (element) {
             this.removeClassName(element as HTMLElement);
-              element = element.nextElementSibling;
+            element = element.nextElementSibling;
         }
     }
 }
