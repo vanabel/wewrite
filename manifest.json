@@ -3,9 +3,9 @@
 	"name": "WeWrite",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "Make writing note for WeChat MP become more conveient and effective.",
+	"description": "Make obsidian a workspace for writing and publishing article to WeChat MP.",
 	"author": "Learner Chen",
 	"authorUrl": "https://obsidian.md",
 	"fundingUrl": "https://obsidian.md/pricing",
-	"isDesktopOnly": false
+	"isDesktopOnly": true
 }
