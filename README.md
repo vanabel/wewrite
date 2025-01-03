@@ -2,6 +2,7 @@
 
 This is plugin for Obsidian (https://obsidian.md).
 
+
 The plugin is to render obsidian note as WeChat MP article and publish it. Thus make obsidian a good workspace for writing and publishing articles. 
 
 It works on Desktop only

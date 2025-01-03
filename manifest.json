@@ -3,9 +3,8 @@
 	"name": "WeWrite",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "Make obsidian a workspace for writing and publishing article to WeChat MP.",
+	"description": "Make a workspace for writing and publishing article to WeChat MP.",
 	"author": "Learner Chen",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
+	"authorUrl": "https://www.3thinking.cn/",
 	"isDesktopOnly": true
 }
