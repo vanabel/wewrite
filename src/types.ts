@@ -72,6 +72,10 @@ declare module "obsidian" {
     }
 }
 
-
-
+declare global {
+	interface Window {
+		electron: any;
+		require: NodeRequire;
+	}
+}
 export { };

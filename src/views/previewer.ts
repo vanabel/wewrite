@@ -153,6 +153,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
                     button.onClick(async () => {
                         console.log(`publish to MP directly.`);
                         //TODO to pulish to MP directly.
+                        this.draftHeader.publishDraft()
                     })
                 }
             )
@@ -196,6 +197,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
         const media_id = await this.wechatClient.sendArticleToDraftBox(this.draftHeader.getActiveLocalDraft()!, this.getArticleContent())
         
         if (media_id) {
+            this.draftHeader.updateDraftDraftId(media_id)
             const news_item = await this.wechatClient.getDraftById(this._plugin.settings.selectedAccount!, media_id)
             if (news_item) {
                 console.log(`news_item=>`, news_item[0]);

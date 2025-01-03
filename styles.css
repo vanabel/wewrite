@@ -242,3 +242,37 @@ details[open] summary::before {
   flex-direction: column;
   height: 88vh; /* 100% 视口高度 */
 }
+
+/* image editor */
+.image-editor-modal {
+  width: 90vw;
+  height: 80vh;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 20px;
+	gap: 10px;
+}
+
+.container {
+	position: relative;
+	border: 2px dashed #ccc;
+	overflow: hidden;
+	margin-bottom: 10px;
+}
+
+#regionA {
+	width: 300px;
+	height: 127.6px;
+	background-color: #fff;
+}
+
+#regionB {
+	width: 127.6px;
+	height: 127.6px;
+	background-color: #fff;
+}
+
+canvas {
+	cursor: move;
+}

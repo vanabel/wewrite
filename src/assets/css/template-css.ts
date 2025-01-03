@@ -257,15 +257,15 @@ export const combinedCss = `.admonition {
 /* table */
 .table-container {
   display: flex;
-  justify-content: center;
+  overflow: auto;
+  padding:auto
 }
 .wewrite table {
     /* display: inline-block !important; */
+    display: table;
     font-size: 12px;
-    width: auto !important;
-    /* max-width: 100%; */
-    overflow: auto;
-    border: solid 1px #3eaf7c;
+    width: fit-content !important;
+    /* border: solid 1px #3eaf7c; */
     margin: auto;
   }
   .wewrite thead {

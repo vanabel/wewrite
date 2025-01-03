@@ -9,6 +9,7 @@ import { ThemeManager } from "src/views/theme-manager";
 import { FolderSuggest } from "./folder-suggester";
 import { WECHAT_MP_WEB_PAGE } from "./images";
 import { WeWriteAccountInfo } from "./wewrite-setting";
+import { $t } from "src/lang/i18n";
 
 export class WeWriteSettingTab extends PluginSettingTab {
 	private _plugin: WeWritePlugin;
@@ -26,37 +27,37 @@ export class WeWriteSettingTab extends PluginSettingTab {
 
 		containerEl.empty();
 
-		containerEl.createEl('h1', { text: "WeWrite Settings" })
+		containerEl.createEl('h1', { text: $t('wewrite-settings') })
 		containerEl.createEl('hr')
 		// external IP
 		const ip = new Setting(containerEl)
-			.setName('Public IP Address: ' + this._plugin.settings.ipAddress)
+			.setName($t('public-ip-address') + this._plugin.settings.ipAddress)
 			.setHeading()
-			.setDesc('You should add this IP to "IP Whitelist" on your WeChat Official Account Platform development configuration.')
+			.setDesc($t('you-should-add-this-ip-to-ip-whitelist-o'))
 		this._plugin.updateIpAddress().then(ipAddress => {
 			ip.setName('Public IP Address: ' + ipAddress)
 		})
 		ip.addExtraButton(button => {
 			button.setIcon('clipboard-copy')
-				.setTooltip('Copy IP to clipboard')
+				.setTooltip($t('copy-ip-to-clipboard'))
 				.onClick(async () => {
 					await navigator.clipboard.writeText(this._plugin.settings.ipAddress ?? '');
-					new Notice('IP copied to clipboard');
+					new Notice($t('ip-copied-to-clipboard'));
 				});
 		});
 
 		containerEl.createEl('hr')
 		// Account title
 		new Setting(containerEl)
-			.setName('Account Info ')
+			.setName($t('account-info'))
 			.setHeading()
 
 		const div = containerEl.createDiv({ cls: 'wechat-mp-web-image elevated-shadow' })
 		div.innerHTML = `<a href="https://mp.weixin.qq.com/cgi-bin/frame?t=pages/developsetting/page/developsetting_frame&nav=10141"><img src="${WECHAT_MP_WEB_PAGE}" alt="wechat-mp-web-page"></a> </p>`
 
 		new Setting(containerEl)
-			.setName('Select WeChat MP Account')
-			.setDesc('Choose the account you want to edit.')
+			.setName($t('select-wechat-mp-account'))
+			.setDesc($t('choose-the-account-you-want-to-edit'))
 			.addDropdown(
 				(dropdown) => {
 					this.accountDropdown = dropdown
@@ -68,7 +69,7 @@ export class WeWriteSettingTab extends PluginSettingTab {
 						})
 					}
 					dropdown
-						.setValue(this._plugin.settings.selectedAccount ?? 'Select WeChat MP Account')
+						.setValue(this._plugin.settings.selectedAccount ?? $t('select-wechat-mp-account-0'))
 						.onChange(async (value) => {
 							this._plugin.settings.selectedAccount = value;
 							this.updateAccountSettings(this._plugin.settings.selectedAccount, this.accountEl)
@@ -80,23 +81,23 @@ export class WeWriteSettingTab extends PluginSettingTab {
 			.addExtraButton(
 				(button) => {
 					button.setIcon('plus')
-						.setTooltip('Add new account')
+						.setTooltip($t('add-new-account'))
 						.onClick(async () => {
 							this.newAccountInfo();
 						})
 				}
 			)
 		const frame = containerEl.createDiv({ cls: 'wechat-mp-account-info-div' })
-		const title = frame.createEl('div', { cls: 'wechat-mp-account-info-title', text: 'Account Info' })
+		const title = frame.createEl('div', { cls: 'wechat-mp-account-info-title', text: $t('account-info') })
 		this.accountEl = frame.createDiv({ cls: 'wechat-mp-account-info-content' })
 		this.updateAccountSettings(this.accountDropdown.getValue(), this.accountEl)
 		new Setting(containerEl)
-			.setName('Import/Export WeChat MP Account')
-			.setDesc('Import or export your account info.')
+			.setName($t('import-export-wechat-mp-account'))
+			.setDesc($t('import-or-export-your-account-info'))
 			.addButton(
 				(button) => {
 					button.setIcon('download')
-						.setTooltip('Import account info')
+						.setTooltip($t('import-account-info'))
 						.onClick(async () => {
 							//TODO import account info, to be implemented.
 							console.log(`import account info`);
@@ -106,7 +107,7 @@ export class WeWriteSettingTab extends PluginSettingTab {
 			.addButton(
 				(button) => {
 					button.setIcon('upload')
-						.setTooltip('Export account info')
+						.setTooltip($t('export-account-info'))
 						.onClick(async () => {
 							//TODO export account info, to be implemented.
 							console.log(`export account info`);
@@ -121,11 +122,11 @@ export class WeWriteSettingTab extends PluginSettingTab {
 
 	newCSSStyleFolder() {
 		new Setting(this.containerEl)
-		.setName("CSS Styles folder location")
-		.setDesc("Files in this folder will be available as CSS Styles for rendering in WeChat posts.")
+		.setName($t('css-styles-folder-location'))
+		.setDesc($t('files-in-this-folder-will-be-available-a'))
 		.addSearch((cb) => {
 			new FolderSuggest(this.app, cb.inputEl);
-			cb.setPlaceholder("Example: folder1/folder2")
+			cb.setPlaceholder($t('example-folder1-folder2'))
 				.setValue(this._plugin.settings.css_styles_folder)
 				.onChange((new_folder) => {
 					this._plugin.settings.css_styles_folder = new_folder;
@@ -134,7 +135,7 @@ export class WeWriteSettingTab extends PluginSettingTab {
 		}).addExtraButton(
 			(button) => {
 				button.setIcon("download")
-					.setTooltip("Download CSS style themes from Server")
+					.setTooltip($t('download-css-style-themes-from-server'))
 					.onClick(async () => {
 						console.log(`to download themes`);
 						ThemeManager.getInstance(this._plugin).downloadThemes();
@@ -145,14 +146,14 @@ export class WeWriteSettingTab extends PluginSettingTab {
 	}
 	newAccountInfo() {
 		let n = 0
-		let newName = 'New Account'
+		let newName = $t('new-account')
 		while (true) {
 			const account = this._plugin.settings.mpAccounts.find((account: WeWriteAccountInfo) => account.accountName === newName)
 			if (account === undefined || account === null) {
 				break
 			}
 			n += 1
-			newName = 'New Account ' + n
+			newName = $t('new-account') + n
 		}
 
 		const newAccount = {
@@ -178,8 +179,8 @@ export class WeWriteSettingTab extends PluginSettingTab {
 
 		//account Name
 		new Setting(cEl)
-			.setName('account name')
-			.setDesc('Account name for your wechat official account')
+			.setName($t('account-name'))
+			.setDesc($t('account-name-for-your-wechat-official-ac'))
 			.addText(text => text
 				.setValue(account.accountName)
 				.onChange(async (value) => {
@@ -190,7 +191,7 @@ export class WeWriteSettingTab extends PluginSettingTab {
 		//addId		
 		new Setting(cEl)
 			.setName('AppId')
-			.setDesc('AppId for your wechat official account')
+			.setDesc($t('appid-for-your-wechat-official-account'))
 			.addText(text => text
 				.setValue(account.appId)
 				.onChange(async (value) => {
@@ -202,7 +203,7 @@ export class WeWriteSettingTab extends PluginSettingTab {
 		//addSecret
 		new Setting(cEl)
 			.setName('App Secret')
-			.setDesc('App Secret for your wechat official account')
+			.setDesc($t('app-secret-for-your-wechat-official-acco'))
 			.addText(text => text
 				.setValue(account.appSecret)
 				.onChange(async (value) => {
@@ -211,14 +212,14 @@ export class WeWriteSettingTab extends PluginSettingTab {
 				}));
 		// refresh token
 		new Setting(cEl)
-			.setName('Test Connection')
-			.setDesc('To check whether the [App Id] and [App Secret] and [IP Address Whitelist] setting on are correct. ')
+			.setName($t('test-connection'))
+			.setDesc($t('to-check-whether-the-app-id-and-app-secr'))
 			.addExtraButton(async button => {
-				button.setTooltip('click to test connection').setIcon('plug-zap');
+				button.setTooltip($t('click-to-test-connection')).setIcon('plug-zap');
 				button.onClick(async () => {
 					const success = await this._plugin.TestAccessToken(account.accountName);
 					if (success) {
-						new Notice('Successfully connected to WeChat official account platform.');
+						new Notice($t('successfully-connected-to-wechat-officia'));
 					} else {
 
 					}
@@ -227,11 +228,11 @@ export class WeWriteSettingTab extends PluginSettingTab {
 
 		// delete this account
 		new Setting(cEl)
-			.setName('Delete Account')
-			.setDesc('Be carefull! This will delete all your settings and data of the account. ')
+			.setName($t('delete-account'))
+			.setDesc($t('be-carefull-this-will-delete-all-your-se'))
 			.setClass('danger-button')
 			.addExtraButton(async button => {
-				button.setTooltip('click to delete account').setIcon('trash-2');
+				button.setTooltip($t('click-to-delete-account')).setIcon('trash-2');
 				button.onClick(async () => {
 					console.log(`to delete the account ${accountName}`);
 					this._plugin.settings.mpAccounts = this._plugin.settings.mpAccounts.filter(account => account.accountName !== accountName)
@@ -255,7 +256,7 @@ export class WeWriteSettingTab extends PluginSettingTab {
 	async detectIP(ip: Setting) {
 		let address = await getPublicIpAddress();
 		if (address === undefined) {
-			'No IP Address'
+			address = $t('no-ip-address')
 		}
 		ip.addButton(button => {
 			button.setButtonText(address)
@@ -268,10 +269,10 @@ export class WeWriteSettingTab extends PluginSettingTab {
 		})
 		ip.addExtraButton(button => {
 			button.setIcon('clipboard-copy')
-				.setTooltip('Copy IP to clipboard')
+				.setTooltip($t('copy-ip-to-clipboard-0'))
 				.onClick(async () => {
 					await navigator.clipboard.writeText(await getPublicIpAddress());
-					new Notice('IP copied to clipboard');
+					new Notice($t('ip-copied-to-clipboard-0'));
 				});
 		});
 	}

@@ -211,7 +211,10 @@ export class ThemeManager {
         return mergedRoot
     }
     removeClassName(root: HTMLElement) {
-        root.className = '';
+        // if (root instanceof SVGElement){
+        //     return
+        // }
+        // root.className = '';
         root.removeAttribute('class')
         let element = root.firstElementChild;
         while (element) {

@@ -50,7 +50,8 @@ export type LocalDraftItem = {
     only_fans_can_comment?: number;
     pic_crop_235_1?: string; //X1_Y1_X2_Y2, 用分隔符_拼接为X1_Y1_X2_Y2  
     pic_crop_1_1?: string; //X1_Y1_X2_Y2, 用分隔符_拼接为X1_Y1_X2_Y2
-    url?: string; //	草稿的临时链接
+    last_draft_url?: string; //	草稿的临时链接
+    last_draft_id?: string; //
 
 }
 

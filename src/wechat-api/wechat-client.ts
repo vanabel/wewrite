@@ -18,7 +18,7 @@ export class WechatClient {
   }
   public static getInstance(plugin: WeWritePlugin): WechatClient {
     if (!WechatClient.instance) {
-      WechatClient.instance = new WechatClient( plugin);
+      WechatClient.instance = new WechatClient(plugin);
     }
     return WechatClient.instance;
   }
@@ -73,7 +73,7 @@ export class WechatClient {
 
     return await res.json;
   }
-  public async sendArticleToDraftBox(localDraft: LocalDraftItem, data: string){
+  public async sendArticleToDraftBox(localDraft: LocalDraftItem, data: string) {
     const accessToken = await this._plugin.refreshAccessToken(this._plugin.settings.selectedAccount);
     console.log(`sendArticleToDraftBox: accessToken=>${accessToken}`);
     if (!accessToken) {
@@ -103,46 +103,46 @@ export class WechatClient {
     });
 
     console.log(`send draft:`, res.json);
-    const {errcode, media_id} = res.json;
+    const { errcode, media_id } = res.json;
     if (errcode !== undefined && errcode !== 0) {
       new Notice(getErrorMessage(errcode), 0)
       return false;
-    }else{
+    } else {
       new Notice(`草稿发送成功${media_id}`);
     }
-    
+
     return media_id;
   }
-  public async wxAddDraft(token: string, data: DraftArticle) {
-    const url = 'https://api.weixin.qq.com/cgi-bin/draft/add?access_token=' + token;
-    const body = {
-      articles: [{
-        title: data.title,
-        content: data.content,
-        digest: data.digest,
-        thumb_media_id: data.thumb_media_id,
-        ...data.pic_crop_235_1 && { pic_crop_235_1: data.pic_crop_235_1 },
-        ...data.pic_crop_1_1 && { pic_crop_1_1: data.pic_crop_1_1 },
-        ...data.content_source_url && { content_source_url: data.content_source_url },
-        ...data.need_open_comment !== undefined && { need_open_comment: data.need_open_comment },
-        ...data.only_fans_can_comment !== undefined && { only_fans_can_comment: data.only_fans_can_comment },
-        ...data.author && { author: data.author },
-      }]
-    };
+  // public async wxAddDraft(token: string, data: DraftArticle) {
+  //   const url = 'https://api.weixin.qq.com/cgi-bin/draft/add?access_token=' + token;
+  //   const body = {
+  //     articles: [{
+  //       title: data.title,
+  //       content: data.content,
+  //       digest: data.digest,
+  //       thumb_media_id: data.thumb_media_id,
+  //       ...data.pic_crop_235_1 && { pic_crop_235_1: data.pic_crop_235_1 },
+  //       ...data.pic_crop_1_1 && { pic_crop_1_1: data.pic_crop_1_1 },
+  //       ...data.content_source_url && { content_source_url: data.content_source_url },
+  //       ...data.need_open_comment !== undefined && { need_open_comment: data.need_open_comment },
+  //       ...data.only_fans_can_comment !== undefined && { only_fans_can_comment: data.only_fans_can_comment },
+  //       ...data.author && { author: data.author },
+  //     }]
+  //   };
 
-    const res = await requestUrl({
-      method: 'POST',
-      url: url,
-      throw: false,
-      body: JSON.stringify(body)
-    });
+  //   const res = await requestUrl({
+  //     method: 'POST',
+  //     url: url,
+  //     throw: false,
+  //     body: JSON.stringify(body)
+  //   });
 
-    return res;
-  }
+  //   return res;
+  // }
   public async uploadImage(data: Blob, filename: string, type?: string) {
     console.log(`uploadImage: filename=`, filename);
     console.log(`uploadImage: data=`, data);
-    
+
     const accessToken = await this._plugin.refreshAccessToken(this._plugin.settings.selectedAccount);
     console.log(`uploadImage: accessToken=>${accessToken}`);
     if (!accessToken) {
@@ -150,10 +150,10 @@ export class WechatClient {
     }
 
     let url = `https://api.weixin.qq.com/cgi-bin/media/uploadimg?access_token=${accessToken}`
-    if (type === undefined && data.size >= 1024 * 1024 ){
+    if (type === undefined && data.size >= 1024 * 1024) {
       type = 'image'
     }
-    if (type !== undefined ) {
+    if (type !== undefined) {
       url = `https://api.weixin.qq.com/cgi-bin/material/add_material?access_token=${accessToken}&type=${type}`
     }
 
@@ -182,7 +182,7 @@ export class WechatClient {
 
     const res = await requestUrl(options);
     console.log(`uploadImage:`, res.json);
-    
+
     const resData = await res.json;
     return {
       url: resData.url || '',
@@ -191,7 +191,7 @@ export class WechatClient {
       errmsg: resData.errmsg || '',
     }
   }
-  
+
   public async getMaterialList(accountName: string, type: string, offset: number = 0, count: number = 20) {
     const accessToken = await this._plugin.refreshAccessToken(accountName);
     if (!accessToken) {
@@ -303,7 +303,7 @@ export class WechatClient {
       return total_count
     }
   }
-  public async getDraftById(accountName:string, meida_id: string) {
+  public async getDraftById(accountName: string, meida_id: string) {
 
     const accessToken = await this._plugin.refreshAccessToken(accountName);
     if (!accessToken) {
@@ -330,6 +330,37 @@ export class WechatClient {
       return false;
     } else {
       return news_item
+    }
+  }
+  public async publishDraft(meida_id: string, accountName: string = "") {
+    if (!accountName) {
+      accountName = this._plugin.settings.selectedAccount!;
+    }
+    const accessToken = await this._plugin.refreshAccessToken(accountName);
+    if (!accessToken) {
+      return false;
+    }
+    // get all images by loop
+    const url = `${this.baseUrl}/freepublish/submit?access_token=${accessToken}`
+    const body = {
+      media_id: meida_id,
+    };
+
+    const req: RequestUrlParam = {
+      url: url,
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify(body)
+    };
+    const resp = await requestUrl(req);
+
+    console.log(`resp=>`, resp);
+    const { errcode, errmsg, publish_id } = resp.json;
+    if (errcode !== undefined && errcode !== 0) {
+      new Notice(getErrorMessage(errcode), 0);
+      return false;
+    } else {
+      return publish_id
     }
   }
 }
