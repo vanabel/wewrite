@@ -16,7 +16,6 @@ export class Links extends WeWriteMarkedExtension {
     }
 
     async postprocess(html: string) {
-        // console.log(`links postprocess:`, this.allLinks);
         if (!this.allLinks.length) {
             return html;
         }

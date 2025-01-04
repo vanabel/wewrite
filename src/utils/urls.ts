@@ -9,11 +9,8 @@ export class UrlUtils {
         this.app = app;
     }
     public parseObsidianUrl(url: string): string | null {
-        //obsidian://open?vault=devobs&file=attachments%2Fpeony.jpg,devobs,attachments%2Fpeony.jpg
-        // console.log(`url: ${url}`);
         const regex = /obsidian:\/\/open\?vault=(.*?)&file=([^,]*),?(.*)$/;
         const match = url.match(regex);
-        console.log(`match: ${match}`);
         
         if (match && match[2]) {
             return decodeURIComponent(match[2]);
@@ -42,11 +39,9 @@ export class UrlUtils {
     }
     public async getInternalLinkDisplayUrl(internalLink: string): Promise<string | null> {
         const filePath = this.parseObsidianUrl(internalLink);
-        console.log(`filePath: ${filePath}`);
         
         if (filePath) {
             const file = this.getFileFromPath(filePath);
-            // console.log(`file: ${file}`);
             
             if (file) {
                 return this.getDisplayUrl(file);

@@ -113,7 +113,6 @@ export class CodeRenderer extends WeWriteMarkedExtension {
         token.html = '<span>mermaid渲染失败</span>';
 
         const href = token.href;
-        console.log(`renderMermaidAsync: ${href}`);
         const index = this.mermaidIndex;
         this.mermaidIndex++;
 
@@ -173,8 +172,6 @@ export class CodeRenderer extends WeWriteMarkedExtension {
 						return this.renderCharts(token);
 					}
 					if (token.lang && token.lang.trim().toLocaleLowerCase() == 'mpcard') {
-						console.log(`mpcard not support yet: ${token.text}`);
-						
 						// return this.renderCard(token);
 					}
 					if (token.lang && token.lang.trim().toLocaleLowerCase().startsWith('ad-')) {

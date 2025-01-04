@@ -79,10 +79,8 @@ export class MPArticleHeader {
         //TODO: only if the file is the active file
         const activeFile = this._plugin.app.workspace.getActiveFile()
         if (activeFile === undefined || file !== activeFile) {
-            console.log(`not the active file. return`);
             return;
         }
-        console.log(`on note rename, update local draft`);
 
         if (this.activeLocalDraft !== undefined) {
             this.activeLocalDraft.notePath = file.path
@@ -127,7 +125,6 @@ export class MPArticleHeader {
         this._digest = details.createEl('textarea', { cls: 'wechat-mp-article-preview-digest', attr: { rows: 3, placeholder: '图文消息的摘要，仅有单图文消息才有摘要，多图文此处为空。如果本字段为没有填写，则默认抓取正文前54个字。' } })
         this._digest.onkeyup = (event: KeyboardEvent) => {
             const target = event.target as HTMLTextAreaElement;
-            console.log(target.value);
             if (this.activeLocalDraft !== undefined) {
                 this.activeLocalDraft.digest = target.value
                 this.localDraftmanager.setDraft(this.activeLocalDraft)
@@ -171,7 +168,6 @@ export class MPArticleHeader {
                     .setIcon('panel-left-close')
                     .setTooltip('pick image in WeChat Official Account from left side view')
                     .onClick(async () => {
-                        console.log('show left view')
                         this._plugin.showLeftView()
                     })
             )
@@ -200,25 +196,17 @@ export class MPArticleHeader {
 
         coverframe.ondragenter = (e) => {
             e.preventDefault()
-            // console.log('drag over',e)
             coverframe.addClass('image-on-dragover')
         }
         coverframe.ondragleave = (e) => {
             e.preventDefault()
-            // console.log('drag leave', e)
             coverframe.removeClass('image-on-dragover')
         }
         coverframe.ondragover = (e) => {
             e.preventDefault()
-            // console.log('ondragover', e)
-            // const files = e.dataTransfer?.files
         }
         coverframe.addEventListener('drop', async (e) => {
             e.preventDefault()
-            // console.log('heard drop dataTransfer', e.dataTransfer?.types)
-            // console.log('heard drop text', e.dataTransfer?.getData('text/plain'))
-            console.log('heard drop url', e.dataTransfer?.getData('text/uri-list'))
-            // console.log('heard drop media_id', e.dataTransfer?.getData('media_id'))
             this.current_x = 0
             this.current_y = 0
 
@@ -229,18 +217,11 @@ export class MPArticleHeader {
                     const urlParser = new UrlUtils(this._plugin.app);
 
                     const appurl = await urlParser.getInternalLinkDisplayUrl(url)
-                    console.log(`appUrl: ${appurl}`);
-                    // coverframe.setAttr('style', `background-image: url('${appurl}'); background-size:cover; background-position: 0px 0px;`);
                     this.cover_image = appurl;
-                    // coverframe.setAttr('style', `background-image: url('${this.cover_image}'); background-size:cover; backgroup-repeat:none; background-position:  ${this.current_x}px ${this.current_y}px;`);
-                    // this.setCoverImage()
-
 
                 } else {
 
                     this.cover_image = url;
-                    // coverframe.setAttr('style', `background-image: url('${this.cover_image}'); background-size:cover; backgroup-repeat:none; background-position:  ${this.current_x}px ${this.current_y}px;`);
-                    // this.setCoverImage()
                     const media_id = await this.getCoverImageMediaId(url)
                     coverframe.setAttr('data-media_id', media_id)
                     if (this.activeLocalDraft !== undefined) {
@@ -250,76 +231,15 @@ export class MPArticleHeader {
 
                 // coverframe.setAttr('style', `background-image: url('${url}'); background-size:cover; background-position: 0px 0px;`);
                 this.localDraftmanager.setDraft(this.activeLocalDraft!)
-
-
                 this.setCoverImage(this.cover_image!)
             }
             coverframe.removeClass('image-on-dragover')
         })
 
-        //TODO panning for find right position of cover
-        // coverframe.onmousedown = (e: MouseEvent) => {
-        //     console.log('mousedown:', e.clientX, e.clientY)
-        //     this.panning = true
-        //     this.origin_x = e.clientX
-        //     this.origin_y = e.clientY
-
-        // }
-        // coverframe.onmouseup = (e: MouseEvent) => {
-        //     console.log('mousedown:', e.clientX, e.clientY)
-        //     this.panning = false
-        //     const x = e.clientX - this.origin_x
-        //     const y = e.clientY - this.origin_y
-        //     this.current_x += x
-        //     this.current_y += y
-
-        // }
-        // coverframe.onmousemove = (e: MouseEvent) => {
-        //     if (this.panning && this.cover_image) {
-        //         const x = e.clientX - this.origin_x
-        //         const y = e.clientY - this.origin_y
-        //         this.current_x += x
-        //         this.current_y += y
-
-        //         const coverframeRect = coverframe.getBoundingClientRect();
-        //         const img = new Image();
-        //         img.src = this.cover_image;
-        //         img.onload = () => {
-        //             const imgWidth = img.width;
-        //             const imgHeight = img.height;
-
-        //             // 计算缩放比例
-        //             const ratioX = coverframeRect.width / imgWidth;
-        //             const ratioY = coverframeRect.height / imgHeight;
-        //             const ratio = Math.max(ratioX, ratioY);
-
-        //             // 计算缩放后的图像尺寸
-        //             const scaledImgWidth = imgWidth * ratio;
-        //             const scaledImgHeight = imgHeight * ratio;
-
-        //             // 计算最大和最小的背景位置
-        //             const max_x = Math.max(0, scaledImgWidth - coverframeRect.width);
-        //             const min_x = Math.min(0, -scaledImgWidth + coverframeRect.width);
-        //             const max_y = Math.max(0, scaledImgHeight - coverframeRect.height / 2.35);
-        //             const min_y = Math.min(0, -scaledImgHeight + coverframeRect.height / 2.35);
-
-        //             // 限制背景位置
-        //             this.current_x = Math.max(min_x, Math.min(max_x, this.current_x));
-        //             this.current_y = Math.max(min_y, Math.min(max_y, this.current_y));
-
-        //             // coverframe.setAttr('style', `background-image: url('${this.cover_image}'); background-size: cover; background-position: ${this.current_x}px ${this.current_y}px; background-repeat: no-repeat;`);
-        //             this.setCoverImageXY(this.current_x, this.current_y)
-        //         };
-
-        //         this.origin_x = e.clientX
-        //         this.origin_y = e.clientY
-        //     }
-
-        // }
+        
         return coverframe
     }
     setCoverImage(url: string|null) {
-        console.log(`set cover image: ${url}`);
         if (!url){
             return
         }
@@ -404,34 +324,22 @@ export class MPArticleHeader {
         
     }
     updateCoverImage() {
-        console.log('update cover image')
+        //TODO
         //clear media_id
         // use the canvas to URLdata and update url 
     }
     resetImage() {
-        console.log('reset image')
         this.current_x = 0;
         this.current_y = 0;
         this.setCoverImageXY(0, 0)
     }
-    // private setCoverImage() {
-
-    //     this.coverframe.setAttr('style', `background-image: url('${this.cover_image}'); background-size:cover; background-repeat: no-repeat; background-position:  ${this.current_x}px ${this.current_y}px;`);
-    //     if (this.activeLocalDraft !== undefined) {
-    //         this.activeLocalDraft.cover_image_url = this.cover_image!
-    //     }
-    // }
-
+    
     async checkCoverImage() {
-        // console.log(`checkCoverImage:${this.cover_image}`, this.activeLocalDraft);
-
         if (this.activeLocalDraft !== undefined) {
             if (this.activeLocalDraft.thumb_media_id === undefined || !this.activeLocalDraft.thumb_media_id) {
                 if (this.cover_image) {
                     const media_id = await this.getCoverImageMediaId(this.cover_image)
                     this.activeLocalDraft.thumb_media_id = media_id
-                    console.log(`checkCoverImage thumb_media_id:${media_id}`);
-
                     return true;
                 }
             } else {
@@ -443,16 +351,13 @@ export class MPArticleHeader {
     async getCoverImageMediaId(url: string, upload: boolean = false) {
         let _media_id = this._plugin.findImageMediaId(url)
         if (_media_id === undefined && upload) {
-            console.log('media_id is undefined')
             const blob = await fetch(url).then(res => res.blob());
             const res = await WechatClient.getInstance(this._plugin).uploadImage(blob, 'banner-cover.png', 'image')
-            console.log(`upload banner image:res=>`, res);
 
             if (res) {
                 const { errcode, media_id } = res
 
                 if (errcode !== 0) {
-                    console.log(`upload image error: ${errcode}`)
                     new Notice('upload cover image error')
                     return
                 } else {
@@ -475,7 +380,6 @@ export class MPArticleHeader {
     async updateLocalDraft() {
 
         if (this.localDraftmanager.isActiveNoteDraft(this.activeLocalDraft)) {
-            console.log(`no real change on the active note. `);
             return;
         }
         //could be called when switch account name

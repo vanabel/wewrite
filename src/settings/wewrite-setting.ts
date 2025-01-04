@@ -51,7 +51,6 @@ export const saveWeWriteSetting = async (doc:WeWriteSetting): Promise<void> => {
             doc._rev = existedDoc._rev;
             db.put(doc)
                 .then(() => {
-                    console.log(`db saved settings.`);
                     resolve();
                 })
                 .catch((error: any) => {

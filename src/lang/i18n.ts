@@ -6,7 +6,6 @@ import { moment } from 'obsidian';
 
 import enUsTrans from './locales/en-us.json';
 import zhCnTrans from './locales/zh-cn.json';
-console.log(`moment.locale`, moment, moment.locale());
 
 i18n
   .init({

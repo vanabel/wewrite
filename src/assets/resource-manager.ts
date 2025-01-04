@@ -36,20 +36,17 @@ export class ResourceManager {
     public forceRenderActiveMarkdownView() {
         const view = this.getCurrentMarkdownView();
         if (view) {
-            console.log(`trigger render for ${view.file?.path}`);
             this._plugin.app.workspace.trigger('render', view)
         }
     }
     public queryElements(query: string) {
         const view = this.getCurrentMarkdownView();
         if (!view) return [];
-        console.log(`getViewMode=>`, view.getMode());
 
         const view_query = view.getMode() === 'preview' ? '.markdown-preview-view' : '.markdown-source-view';
         const preview = view.containerEl.querySelector(view_query)
 
         if (!preview) {
-            console.log(`no preview found`);
             return []
 
         }

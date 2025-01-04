@@ -171,13 +171,17 @@ export class Embed extends WeWriteMarkedExtension {
             console.error('File not found' + path);
             return '';
         }
-        const resPath = this.plugin.app.vault.getResourcePath(file as TFile);
-        const info = {
-            resUrl: resPath,
-            filePath: file.path,
-            url: null
-        };
-        return resPath;
+        if (file instanceof TFile) {
+            const resPath = this.plugin.app.vault.getResourcePath(file);
+            const info = {
+                resUrl: resPath,
+                filePath: file.path,
+                url: null
+            };
+            return resPath;
+        }else{
+            return ''
+        }
     }
 
     isImage(file: string) {
@@ -409,21 +413,17 @@ export class Embed extends WeWriteMarkedExtension {
                         href: matches[1],
                         text: matches[1]
                     };
-                    console.log(`embed tokenizer: ${JSON.stringify(token)}`);
 
                     return token;
                 },
                 renderer: (token: Tokens.Generic) => {
                     const embedType = getEmbedType(token.href);
-                    console.log(`embedType: ${embedType}`);
 
                     if (embedType == 'image' || embedType == 'webp') {
                         // images
                         let item = this.parseImageLink(token.href);
-                        console.log(`localFile renderer: ${JSON.stringify(item)}`);
                         if (item) {
                             const src = this.getImagePath(item.path);
-                            console.log(`localFile renderer: ${src}`);
 
                             const width = item.width ? `width="${item.width}"` : '';
                             const height = item.height ? `height="${item.height}"` : '';
@@ -470,7 +470,6 @@ export class Embed extends WeWriteMarkedExtension {
         token.html = "excalidraw渲染失败"
 
         const href = token.href;
-        console.log(`renderExcalidrawAsync: ${href}`);
         const index = this.excalidrawIndex;
         this.excalidrawIndex++;
         const root = ObsidianMarkdownRenderer.getInstance(this.plugin.app).queryElement(index, 'div.excalidraw-svg')
@@ -480,8 +479,6 @@ export class Embed extends WeWriteMarkedExtension {
         root.removeAttribute('style');
         try {
 
-            console.log(`root=>`, root);
-            
             const image = root.querySelector('img')
             if (image) {
                 image.setAttr('width', '100%')
@@ -492,13 +489,12 @@ export class Embed extends WeWriteMarkedExtension {
             token.html = `<img src="${dataUrl}" class="wewwrite-exclaidraw" >`
         }
         catch (e) {
-            console.log(`renderExcalidrawAsync error:`, e);
+            console.error(`renderExcalidrawAsync error:`, e);
         }
     }
     async renderMarkdownEmbedAsync(token: Tokens.Generic) {
 
         const href = token.href;
-        console.log(`renderMarkdownEmbedAsync: ${href}`);
         const content = await this.renderFile(href);
         token.html = `<div class="markdown-embed inline-embed is-loaded">${content}</div>`
     }

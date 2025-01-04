@@ -75,7 +75,6 @@ export class PreviewPanel extends ItemView implements PreviewRender {
             }
         )
         this._plugin.messageService.registerListener('draft-title-updated', (title: string) => {
-            console.log(`on messageService, title=>`, title);
 
             this.articleTitle.setName(title)
         })
@@ -87,13 +86,13 @@ export class PreviewPanel extends ItemView implements PreviewRender {
     }
 
     onFileContentRendered(view: MarkdownView) {
+        //TODO
         // throw new Error('Method not implemented.');
-        console.log(`onFile content rendered. `);
 
     }
     startWatchActiveNoteChange() {
+        //TODO
         // throw new Error('Method not implemented.');
-        console.log(`start watch activve note change. `);
 
     }
 
@@ -108,27 +107,11 @@ export class PreviewPanel extends ItemView implements PreviewRender {
             .addDropdown((dropdown: DropdownComponent) => {
                 this.themeSelector.dropdown(dropdown);
             })
-            // .addExtraButton(
-            //     (button) => {
-            //         button.setIcon('image-up')
-            //             .setTooltip('')
-            //             .onClick(async () => {
-            //                 console.log(`upload materials.`);
-            //                 // ResourceManager.getInstance(this._plugin).forceRenderActiveMarkdownView()
-            //                 // ResourceManager.getInstance(this._plugin).scrollActiveMarkdownView()
-            //                 uploadSVGs(this.articleDiv, this._plugin.wechatClient)
-            //                 uploadCanvas(this.articleDiv, this._plugin.wechatClient)
-            //                 uploadURLImage(this.articleDiv, this._plugin.wechatClient)
-
-            //             })
-            //     }
-            // )
             .addExtraButton(
                 (button) => {
                     button.setIcon('refresh-cw')
                         .setTooltip('Rerender the article content.')
                         .onClick(async () => {
-                            // console.log(`rerender article content.`);
                             this.renderDraft()
                         })
                 }
@@ -151,8 +134,6 @@ export class PreviewPanel extends ItemView implements PreviewRender {
                     button.setIcon('newspaper')
                         .setTooltip('publish to MP directly.')
                     button.onClick(async () => {
-                        console.log(`publish to MP directly.`);
-                        //TODO to pulish to MP directly.
                         this.draftHeader.publishDraft()
                     })
                 }
@@ -188,8 +169,6 @@ export class PreviewPanel extends ItemView implements PreviewRender {
         return this.draftHeader.checkCoverImage()
     }
     async sendArticleToDraftBox() {
-        console.log(`send article to draft box.`);
-
         await uploadSVGs(this.articleDiv, this._plugin.wechatClient)
         await uploadCanvas(this.articleDiv, this._plugin.wechatClient)
         await uploadURLImage(this.articleDiv, this._plugin.wechatClient)
@@ -200,7 +179,6 @@ export class PreviewPanel extends ItemView implements PreviewRender {
             this.draftHeader.updateDraftDraftId(media_id)
             const news_item = await this.wechatClient.getDraftById(this._plugin.settings.selectedAccount!, media_id)
             if (news_item) {
-                console.log(`news_item=>`, news_item[0]);
                 open(news_item[0].url)
             }
         }
@@ -223,22 +201,16 @@ export class PreviewPanel extends ItemView implements PreviewRender {
     async parseActiveMarkdown() {
         const mview = ResourceManager.getInstance(this._plugin).getCurrentMarkdownView()
         if (!mview) {
-            console.log(`not a markdown view`);
             return 'not a markdown view';
         }
-        const mode = (mview.currentMode as any).type
-        console.log('markdown view mode:', mode)
         this.articleDiv.empty();
         this.elementMap = new Map<string, HTMLElement | string>()
         const activeFile = this.app.workspace.getActiveFile();
-        console.log(`activeFile =>`, activeFile);
 
         if (!activeFile) {
-            console.log(`no active file`);
             return `<h1>No active file</h1>`
         }
         if (activeFile.extension !== 'md') {
-            console.log(`not a markdown file`);
             return `<h1>Not a markdown file</h1>`
         }
         let html = await WechatRender.getInstance(this._plugin, this).parseNote(activeFile.path, this.articleDiv, this)
@@ -274,8 +246,6 @@ export class PreviewPanel extends ItemView implements PreviewRender {
     startListen() {
         this.registerEvent(
             this._plugin.app.vault.on('rename', (file: TFile) => {
-                console.log(`File renamed: ${file.path}`);
-                //TODO: localdraft is not valid any more
                 this.draftHeader.onNoteRename(file)
             })
         );
@@ -298,14 +268,12 @@ export class PreviewPanel extends ItemView implements PreviewRender {
     }
 
     onEditorChange(editor: Editor, info: MarkdownView) {
-        console.log(`onEditorChange:`, editor);
         this.renderDraft()
     }
     updateElementByID(id: string, html: string): void {
         const item = this.articleDiv.querySelector('#' + id) as HTMLElement;
         if (!item) return;
         const doc = sanitizeHTMLToDom(html);
-        console.log(`doc=>`, doc);
 
         item.empty();
         if (doc.childElementCount > 0) {

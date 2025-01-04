@@ -22,8 +22,6 @@ export class CodeHighlight extends WeWriteMarkedExtension {
         if (lang && hljs.getLanguage(lang)) {
           try {
             const result = hljs.highlight(code, { language: lang });
-            console.log(`result: ${result.value}`);
-            
             return result.value;
           } catch (err) { }
         }

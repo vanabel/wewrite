@@ -25,10 +25,8 @@ const mathjax_options = {
 }
 
 export function parseMath(math: string): string {
-    console.log(`math:`, math);
     
   const node = mathjax_document.convert(math, mathjax_options)
-  console.log(`node`, node);
   
   return adaptor.innerHTML(node)
 }
@@ -47,7 +45,6 @@ export function parseHTML(html: string): string {
     }
     
     matches = html.match(inlineRule)
-    console.log(`matches: ${matches}`)
     if (matches) {
       matches.forEach(match => {
         const math = match.replace(/\$/g, '')

@@ -17,7 +17,6 @@ export function compileCSS(cssContent: string) {
             }
         });
     });
-    console.log(`variables: `, variables);
     
 
     // 替换变量
@@ -35,9 +34,7 @@ export function compileCSS(cssContent: string) {
 
     // 生成新的 CSS 内容
     
-    // console.log('CSS conversion completed successfully.');
     const newCssContent = root.toString();
-    // console.log(`newCssContent: `, newCssContent);
     return root
     // return newCssContent;
 }

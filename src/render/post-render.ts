@@ -70,17 +70,14 @@ export async function uploadSVGs(root: HTMLElement, wechatClient: WechatClient){
     const uploadPromises = svgs.map(async (svg) => {
         const svgString = svg.outerHTML;
         if (svgString.length < 10000) {
-            console.log(`svg size:${svgString.length} < 100000; skipped.`)
             return
         }
         await svgToPng(svgString).then(async blob => {
             await wechatClient.uploadImage(blob, imageFileName(blob.type)).then(res => {
                 if (res){
-                    // console.log(`upload svg to wechat server: ${res.media_id}`)
                     svg.outerHTML = `<img src="${res.url}" />`
                 }else{
-                    console.log(`upload svg failed.`);
-                    
+                    console.error(`upload svg failed.`);
                 }
             })
         })
@@ -98,7 +95,6 @@ export async function uploadCanvas(root:HTMLElement, wechatClient:WechatClient):
         const blob = getCanvasBlob(canvas);
         await wechatClient.uploadImage(blob, imageFileName(blob.type)).then(res => {
             if (res){
-                // console.log(`upload canvas to wechat server: ${res.media_id}`)
                 canvas.outerHTML = `<img src="${res.url}" />`
             }else{
                 console.log(`upload canvas failed.`);
@@ -118,10 +114,7 @@ export async function uploadURLImage(root:HTMLElement, wechatClient:WechatClient
     
     const uploadPromises = images.map(async (img) => {
         let blob:Blob|undefined 
-        // console.log(`img src: ${img.src}`);
-        
         if (img.src.includes('://mmbiz.qpic.cn/')){
-            // console.log(`it is a wechat image. skipped.`);
             return;
         }
         else if (img.src.startsWith('data:image/')){
@@ -131,7 +124,6 @@ export async function uploadURLImage(root:HTMLElement, wechatClient:WechatClient
         }
         
         if (blob === undefined){
-            console.log(`not blob, return`);
             return
             
         }else{
@@ -140,7 +132,7 @@ export async function uploadURLImage(root:HTMLElement, wechatClient:WechatClient
                 if (res){
                     img.src = res.url
                 }else{
-                    console.log(`upload image failed.`);
+                    console.error(`upload image failed.`);
                     
                 }
             })

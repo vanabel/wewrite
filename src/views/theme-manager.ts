@@ -11,11 +11,10 @@ export type WeChatTheme = {
     content?: string;
 
 }
-console.log('combinedCSS=>', combinedCss)
 export class ThemeManager {
     downloadThemes() {
         //TODO, implement themes template download.
-        throw new Error("Method not implemented.");
+        // throw new Error("Method not implemented.");
     }
     private _plugin: WeWritePlugin;
     defaultCssRoot: postcss.Root;
@@ -24,11 +23,6 @@ export class ThemeManager {
 
     private constructor(plugin: WeWritePlugin) {
         this._plugin = plugin;
-        // const { vars, root } = this.pickoutCssVars(combinedCss)
-        // console.log(`vars:`, vars);
-        // console.log(`root=>`, root);
-        // this.defaultCssRoot = root;
-
 
     }
     static getInstance(plugin: WeWritePlugin): ThemeManager {
@@ -67,17 +61,13 @@ export class ThemeManager {
         return cleanedCSS.trim();
     }
     public async getThemeContent(path: string) {
-        console.log(`path:`, path);
-
         const file = this._plugin.app.vault.getFileByPath(path);
         if (!file) {
             return ThemeManager.template_css; //DEFAULT_STYLE;
         }
         const fileContent = await this._plugin.app.vault.cachedRead(file);
-        // console.log(`fileContent:`, fileContent);
 
         const reg_css_block = /```[cC][Ss]{2}\s*([\s\S]*?)\s*```/g;
-        // console.log(`reg:`, reg);
 
         // 使用正则表达式提取 CSS 代码块
         // const cssBlocks = fileContent.match(reg);
@@ -106,14 +96,9 @@ export class ThemeManager {
         const themes: WeChatTheme[] = [];
 
         const getAllFiles = async (folder: TFolder) => {
-            // console.log(`getAllfiles in folder: ${folder.path}`);
-
             const promises = folder.children.map(async (child) => {
                 if (child instanceof TFile && child.extension === "md") {
-                    // console.log(`theme found: ${child.path}`);
-
                     const theme = await this.getThemeProperties(child);
-                    // console.log(`theme properties:`, theme);
                     if (theme) {
                         themes.push(theme);
                     }
@@ -133,11 +118,8 @@ export class ThemeManager {
     private async getThemeProperties(file: TFile): Promise<WeChatTheme | undefined> {
         const fileContent = await this._plugin.app.vault.cachedRead(file);
         const { data } = matter(fileContent); // 解析前置元数据
-        // console.log(`data`, data);
-
         if (data.theme_name === undefined || !data.theme_name.trim()) {
             // it is not a valid theme.
-            console.log(`not a valid theme.`);
             return;
         }
 
@@ -161,7 +143,6 @@ export class ThemeManager {
             if (property.startsWith('--')) {
                 const value = root.style.getPropertyValue(property);
                 root.style.removeProperty(property);
-                console.log(`remove:`, property, value);
 
             }
         }

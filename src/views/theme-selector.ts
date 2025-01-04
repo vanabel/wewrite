@@ -19,7 +19,6 @@ export class ThemeSelector {
         await this.updateThemeOptions()
 
         themDropdown.onChange(async (value) => {
-            console.log(value)
             this._plugin.settings.custom_theme = value
             
             this._plugin.messageService.sendMessage('custom-theme-changed', value)
@@ -27,7 +26,6 @@ export class ThemeSelector {
     }
     private async updateThemeOptions() {
         const themes = await this._themeManager.loadThemes()
-        console.log(`themes=>`, themes);
 
         //clear all options
         this._themeDropdown.selectEl.length = 0
@@ -44,18 +42,14 @@ export class ThemeSelector {
     }
     onThemeChange(file: TFile) {
         if (file instanceof TFile && file.extension === 'md' && file.path.startsWith(this._plugin.settings.css_styles_folder)) {
-            console.log(`theme file changed: ${file.path}`);
             this.updateThemeOptions()
         } else {
-            console.log(`not a theme file`);
 
         }
     }
     public startWatchThemes() {
         this._plugin.registerEvent(
             this._plugin.app.vault.on('rename', (file: TFile) => {
-                console.log(`File renamed: ${file.path}`);
-                
                 // 在这里处理文件修改的逻辑
                 this.onThemeChange(file)
 
@@ -63,7 +57,6 @@ export class ThemeSelector {
         );
         this._plugin.registerEvent(
             this._plugin.app.vault.on('modify', (file: TFile) => {
-                console.log(`File modified: ${file.path}`);
                 // 在这里处理文件修改的逻辑
                 this.onThemeChange(file)
 
@@ -72,7 +65,6 @@ export class ThemeSelector {
 
         this._plugin.registerEvent(
             this._plugin.app.vault.on('create', (file: TFile) => {
-                console.log(`File created: ${file.path}`);
                 // 在这里处理文件创建的逻辑
                 this.onThemeChange(file)
             })
@@ -80,15 +72,14 @@ export class ThemeSelector {
 
         this._plugin.registerEvent(
             this._plugin.app.vault.on('delete', (file: TFile) => {
-                console.log(`File deleted: ${file.path}`);
                 // 在这里处理文件删除的逻辑
                 this.onThemeChange(file)
             })
         );
     }
     public stopWatchThemes() {
+        //TODO
         // throw new Error('Method not implemented.');
-        console.log(`stop watch themes`);
 
     }
 

@@ -56,7 +56,6 @@ class ImageSelectionModal extends Modal {
             checkbox.addEventListener("change", (event) => {
                 if (event.target instanceof HTMLInputElement && event.target.checked) {
                     this.selectedImage = image;
-                    console.log(`Selected image: ${this.selectedImage}`);
                     this.close();
                 }
             });

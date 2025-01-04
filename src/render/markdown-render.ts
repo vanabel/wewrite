@@ -29,7 +29,6 @@ export class ObsidianMarkdownRenderer {
     }
     public async render(path: string, container: HTMLElement, view:Component) {
         if (path === undefined || !path || !path.toLowerCase().endsWith('.md')) {
-            console.log(`invalid note path for rendering: ${path}`);
             return;
         }
         this.container = container
@@ -57,11 +56,9 @@ export class ObsidianMarkdownRenderer {
     }
     public queryElement(index: number, query: string) {
         if (this.el === undefined || !this.el) {
-            console.log(`markdown render has not been initialized`);
             return null
         }
         if (this.rendering) {
-            console.log(`markdown render is still rendering`);
             return null
         }
         const nodes = this.el.querySelectorAll<HTMLElement>(query)

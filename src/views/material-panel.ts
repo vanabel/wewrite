@@ -65,7 +65,6 @@ export class MaterialPanel {
     }
   }
   async refreshContent(): Promise<any> {
-    console.log(`refresh `);
     this.content.innerHTML = '';
     this.items = []
     this.setTotal(0);
@@ -97,7 +96,6 @@ export class MaterialPanel {
         item.setTitle('set as cover of current draft')
             .setIcon('image-plus')
             .onClick(() => {
-                console.log(`set as cover of current draft`);
                 
             });
     });
@@ -107,13 +105,9 @@ export class MaterialPanel {
   private toggleContent() {
     if (this.content.style.display === 'none') {
       this.content.style.display = 'block';
-      // this.toggleButton.textContent = '收起';
-      // this.toggleButton.className = 'toggle-icon chevron-up';
       setIcon(this.toggleButton, 'chevron-up')
     } else {
       this.content.style.display = 'none';
-      // this.toggleButton.textContent = '展开';
-      // this.toggleButton.className = 'toggle-icon chevron-right';
       setIcon(this.toggleButton, 'chevron-right')
     }
   }
@@ -142,23 +136,19 @@ export class MaterialPanel {
     this.items.push({item:item, el:itemDiv});
 
     if (this.type === 'draft' || this.type === 'news') {
-        // console.log(`item=>`, item);
-        
         itemDiv.innerHTML = `<a href=${item.content.news_item[0].url}> ${item.content.news_item[0].title}</a>`
         itemDiv.addEventListener('click', () => { })
     }else if (this.type === 'image') {
-      // console.log(`image[${this.items.length}].media_id=${item.media_id}`);
-      
         itemDiv.innerHTML = '<img src="' + item.url + '" alt="' + item.name + '" />'
         itemDiv.addEventListener('click', () => {
-          console.log(`click ${item.used}`)
+          //TODO 
         })
         itemDiv.addEventListener('contextmenu', (event) => {
           event.preventDefault();
           this.showContextMenu(item, event)
         })
     }else{
-      console.log(`other type has not been implemented.`);
+      console.error(`other type has not been implemented.`);
       
     }
     this.setTotal(this.items.length)
@@ -170,8 +160,6 @@ export class MaterialPanel {
     if (old_item !== undefined && old_item !== null) {
       old_item.item.used = item.used
     }else{
-      // console.log(`Update used: item.media_id:`, item.media_id );
-      
       this.addItem(item)
     }
   }

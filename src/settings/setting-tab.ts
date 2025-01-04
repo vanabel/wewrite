@@ -99,8 +99,7 @@ export class WeWriteSettingTab extends PluginSettingTab {
 					button.setIcon('download')
 						.setTooltip($t('import-account-info'))
 						.onClick(async () => {
-							//TODO import account info, to be implemented.
-							console.log(`import account info`);
+							this.importAccountInfo();
 						})
 				}
 			)
@@ -109,8 +108,7 @@ export class WeWriteSettingTab extends PluginSettingTab {
 					button.setIcon('upload')
 						.setTooltip($t('export-account-info'))
 						.onClick(async () => {
-							//TODO export account info, to be implemented.
-							console.log(`export account info`);
+							this.exportAccountInfo();
 
 						})
 				}
@@ -119,6 +117,14 @@ export class WeWriteSettingTab extends PluginSettingTab {
 			this.newCSSStyleFolder()
 
 	} //display	()
+	exportAccountInfo() {
+		//TODO
+		// throw new Error("Method not implemented.");
+	}
+	importAccountInfo() {
+		//TODO
+		// throw new Error("Method not implemented.");
+	}
 
 	newCSSStyleFolder() {
 		new Setting(this.containerEl)
@@ -137,7 +143,6 @@ export class WeWriteSettingTab extends PluginSettingTab {
 				button.setIcon("download")
 					.setTooltip($t('download-css-style-themes-from-server'))
 					.onClick(async () => {
-						console.log(`to download themes`);
 						ThemeManager.getInstance(this._plugin).downloadThemes();
 						
 					});
@@ -234,7 +239,6 @@ export class WeWriteSettingTab extends PluginSettingTab {
 			.addExtraButton(async button => {
 				button.setTooltip($t('click-to-delete-account')).setIcon('trash-2');
 				button.onClick(async () => {
-					console.log(`to delete the account ${accountName}`);
 					this._plugin.settings.mpAccounts = this._plugin.settings.mpAccounts.filter(account => account.accountName !== accountName)
 					const account = this._plugin.settings.mpAccounts[0]
 					if (account !== undefined){

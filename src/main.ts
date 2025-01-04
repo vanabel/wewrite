@@ -9,10 +9,10 @@ import { ResourceManager } from './assets/resource-manager';
 import { WeWriteSettingTab } from './settings/setting-tab';
 import { getWeChatMPSetting, saveWeWriteSetting, WeWriteSetting } from './settings/wewrite-setting';
 import { MessageService } from './utils/message-service';
+import { ImageEditorModal } from './views/draft-modal';
 import { MaterialView, VIEW_TYPE_MP_MATERIAL } from './views/material-view';
 import { PreviewPanel, VIEW_TYPE_NP_PREVIEW } from './views/previewer';
 import { WechatClient } from './wechat-api/wechat-client';
-import { ImageEditorModal } from './views/draft-modal';
 
 
 const DEFAULT_SETTINGS: WeWriteSetting = {
@@ -47,7 +47,7 @@ export default class WeWritePlugin extends Plugin {
     }
     assetsUpdated() {
 		//TODO
-		console.log(`assetsUpdated:Method not implemented. `);
+		this.messageService.sendMessage('material-updated', null)
 		
     }
     onWeChantMPAccountChange(value: string) {
@@ -58,9 +58,6 @@ export default class WeWritePlugin extends Plugin {
 		this.settings.selectedAccount = value;
 		this.assetsManager.loadMaterial(value);
     }
-	save_settings() {
-		throw new Error("Method not implemented.");
-	}
 	settings: WeWriteSetting;
 	wechatClient: WechatClient;
 	assetsManager: AssetsManager;
@@ -92,8 +89,7 @@ export default class WeWritePlugin extends Plugin {
 		const ribbonIconEl = this.addRibbonIcon('scan-eye', 'WeWrite', (evt: MouseEvent) => {
 			this.activateView();
 		});
-		// Perform additional things with the ribbon
-		ribbonIconEl.addClass('my-plugin-ribbon-class');
+		ribbonIconEl.addClass('wewrite-ribbon-icon');
 
 		// This adds a settings tab so the user can configure various aspects of the plugin
 		this.addSettingTab(new WeWriteSettingTab(this.app, this));
@@ -206,8 +202,6 @@ export default class WeWritePlugin extends Plugin {
 		const {access_token: accessToken, expires_in: expiresIn, lastRefreshTime} = account
 		// token not exist.
 		if (accessToken === undefined || accessToken === ''){
-			console.log(`token not exist, try get it first time.`);
-			
 			const token = await this.wechatClient.getAccessToken(appId, appSecret)
 			if (token){
 				this.setAccessToken(accountName, token.access_token, token.expires_in)
@@ -215,21 +209,17 @@ export default class WeWritePlugin extends Plugin {
 			}
 		}else if ((lastRefreshTime! + expiresIn!*1000) <  new Date().getTime()){
 			// token exipred.
-			console.log(`token exipred, referesh it.`);
 			const token = await this.wechatClient.getAccessToken(appId, appSecret)
 			if (token){
 				this.setAccessToken(accountName, token.access_token, token.expires_in)
 				return token.access_token
 			}
 		}else{
-			console.log(`token is still valid: ${accountName}: access token: ${accessToken} `);
 			return accessToken
 		}
 		return false // should not be here, something error. 
 	}
 	getMPAccountByName(accountName: string|undefined) {
-		console.log(`getMPAccountByName`, this.settings);
-		
 		return this.settings.mpAccounts.find(account => account.accountName === accountName);
 	}
 	getSelectedMPAccount() {

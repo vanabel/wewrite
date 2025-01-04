@@ -119,7 +119,6 @@ export class AssetsManager {
         
         this._plugin.messageService.sendMessage('clear-news-list', null)
         let list = await this.getAllMeterialOfTypeFromDB(accountName, 'news')
-        // console.log(`news list:`, list);
 
         if (list !== undefined || list !== null) {
             this.assets.set('news', list)
@@ -130,7 +129,6 @@ export class AssetsManager {
 
         this._plugin.messageService.sendMessage('clear-image-list', null)
         list = await this.getAllMeterialOfTypeFromDB(accountName, 'image')
-        console.log(`image list:`, list);
         if (list !== undefined || list !== null) {
             this.assets.set('image', list)
             list.forEach(item => {
@@ -140,7 +138,6 @@ export class AssetsManager {
 
         this._plugin.messageService.sendMessage('clear-voice-list', null)
         list = await this.getAllMeterialOfTypeFromDB(accountName, 'voice')
-        console.log(`voice list:`, list);
         if (list !== undefined || list !== null) {
             this.assets.set('voice', list)
             list.forEach(item => {
@@ -151,7 +148,6 @@ export class AssetsManager {
 
         this._plugin.messageService.sendMessage('clear-video-list', null)
         list = await this.getAllMeterialOfTypeFromDB(accountName, 'video')
-        console.log(`video list:`, list);
         if (list !== undefined || list !== null) {
             this.assets.set('video', list)
             list.forEach(item => {
@@ -161,7 +157,6 @@ export class AssetsManager {
 
         this._plugin.messageService.sendMessage('clear-draft-list', null)
         list = await this.getAllMeterialOfTypeFromDB(accountName, 'draft')
-        console.log(`draft list:`, list);
         if (list !== undefined || list !== null) {
             this.assets.set('draft', list)
             list.forEach(item => {
@@ -200,7 +195,6 @@ export class AssetsManager {
                 new Notice(getErrorMessage(errcode), 0)
                 break;
             }
-            console.log(`total_count=>${total}, offset=>${offset}, item_count=>${item_count}`);
             list.push(...item);
             total = total_count
             offset += item_count;
@@ -230,7 +224,6 @@ export class AssetsManager {
                 new Notice(getErrorMessage(errcode), 0)
                 break;
             }
-            console.log(`total_count=>${total}, offset=>${offset}, item_count=>${item_count}`);
             draftList.push(...item);
             total = total_count
             offset += item_count;
@@ -244,10 +237,6 @@ export class AssetsManager {
         draftList.forEach((i: MaterialItem) => {
             i.accountName = accountName
             i.type = 'draft'
-            // if (item._id === undefined){
-            //     item._id = item.media_id
-            // }
-            console.log(`i=>`, i);
             
             this.pushMaterailToDB(i)
         })
@@ -266,7 +255,6 @@ export class AssetsManager {
                 new Notice(getErrorMessage(errcode), 0)
                 break;
             }
-            console.log(` offset=>${offset}, total_count=>${total_count}, item_count=>${item_count}`);
             list.push(...item);
             total = total_count
             offset += item_count;
@@ -286,7 +274,6 @@ export class AssetsManager {
     }
     private getImageSrc(materialItem: MaterialNewsItem[] | DraftItem[]) {
         if (materialItem === undefined || !materialItem) {
-            console.log(`no assets`);
         } else {
             materialItem.forEach(news => {
                 news.content.news_item.forEach((item: NewsItem) => {
@@ -299,24 +286,15 @@ export class AssetsManager {
                             // we do nothing here, maybe the old one has been deleted
                         }
 
-                    } else {
-                        // the new has not themb_media_id, let's see what it is
-                        // console.log(`bail id set for [${item.title}]:`, item.url);
-
-                    }
+                    } 
                     const content = item.content
-                    // console.log(`news conent: ${content}`);
 
                     const dom = sanitizeHTMLToDom(content)
-                    // console.log(`dom:`, dom);
                     const imgs = dom.querySelectorAll('img')
-                    // console.log(`images:`, imgs);
                     imgs.forEach(img => {
                         const data_src = img.getAttribute('data-src')
-                        // console.log(`src:`, data_src);
 
                         if (data_src !== null) {
-                            // dataSrcList.push({src: data_src, url: item.url})
                             this.imgUrlList.add(data_src, item.url)
                         }
                     })
@@ -331,7 +309,6 @@ export class AssetsManager {
         // media_id in thumb_media_id 
         const images = this.assets.get('image')
         if (images === undefined || !images) {
-            console.log(`no image assets`);
             return
         }
 
@@ -346,9 +323,6 @@ export class AssetsManager {
         const drafts = this.assets.get('draft')
         this.getImageSrc(drafts as DraftItem[])
 
-        // console.log(`thumbMediaIdList=>`, this.thumbUrlList);
-        // console.log(`dataSrcList=>`, this.imgUrlList);
-
         const verifyList = new SrcThumbList()
         this.thumbUrlList.list.forEach((articles, url) => {
             verifyList.add(url, articles)
@@ -357,7 +331,6 @@ export class AssetsManager {
             verifyList.add(url, articles)
         })
 
-        // console.log(`verifyList=>`, verifyList);
         this._plugin.messageService.sendMessage('src-thumb-list-updated', verifyList)
         images.forEach(image => {
             const used = verifyList.get(image.url) !== undefined
@@ -368,8 +341,6 @@ export class AssetsManager {
 
     async fetchAllMeterialOfTypeFromDB(accountName: string, type: MediaType): Promise<MaterialItem[]> {
         return new Promise((resolve) => {
-            // console.log(`this.db=>`, this.db);
-            // console.log(`this.db.find=>`, this.db.find);
 
             this.db.find({
                 selector: {
@@ -400,13 +371,11 @@ export class AssetsManager {
             this.db.get(doc._id).then(existedDoc => {
                 if (areObjectsEqual(doc, existedDoc)) {
                     // the material has not been changed
-                    console.log(`no change on material, no save needed.`);
                     resolve()
                 } else {
                     doc._rev = existedDoc._rev;
                     this.db.put(doc)
                         .then(() => {
-                            console.log(`db saved meterial.`);
                             resolve();
                         })
                         .catch((error: any) => {
@@ -415,9 +384,6 @@ export class AssetsManager {
                         });
                 }
             }).catch(error => {
-                console.log('material id not exist, new item: ', error);
-                console.log(`material item=>`, doc);
-                
                 this.db.put(doc).then(() => {
                     resolve()
                 }).catch((err) => {
@@ -468,11 +434,6 @@ export class AssetsManager {
                     break; // 没有更多记录
                 }
 
-                // 处理当前页的记录
-                //   docs.forEach((item, index) => {
-                //     console.log(`Processing record ${offset + index + 1}:`, item);
-                //     // 在这里进行具体的处理逻辑
-                //   });
                 items.push(...docs)
 
                 offset += docs.length;
@@ -484,10 +445,8 @@ export class AssetsManager {
         const list = this.assets.get(type)
         if (list !== undefined) {
             const m = list.find(item => item.media_id === media_id)
-            console.log(`findUrlOfMediaId: type="${type}", media_id=[${media_id}]`);
 
             if (m !== undefined) {
-                console.log(`findUrlOfMediaId: type="${type}", media_id=[${media_id}], url=[${m.url}]`);
                 return m.url
             }
         }
@@ -496,10 +455,8 @@ export class AssetsManager {
         const list = this.assets.get(type)
         if (list !== undefined) {
             const m = list.find(item => item.url === url)
-            // console.log(`findUrlOfMediaId: type="${type}", media_id=[${m.media_id}]`);
 
             if (m !== undefined) {
-                console.log(`findUrlOfMediaId: type="${type}", media_id=[${m.media_id}], url=[${m.url}]`);
                 return m.media_id
             }
         }

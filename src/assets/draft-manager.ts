@@ -94,7 +94,6 @@ export class LocalDraftManager {
     public isActiveNoteDraft(draft: LocalDraftItem | undefined) {
         const activeFile = this._plugin.app.workspace.getActiveFile()
         if (draft === undefined && activeFile === null) {
-            console.log(`no active file and no draft`);
             return true
         }
         if (draft !== undefined && activeFile ) {
@@ -104,28 +103,11 @@ export class LocalDraftManager {
     }
     public async getDraft(accountName: string, notePath: string): Promise<LocalDraftItem | undefined> {
         return new Promise((resolve) => {
-            // console.log(`this.db=>`, this.db);
-            // console.log(`this.db.find=>`, this.db.find);
-
-            // this.db.find({
-            //     selector: {
-            //         accountName: { $eq: accountName },
-            //         notePath: { $eq: notePath }
-            //     }
-            // }).then((result: PouchDB.Find.FindResponse<LocalDraftItem>) => {
-            //     if (result.docs.length > 0){
-            //         resolve(result.docs[0])
-            //     }
-            // }).catch((err) => {
-            //     console.error(err);
-            // })
             this.db.get(accountName + notePath)
                 .then((doc) => {
                     resolve(doc as LocalDraftItem)
                 })
                 .catch((err) => {
-                    // console.error(err);
-                    console.log(`no draft found for account: ${accountName}, path: ${notePath}`);
                     resolve(undefined)
                 })
 
@@ -135,7 +117,6 @@ export class LocalDraftManager {
     public async setDraft(doc: LocalDraftItem): Promise<void> {
         return new Promise((resolve) => {
             if (doc.accountName === undefined || doc.notePath === undefined) {
-                console.log(`invalid draft item`, doc);
                 return
             }
             if (doc._id === undefined) {
@@ -144,8 +125,6 @@ export class LocalDraftManager {
             this.db.get(doc._id).then(existedDoc => {
                 if (areObjectsEqual(doc, existedDoc)) {
                     // the draft has not been changed
-                    console.log(`no change on draft, no save needed.`);
-
                     resolve()
 
                 } else {
@@ -160,7 +139,6 @@ export class LocalDraftManager {
                         });
                 }
             }).catch(error => {
-                console.log('save local draft new item ', error);
                 this.db.put(doc).then(() => {
                     resolve()
                 }).catch((err) => {

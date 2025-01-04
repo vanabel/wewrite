@@ -26,16 +26,12 @@ export class MaterialView extends ItemView {
   }
 
   async onOpen() {
-    console.log(`onOpen material view`);
-    
     this.redraw();
   }
 
   async onClose() { }
 
   public readonly redraw = (): void => {
-    console.log(`redraw material view`);
-
     const rootEl = createDiv({ cls: 'nav-folder mod-root' });
     const accountEl = new WeChatMPAccountSwitcher(this._plugin, rootEl)
     accountEl.setName('MP Account: ')

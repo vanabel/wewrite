@@ -22,9 +22,6 @@ export class ImageEditorModal extends Modal {
 	onOpen() {
 		const { contentEl, modalEl, containerEl } = this;
 		modalEl.classList.add('image-editor-modal');
-		console.log(`containerEl=>`, containerEl);
-
-
 		contentEl.createDiv({ cls: 'container', attr: { id: 'regionA' } });
 		contentEl.createDiv({ cls: 'container', attr: { id: 'regionB' } });
 
@@ -179,11 +176,6 @@ export class ImageEditorModal extends Modal {
 
 		const dataURL = mergedCanvas.toDataURL('image/png');
 		this.setDraftCoverImage(dataURL);
-		// const blob = this.dataURIToBlob(dataURL);
-
-		// void this.saveFile(blob, 'merged_image.png').then(filePath => {
-		// 	console.log('Saved merged image to:', filePath);
-		// });
 	}
 
 	private dataURIToBlob(dataURI: string): Blob {
@@ -216,32 +208,4 @@ export class ImageEditorModal extends Modal {
 		}
 		return ""
 	}
-
-	// private async removeBackground(imagePath: string) {
-	// 	try {
-	// 		const image = await Jimp.read(imagePath);
-
-	// 		// Assuming white background
-	// 		const colorToRemove = '#FFFFFF';
-
-	// 		for (let y = 0; y < image.bitmap.height; y++) {
-	// 			for (let x = 0; x < image.bitmap.width; x++) {
-	// 				const pixelColor = intToRGBA(image.getPixelColor(x, y));
-	// 				if (pixelColor.r === parseInt(colorToRemove.slice(1, 3), 16) &&
-	// 					pixelColor.g === parseInt(colorToRemove.slice(3, 5), 16) &&
-	// 					pixelColor.b === parseInt(colorToRemove.slice(5, 7), 16)) {
-	// 					image.setPixelColor(rgbaToInt(0, 0, 0, 0), x, y); // Set alpha to 0
-	// 				}
-	// 			}
-	// 		}
-
-	// 		const outputPath = imagePath.replace(/\.png$/, '_transparent');
-	// 		await image.write(`${outputPath}.png`);
-	// 		console.log('Background removed and saved as:', outputPath);
-	// 		return outputPath;
-	// 	} catch (err) {
-	// 		console.error(err);
-	// 		throw err;
-	// 	}
-	// }
 }
