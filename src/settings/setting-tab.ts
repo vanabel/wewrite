@@ -91,28 +91,28 @@ export class WeWriteSettingTab extends PluginSettingTab {
 		const title = frame.createEl('div', { cls: 'wechat-mp-account-info-title', text: $t('account-info') })
 		this.accountEl = frame.createDiv({ cls: 'wechat-mp-account-info-content' })
 		this.updateAccountSettings(this.accountDropdown.getValue(), this.accountEl)
-		new Setting(containerEl)
-			.setName($t('import-export-wechat-mp-account'))
-			.setDesc($t('import-or-export-your-account-info'))
-			.addButton(
-				(button) => {
-					button.setIcon('download')
-						.setTooltip($t('import-account-info'))
-						.onClick(async () => {
-							this.importAccountInfo();
-						})
-				}
-			)
-			.addButton(
-				(button) => {
-					button.setIcon('upload')
-						.setTooltip($t('export-account-info'))
-						.onClick(async () => {
-							this.exportAccountInfo();
+		// new Setting(containerEl)
+		// 	.setName($t('import-export-wechat-mp-account'))
+		// 	.setDesc($t('import-or-export-your-account-info'))
+		// 	.addButton(
+		// 		(button) => {
+		// 			button.setIcon('download')
+		// 				.setTooltip($t('import-account-info'))
+		// 				.onClick(async () => {
+		// 					this.importAccountInfo();
+		// 				})
+		// 		}
+		// 	)
+		// 	.addButton(
+		// 		(button) => {
+		// 			button.setIcon('upload')
+		// 				.setTooltip($t('export-account-info'))
+		// 				.onClick(async () => {
+		// 					this.exportAccountInfo();
 
-						})
-				}
-			)
+		// 				})
+		// 		}
+		// 	)
 			containerEl.createEl('hr')
 			this.newCSSStyleFolder()
 

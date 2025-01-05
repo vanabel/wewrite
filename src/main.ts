@@ -9,7 +9,7 @@ import { ResourceManager } from './assets/resource-manager';
 import { WeWriteSettingTab } from './settings/setting-tab';
 import { getWeChatMPSetting, saveWeWriteSetting, WeWriteSetting } from './settings/wewrite-setting';
 import { MessageService } from './utils/message-service';
-import { ImageEditorModal } from './views/draft-modal';
+// import { ImageEditorModal } from './views/draft-modal';
 import { MaterialView, VIEW_TYPE_MP_MATERIAL } from './views/material-view';
 import { PreviewPanel, VIEW_TYPE_NP_PREVIEW } from './views/previewer';
 import { WechatClient } from './wechat-api/wechat-client';
@@ -93,13 +93,6 @@ export default class WeWritePlugin extends Plugin {
 
 		// This adds a settings tab so the user can configure various aspects of the plugin
 		this.addSettingTab(new WeWriteSettingTab(this.app, this));
-		this.addCommand({
-			id: 'open-image-editor',
-			name: 'Open Image Editor',
-			callback: () => {
-				new ImageEditorModal(this.app, this).open();
-			}
-		});
 	}
 
 	onunload() {

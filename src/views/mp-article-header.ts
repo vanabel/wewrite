@@ -6,6 +6,7 @@ import { LocalDraftItem, LocalDraftManager } from 'src/assets/draft-manager';
 import WeWritePlugin from 'src/main';
 import { UrlUtils } from 'src/utils/urls';
 import { WechatClient } from "src/wechat-api/wechat-client";
+import ImageTransformer from "../../test/image-transformer";
 
 interface Point {
 	x: number;
@@ -190,6 +191,8 @@ export class MPArticleHeader {
                     })
             )
         const container = details.createDiv({ cls: 'wechat-mp-article-preview-cover-container' })
+        // const it = new ImageTransformer(container)    
+        // return it.container
         const coverframe = container.createDiv({ cls: 'wechat-mp-article-preview-cover', attr: { droppable: true } })
 
         // const img = coverframe.createEl('img', {attr:{dragable:false}})
