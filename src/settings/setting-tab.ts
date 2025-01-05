@@ -91,39 +91,108 @@ export class WeWriteSettingTab extends PluginSettingTab {
 		const title = frame.createEl('div', { cls: 'wechat-mp-account-info-title', text: $t('account-info') })
 		this.accountEl = frame.createDiv({ cls: 'wechat-mp-account-info-content' })
 		this.updateAccountSettings(this.accountDropdown.getValue(), this.accountEl)
-		// new Setting(containerEl)
-		// 	.setName($t('import-export-wechat-mp-account'))
-		// 	.setDesc($t('import-or-export-your-account-info'))
-		// 	.addButton(
-		// 		(button) => {
-		// 			button.setIcon('download')
-		// 				.setTooltip($t('import-account-info'))
-		// 				.onClick(async () => {
-		// 					this.importAccountInfo();
-		// 				})
-		// 		}
-		// 	)
-		// 	.addButton(
-		// 		(button) => {
-		// 			button.setIcon('upload')
-		// 				.setTooltip($t('export-account-info'))
-		// 				.onClick(async () => {
-		// 					this.exportAccountInfo();
+		new Setting(containerEl)
+			.setName($t('import-export-wechat-mp-account'))
+			.setDesc($t('import-or-export-your-account-info'))
+			.addButton(
+				(button) => {
+					button.setIcon('download')
+						.setTooltip($t('import-account-info'))
+						.onClick(async () => {
+							this.importAccountInfo();
+						})
+				}
+			)
+			.addButton(
+				(button) => {
+					button.setIcon('upload')
+						.setTooltip($t('export-account-info'))
+						.onClick(async () => {
+							this.exportAccountInfo();
 
-		// 				})
-		// 		}
-		// 	)
+						})
+				}
+			)
 			containerEl.createEl('hr')
 			this.newCSSStyleFolder()
 
 	} //display	()
-	exportAccountInfo() {
-		//TODO
-		// throw new Error("Method not implemented.");
+	async exportAccountInfo() {
+		try {
+			const selectedAccount = this._plugin.getMPAccountByName(this._plugin.settings.selectedAccount);
+			if (!selectedAccount) {
+				new Notice($t('no-account-selected'));
+				return;
+			}
+
+			const accountData = JSON.stringify(selectedAccount, null, 2);
+			const fileName = `wechat-account-${selectedAccount.accountName}.json`;
+			
+			// Check if file exists and generate unique name
+			let finalFileName = fileName;
+			let counter = 1;
+			while (await this.app.vault.adapter.exists(finalFileName)) {
+				finalFileName = `wechat-account-${selectedAccount.accountName} (${counter}).json`;
+				counter++;
+			}
+
+			// Save file
+			await this.app.vault.adapter.write(finalFileName, accountData);
+			new Notice($t('account-exported-successfully') + finalFileName);
+		} catch (error) {
+			new Notice($t('failed-to-export-account') + error);
+			console.error(error);
+		}
 	}
-	importAccountInfo() {
-		//TODO
-		// throw new Error("Method not implemented.");
+
+	async importAccountInfo() {
+		try {
+			// Create file input
+			const input = document.createElement('input');
+			input.type = 'file';
+			input.accept = '.json';
+			
+			input.onchange = async (e) => {
+				const file = (e.target as HTMLInputElement).files?.[0];
+				if (!file) return;
+
+				const reader = new FileReader();
+				reader.onload = async (e) => {
+					try {
+						const content = e.target?.result as string;
+						const importedAccount = JSON.parse(content) as WeWriteAccountInfo;
+
+						// Check if account already exists
+						const exists = this._plugin.settings.mpAccounts.some(account => 
+							account.accountName === importedAccount.accountName &&
+							account.appId === importedAccount.appId &&
+							account.appSecret === importedAccount.appSecret
+						);
+
+						if (exists) {
+							new Notice($t('account-already-exists'));
+							return;
+						}
+
+						// Add new account
+						this._plugin.settings.mpAccounts.push(importedAccount);
+						await this._plugin.saveSettings();
+						this.updateAccountOptions();
+						new Notice($t('account-imported-successfully'));
+					} catch (error) {
+						new Notice($t('failed-to-import-account') + error);
+						console.error(error);
+					}
+				};
+
+				reader.readAsText(file);
+			};
+
+			input.click();
+		} catch (error) {
+			new Notice($t('failed-to-import-account') + error);
+			console.error(error);
+		}
 	}
 
 	newCSSStyleFolder() {

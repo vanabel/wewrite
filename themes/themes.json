@@ -1,0 +1,21 @@
+{
+    "themes": [
+        {
+            "name": "simple CSS",
+            "file": "CSS模板.md"
+        },
+        {
+            "name": "空风格",
+            "file": "empty.md"
+        },
+        {
+            "name": "荔枝风格",
+            "file": "荔枝风格.md"
+        },
+        {
+            "name": "极简风格",
+            "file": "simle-theme.md"
+        }
+
+    ]
+}
