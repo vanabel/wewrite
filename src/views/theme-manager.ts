@@ -15,7 +15,7 @@ export class ThemeManager {
     async downloadThemes() {
         const baseUrl = "https://gitee.com/northern_bank/wewrite/raw/master/themes/";
         const saveDir = this._plugin.settings.css_styles_folder || "/wewrite-custom-css";
-        
+
         try {
             // Create save directory if it doesn't exist
             if (!this._plugin.app.vault.getAbstractFileByPath(saveDir)) {
@@ -27,36 +27,45 @@ export class ThemeManager {
             if (themesResponse.status !== 200) {
                 throw new Error(`Failed to fetch themes.json: ${themesResponse.text}`);
             }
-            
+
             const themesData = themesResponse.json;
             const themes = themesData.themes;
 
             // Download each theme file
             for (const theme of themes) {
-                const fileResponse = await requestUrl(`${baseUrl}${theme.file}`);
-                if (fileResponse.status !== 200) {
-                    console.warn(`Failed to download ${theme.file}: ${fileResponse.text}`);
+                console.log(`Downloading ${theme.file}`);
+                console.log(`url => ${baseUrl}${theme.file}`);
+                try {
+
+
+                    const fileResponse = await requestUrl(`${baseUrl}${theme.file}`);
+                    if (fileResponse.status !== 200) {
+                        console.warn(`Failed to download ${theme.file}: ${fileResponse.text}`);
+                        continue;
+                    }
+
+                    const fileContent = fileResponse.text;
+                    // Generate unique file name
+                    let filePath = `${saveDir}/${theme.file}`;
+                    let counter = 1;
+
+                    while (this._plugin.app.vault.getAbstractFileByPath(filePath)) {
+                        const extIndex = theme.file.lastIndexOf('.');
+                        const baseName = extIndex > 0 ? theme.file.slice(0, extIndex) : theme.file;
+                        const ext = extIndex > 0 ? theme.file.slice(extIndex) : '';
+                        filePath = `${saveDir}/${baseName}(${counter})${ext}`;
+                        counter++;
+                    }
+
+                    await this._plugin.app.vault.create(filePath, fileContent);
+                } catch (error) {
+                    console.error(error);
                     continue;
                 }
-
-                const fileContent = fileResponse.text;
-                // Generate unique file name
-                let filePath = `${saveDir}/${theme.file}`;
-                let counter = 1;
-                
-                while (this._plugin.app.vault.getAbstractFileByPath(filePath)) {
-                    const extIndex = theme.file.lastIndexOf('.');
-                    const baseName = extIndex > 0 ? theme.file.slice(0, extIndex) : theme.file;
-                    const ext = extIndex > 0 ? theme.file.slice(extIndex) : '';
-                    filePath = `${saveDir}/${baseName}(${counter})${ext}`;
-                    counter++;
-                }
-                
-                await this._plugin.app.vault.create(filePath, fileContent);
             }
         } catch (error) {
             console.error("Error downloading themes:", error);
-            throw error;
+            // throw error;
         }
     }
     private _plugin: WeWritePlugin;

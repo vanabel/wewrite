@@ -4,6 +4,24 @@
 
 import { App, DropdownComponent, Notice, PluginSettingTab, Setting } from "obsidian";
 import WeWritePlugin from "src/main";
+
+// FileSystem API type definitions
+interface FileSystemFileHandle {
+  createWritable(): Promise<FileSystemWritableFileStream>;
+  getFile(): Promise<File>;
+  queryPermission(options: { mode: 'read' | 'readwrite' }): Promise<'granted' | 'denied'>;
+}
+
+interface FileSystemDirectoryHandle {
+  getFileHandle(name: string, options?: { create?: boolean }): Promise<FileSystemFileHandle>;
+  queryPermission(options: { mode: 'read' | 'readwrite' }): Promise<'granted' | 'denied'>;
+}
+
+declare global {
+  interface Window {
+    showDirectoryPicker(): Promise<FileSystemDirectoryHandle>;
+  }
+}
 import { getPublicIpAddress } from "src/utils/ip-address";
 import { ThemeManager } from "src/views/theme-manager";
 import { FolderSuggest } from "./folder-suggester";
@@ -125,20 +143,31 @@ export class WeWriteSettingTab extends PluginSettingTab {
 				return;
 			}
 
-			const accountData = JSON.stringify(selectedAccount, null, 2);
-			const fileName = `wechat-account-${selectedAccount.accountName}.json`;
-			
-			// Check if file exists and generate unique name
-			let finalFileName = fileName;
-			let counter = 1;
-			while (await this.app.vault.adapter.exists(finalFileName)) {
-				finalFileName = `wechat-account-${selectedAccount.accountName} (${counter}).json`;
-				counter++;
-			}
+			// Show directory picker
+			try {
+				const dirHandle = await window.showDirectoryPicker();
+				const accountData = JSON.stringify(selectedAccount, null, 2);
+				const fileName = `wechat-account-${selectedAccount.accountName}.json`;
+				
+				// Check if file exists and generate unique name
+				let finalFileName = fileName;
+				let counter = 1;
+				while (await dirHandle.queryPermission({ mode: 'readwrite' }) === 'granted' && 
+					   await dirHandle.getFileHandle(finalFileName, { create: false }).catch(() => null)) {
+					finalFileName = `wechat-account-${selectedAccount.accountName} (${counter}).json`;
+					counter++;
+				}
 
-			// Save file
-			await this.app.vault.adapter.write(finalFileName, accountData);
-			new Notice($t('account-exported-successfully') + finalFileName);
+				// Save file
+				const fileHandle = await dirHandle.getFileHandle(finalFileName, { create: true });
+				const writable = await fileHandle.createWritable();
+				await writable.write(accountData);
+				await writable.close();
+				new Notice($t('account-exported-successfully') + finalFileName);
+			} catch (error) {
+				new Notice($t('failed-to-export-account') + error);
+				console.error(error);
+			}
 		} catch (error) {
 			new Notice($t('failed-to-export-account') + error);
 			console.error(error);
