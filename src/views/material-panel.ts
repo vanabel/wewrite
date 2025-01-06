@@ -99,6 +99,75 @@ export class MaterialPanel {
                 
             });
     });
+    menu.addItem((item) => {
+        item.setTitle('Generate Summary')
+            .setIcon('file-text')
+            .onClick(async () => {
+                // if (!img.notePath) {
+                //   new Notice('Note path is missing');
+                //   return;
+                // }
+                // const content = await this._plugin.app.vault.read(img.notePath);
+                // const result = await this._plugin.deepseekClient.generateSummary(content);
+                // if (result.summary) {
+                //   new Notice(`Summary: ${result.summary}`);
+                // } else {
+                //   new Notice('Failed to generate summary');
+                // }
+            });
+    });
+    menu.addItem((item) => {
+        item.setTitle('Proofread Content')
+            .setIcon('edit')
+            .onClick(async () => {
+                // if (!img.notePath) {
+                //   new Notice('Note path is missing');
+                //   return;
+                // }
+                // const content = await this._plugin.app.vault.read(img.notePath);
+                // const result = await this._plugin.deepseekClient.proofreadContent(content);
+                // if (result.corrections) {
+                //   new Notice(`Found ${result.corrections.length} corrections`);
+                // } else {
+                //   new Notice('Failed to proofread content');
+                // }
+            });
+    });
+    menu.addItem((item) => {
+        item.setTitle('Polish Content')
+            .setIcon('sparkles')
+            .onClick(async () => {
+                // if (!img.notePath) {
+                //   new Notice('Note path is missing');
+                //   return;
+                // }
+                // const content = await this._plugin.app.vault.read(img.notePath);
+                // const result = await this._plugin.deepseekClient.polishContent(content);
+                // if (result.polished) {
+                //   await this._plugin.app.vault.modify(img.notePath, result.polished);
+                //   new Notice('Content polished successfully');
+                // } else {
+                //   new Notice('Failed to polish content');
+                // }
+            });
+    });
+    menu.addItem((item) => {
+        item.setTitle('Generate Cover Image')
+            .setIcon('image')
+            .onClick(async () => {
+                // if (!img.notePath) {
+                //   new Notice('Note path is missing');
+                //   return;
+                // }
+                // const content = await this._plugin.app.vault.read(img.notePath);
+                // const result = await this._plugin.deepseekClient.generateCoverImage(content);
+                // if (result.coverImage) {
+                //   new Notice(`Cover image generated: ${result.coverImage}`);
+                // } else {
+                //   new Notice('Failed to generate cover image');
+                // }
+            });
+    });
     menu.showAtPosition({ x: event.clientX, y: event.clientY });
   }
 

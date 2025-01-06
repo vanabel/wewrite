@@ -13,6 +13,7 @@ import { MessageService } from './utils/message-service';
 import { MaterialView, VIEW_TYPE_MP_MATERIAL } from './views/material-view';
 import { PreviewPanel, VIEW_TYPE_NP_PREVIEW } from './views/previewer';
 import { WechatClient } from './wechat-api/wechat-client';
+import { DeepSeekClient } from './utils/deepseek-client';
 
 
 const DEFAULT_SETTINGS: WeWriteSetting = {
@@ -28,7 +29,9 @@ const DEFAULT_SETTINGS: WeWriteSetting = {
 	codeLineNumber: true,
 	useFontAwesome: true,
     rpgDownloadedOnce: false,
-	
+	accountDataPath: 'wewrite-accounts',
+	deepseekApiUrl: '',
+	deepseekApiKey: ''
 }
 
 export default class WeWritePlugin extends Plugin {
@@ -61,6 +64,7 @@ export default class WeWritePlugin extends Plugin {
 	settings: WeWriteSetting;
 	wechatClient: WechatClient;
 	assetsManager: AssetsManager;
+	deepseekClient: DeepSeekClient | null = null;
 	private editorChangeListener: EventRef | null = null;
 	matierialView: MaterialView;
 	messageService: MessageService;
@@ -74,6 +78,11 @@ export default class WeWritePlugin extends Plugin {
 		if (this.settings.selectedAccount !== undefined) {
             await this.assetsManager.loadMaterial(this.settings.selectedAccount)
         }
+
+		// Initialize DeepSeek client if configured
+		if (this.settings.deepseekApiUrl && this.settings.deepseekApiKey) {
+			this.deepseekClient = DeepSeekClient.getInstance();
+		}
 
 		this.registerView(
 			VIEW_TYPE_NP_PREVIEW,
@@ -231,6 +240,40 @@ export default class WeWritePlugin extends Plugin {
 	findImageMediaId(url:string){
 		return this.assetsManager.findMediaIdOfUrl('image', url)
 	}
+
+	async generateSummary(content: string): Promise<string | null> {
+		if (!this.deepseekClient) {
+			new Notice('DeepSeek API is not configured');
+			return null;
+		}
+		const result = await this.deepseekClient.generateSummary(content);
+		return result.summary;
+	}
+
+	async proofreadContent(content: string): Promise<{original: string, corrected: string}[] | null> {
+		if (!this.deepseekClient) {
+			new Notice('DeepSeek API is not configured');
+			return null;
+		}
+		const result = await this.deepseekClient.proofreadContent(content);
+		return result.corrections;
+	}
+
+	async polishContent(content: string): Promise<string | null> {
+		if (!this.deepseekClient) {
+			new Notice('DeepSeek API is not configured');
+			return null;
+		}
+		const result = await this.deepseekClient.polishContent(content);
+		return result.polished;
+	}
+
+	async generateCoverImage(content: string): Promise<string | null> {
+		if (!this.deepseekClient) {
+			new Notice('DeepSeek API is not configured');
+			return null;
+		}
+		const result = await this.deepseekClient.generateCoverImage(content);
+		return result.coverImage;
+	}
 }
-
-

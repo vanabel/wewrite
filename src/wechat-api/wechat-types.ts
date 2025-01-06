@@ -1,3 +1,5 @@
+import { TFile } from 'obsidian';
+
 /**
  * Define the data types for wechat api
  * @author: Learner Chen
@@ -69,6 +71,7 @@ export type MaterialMeidaItem = {
     update_time: number;
     url: string;
     used: boolean;
+    notePath?: TFile; // 修改为TFile类型
 }
 
 // common
@@ -130,6 +133,3 @@ export type DraftListResponse = {
     item_count: number;
     item: Array<DraftItem>;
 }
-
-
-

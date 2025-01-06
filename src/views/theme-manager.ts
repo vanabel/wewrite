@@ -1,6 +1,6 @@
 /** process custom theme content */
 import matter from "gray-matter";
-import { TFile, TFolder, requestUrl } from "obsidian";
+import { Notice, TFile, TFolder, requestUrl } from "obsidian";
 import postcss from "postcss";
 import { combinedCss } from "src/assets/css/template-css";
 import WeWritePlugin from "src/main";
@@ -33,8 +33,6 @@ export class ThemeManager {
 
             // Download each theme file
             for (const theme of themes) {
-                console.log(`Downloading ${theme.file}`);
-                console.log(`url => ${baseUrl}${theme.file}`);
                 try {
 
 
@@ -60,12 +58,15 @@ export class ThemeManager {
                     await this._plugin.app.vault.create(filePath, fileContent);
                 } catch (error) {
                     console.error(error);
+                    new Notice("Error downloading theme: " + error.message );
                     continue;
                 }
             }
+            new Notice(`Total ${themes.length} Themes downloaded successfully.`);
         } catch (error) {
             console.error("Error downloading themes:", error);
             // throw error;
+            new Notice("Error downloading themes.");
         }
     }
     private _plugin: WeWritePlugin;

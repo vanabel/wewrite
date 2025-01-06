@@ -1,3 +1,20 @@
+export interface DeepSeekResult {
+    summary: string;
+    corrections: {
+        original: string;
+        corrected: string;
+    }[];
+    polished: string;
+    coverImage: string;
+}
+
+export interface DeepSeekClient {
+    getInstance(): DeepSeekClient;
+    generateSummary(content: string): Promise<DeepSeekResult>;
+    proofreadContent(content: string): Promise<DeepSeekResult>;
+    polishContent(content: string): Promise<DeepSeekResult>;
+    generateCoverImage(content: string): Promise<DeepSeekResult>;
+}
 
 /** define some internal usage of obsidian api */
 declare module "obsidian" {

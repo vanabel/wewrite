@@ -26,6 +26,9 @@ export type WeWriteSetting = {
     mpAccounts: Array<WeWriteAccountInfo>;
     useFontAwesome: boolean;
     rpgDownloadedOnce: boolean;
+    accountDataPath: string;
+    deepseekApiUrl?: string;
+    deepseekApiKey?: string;
 }
 
 // Create a new database
@@ -63,4 +66,3 @@ export const saveWeWriteSetting = async (doc:WeWriteSetting): Promise<void> => {
         })
     })
 }
-

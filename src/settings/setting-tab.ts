@@ -7,20 +7,20 @@ import WeWritePlugin from "src/main";
 
 // FileSystem API type definitions
 interface FileSystemFileHandle {
-  createWritable(): Promise<FileSystemWritableFileStream>;
-  getFile(): Promise<File>;
-  queryPermission(options: { mode: 'read' | 'readwrite' }): Promise<'granted' | 'denied'>;
+	createWritable(): Promise<FileSystemWritableFileStream>;
+	getFile(): Promise<File>;
+	queryPermission(options: { mode: 'read' | 'readwrite' }): Promise<'granted' | 'denied'>;
 }
 
 interface FileSystemDirectoryHandle {
-  getFileHandle(name: string, options?: { create?: boolean }): Promise<FileSystemFileHandle>;
-  queryPermission(options: { mode: 'read' | 'readwrite' }): Promise<'granted' | 'denied'>;
+	getFileHandle(name: string, options?: { create?: boolean }): Promise<FileSystemFileHandle>;
+	queryPermission(options: { mode: 'read' | 'readwrite' }): Promise<'granted' | 'denied'>;
 }
 
 declare global {
-  interface Window {
-    showDirectoryPicker(): Promise<FileSystemDirectoryHandle>;
-  }
+	interface Window {
+		showDirectoryPicker(): Promise<FileSystemDirectoryHandle>;
+	}
 }
 import { getPublicIpAddress } from "src/utils/ip-address";
 import { ThemeManager } from "src/views/theme-manager";
@@ -81,7 +81,7 @@ export class WeWriteSettingTab extends PluginSettingTab {
 					this.accountDropdown = dropdown
 					if (this._plugin.settings.mpAccounts.length == 0) {
 						this.newAccountInfo()
-					}else{
+					} else {
 						this._plugin.settings.mpAccounts.forEach(account => {
 							dropdown.addOption(account.accountName, account.accountName)
 						})
@@ -131,43 +131,32 @@ export class WeWriteSettingTab extends PluginSettingTab {
 						})
 				}
 			)
-			containerEl.createEl('hr')
-			this.newCSSStyleFolder()
+		containerEl.createEl('hr')
+		this.newCSSStyleFolder()
 
 	} //display	()
 	async exportAccountInfo() {
 		try {
-			const selectedAccount = this._plugin.getMPAccountByName(this._plugin.settings.selectedAccount);
-			if (!selectedAccount) {
-				new Notice($t('no-account-selected'));
+			if (this._plugin.settings.mpAccounts.length === 0) {
+				new Notice($t('no-accounts-to-export'));
 				return;
 			}
 
-			// Show directory picker
-			try {
-				const dirHandle = await window.showDirectoryPicker();
-				const accountData = JSON.stringify(selectedAccount, null, 2);
-				const fileName = `wechat-account-${selectedAccount.accountName}.json`;
-				
-				// Check if file exists and generate unique name
-				let finalFileName = fileName;
-				let counter = 1;
-				while (await dirHandle.queryPermission({ mode: 'readwrite' }) === 'granted' && 
-					   await dirHandle.getFileHandle(finalFileName, { create: false }).catch(() => null)) {
-					finalFileName = `wechat-account-${selectedAccount.accountName} (${counter}).json`;
-					counter++;
-				}
+			// Create and download file with all accounts
+			const accountsData = JSON.stringify(this._plugin.settings.mpAccounts, null, 2);
+			const blob = new Blob([accountsData], { type: 'application/json' });
+			const url = URL.createObjectURL(blob);
 
-				// Save file
-				const fileHandle = await dirHandle.getFileHandle(finalFileName, { create: true });
-				const writable = await fileHandle.createWritable();
-				await writable.write(accountData);
-				await writable.close();
-				new Notice($t('account-exported-successfully') + finalFileName);
-			} catch (error) {
-				new Notice($t('failed-to-export-account') + error);
-				console.error(error);
-			}
+			const a = document.createElement('a');
+			a.href = url;
+			a.download = `wechat-accounts-${new Date().toISOString().slice(0, 10)}.json`;
+			document.body.appendChild(a);
+			a.click();
+
+			document.body.removeChild(a);
+			URL.revokeObjectURL(url);
+
+			new Notice($t('accounts-exported-successfully') + ` (${this._plugin.settings.mpAccounts.length} accounts)`);
 		} catch (error) {
 			new Notice($t('failed-to-export-account') + error);
 			console.error(error);
@@ -180,7 +169,7 @@ export class WeWriteSettingTab extends PluginSettingTab {
 			const input = document.createElement('input');
 			input.type = 'file';
 			input.accept = '.json';
-			
+
 			input.onchange = async (e) => {
 				const file = (e.target as HTMLInputElement).files?.[0];
 				if (!file) return;
@@ -189,27 +178,63 @@ export class WeWriteSettingTab extends PluginSettingTab {
 				reader.onload = async (e) => {
 					try {
 						const content = e.target?.result as string;
-						const importedAccount = JSON.parse(content) as WeWriteAccountInfo;
+						let importedData: WeWriteAccountInfo | WeWriteAccountInfo[];
 
-						// Check if account already exists
-						const exists = this._plugin.settings.mpAccounts.some(account => 
-							account.accountName === importedAccount.accountName &&
-							account.appId === importedAccount.appId &&
-							account.appSecret === importedAccount.appSecret
-						);
-
-						if (exists) {
-							new Notice($t('account-already-exists'));
+						// Validate JSON structure
+						try {
+							importedData = JSON.parse(content);
+						} catch (error) {
+							new Notice($t('invalid-json-file'));
 							return;
 						}
 
-						// Add new account
-						this._plugin.settings.mpAccounts.push(importedAccount);
+						// Validate account data structure
+						const validateAccount = (account: any): account is WeWriteAccountInfo => {
+							return typeof account === 'object' &&
+								typeof account.accountName === 'string' &&
+								typeof account.appId === 'string' &&
+								typeof account.appSecret === 'string';
+						};
+
+						let accountsToImport: WeWriteAccountInfo[] = [];
+
+						if (Array.isArray(importedData)) {
+							// Multiple accounts
+							if (!importedData.every(validateAccount)) {
+								new Notice($t('invalid-account-data-format'));
+								return;
+							}
+							accountsToImport = importedData;
+						} else if (validateAccount(importedData)) {
+							// Single account
+							accountsToImport = [importedData];
+						} else {
+							new Notice($t('invalid-account-data-format'));
+							return;
+						}
+
+						// Filter out duplicates and invalid accounts
+						const existingAccounts = this._plugin.settings.mpAccounts;
+						const newAccounts = accountsToImport.filter(newAccount =>
+							!existingAccounts.some(existingAccount =>
+								existingAccount.accountName === newAccount.accountName &&
+								existingAccount.appId === newAccount.appId &&
+								existingAccount.appSecret === newAccount.appSecret
+							)
+						);
+
+						if (newAccounts.length === 0) {
+							new Notice($t('no-new-accounts-to-import'));
+							return;
+						}
+
+						// Add new accounts
+						this._plugin.settings.mpAccounts.push(...newAccounts);
 						await this._plugin.saveSettings();
 						this.updateAccountOptions();
-						new Notice($t('account-imported-successfully'));
+						new Notice($t('accounts-imported-successfully') + ` (${newAccounts.length} accounts)`);
 					} catch (error) {
-						new Notice($t('failed-to-import-account') + error);
+						new Notice($t('failed-to-import-accounts') + error);
 						console.error(error);
 					}
 				};
@@ -226,26 +251,48 @@ export class WeWriteSettingTab extends PluginSettingTab {
 
 	newCSSStyleFolder() {
 		new Setting(this.containerEl)
-		.setName($t('css-styles-folder-location'))
-		.setDesc($t('files-in-this-folder-will-be-available-a'))
-		.addSearch((cb) => {
-			new FolderSuggest(this.app, cb.inputEl);
-			cb.setPlaceholder($t('example-folder1-folder2'))
-				.setValue(this._plugin.settings.css_styles_folder)
-				.onChange((new_folder) => {
-					this._plugin.settings.css_styles_folder = new_folder;
-					this._plugin.saveSettings(); 
-				});
-		}).addExtraButton(
-			(button) => {
-				button.setIcon("download")
-					.setTooltip($t('download-css-style-themes-from-server'))
-					.onClick(async () => {
-						ThemeManager.getInstance(this._plugin).downloadThemes();
-						
+			.setName($t('css-styles-folder-location'))
+			.setDesc($t('files-in-this-folder-will-be-available-a'))
+			.addSearch((cb) => {
+				new FolderSuggest(this.app, cb.inputEl);
+				cb.setPlaceholder($t('example-folder1-folder2'))
+					.setValue(this._plugin.settings.css_styles_folder)
+					.onChange((new_folder) => {
+						this._plugin.settings.css_styles_folder = new_folder;
+						this._plugin.saveSettings();
 					});
-			}
-);
+			}).addExtraButton(
+				(button) => {
+					button.setIcon("download")
+						.setTooltip($t('download-css-style-themes-from-server'))
+						.onClick(async () => {
+							ThemeManager.getInstance(this._plugin).downloadThemes();
+						});
+				}
+			);
+
+		// DeepSeek API Settings
+		new Setting(this.containerEl)
+			.setName('DeepSeek API URL')
+			.setDesc('DeepSeek API endpoint URL')
+			.addText(text => text
+				.setValue(this._plugin.settings.deepseekApiUrl || '')
+				.onChange(async (value) => {
+					this._plugin.settings.deepseekApiUrl = value;
+					await this._plugin.saveSettings();
+				}));
+
+		new Setting(this.containerEl)
+			.setName('DeepSeek API Key')
+			.setDesc('Your DeepSeek API key')
+			.addText(text => text
+				.setValue(this._plugin.settings.deepseekApiKey || '')
+				.onChange(async (value) => {
+					this._plugin.settings.deepseekApiKey = value;
+					await this._plugin.saveSettings();
+				}));
+
+
 	}
 	newAccountInfo() {
 		let n = 0
@@ -339,21 +386,21 @@ export class WeWriteSettingTab extends PluginSettingTab {
 				button.onClick(async () => {
 					this._plugin.settings.mpAccounts = this._plugin.settings.mpAccounts.filter(account => account.accountName !== accountName)
 					const account = this._plugin.settings.mpAccounts[0]
-					if (account !== undefined){
+					if (account !== undefined) {
 						this._plugin.settings.selectedAccount = account.accountName
 						this.updateAccountOptions()
-					}else{
+					} else {
 						this.newAccountInfo()
 					}
 				});
 			})
 	}
-	updateAccountOptions(){
+	updateAccountOptions() {
 		this.accountDropdown.selectEl.options.length = 0
 		this._plugin.settings.mpAccounts.forEach(account => {
 			this.accountDropdown.addOption(account.accountName, account.accountName)
 		})
-		this.accountDropdown.setValue(this._plugin.settings.selectedAccount?? '')
+		this.accountDropdown.setValue(this._plugin.settings.selectedAccount ?? '')
 	}
 	async detectIP(ip: Setting) {
 		let address = await getPublicIpAddress();

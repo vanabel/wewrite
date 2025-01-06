@@ -114,40 +114,48 @@ export class LocalDraftManager {
         })
     }
 
-    public async setDraft(doc: LocalDraftItem): Promise<void> {
-        return new Promise((resolve) => {
-            if (doc.accountName === undefined || doc.notePath === undefined) {
-                return
+    public async setDraft(doc: LocalDraftItem): Promise<boolean> {
+        return new Promise((resolve, reject) => {
+            if (!doc.accountName || !doc.notePath) {
+                return reject(new Error('Invalid draft: missing accountName or notePath'));
             }
-            if (doc._id === undefined) {
-                doc._id = doc.accountName + doc.notePath
-            }
-            this.db.get(doc._id).then(existedDoc => {
-                if (areObjectsEqual(doc, existedDoc)) {
-                    // the draft has not been changed
-                    resolve()
 
-                } else {
-                    doc._rev = existedDoc._rev;
-                    this.db.put(doc)
-                        .then(() => {
-                            resolve();
-                        })
-                        .catch((error: any) => {
-                            console.error('Error saving local draft:', error);
-                            resolve()
-                        });
-                }
-            }).catch(error => {
-                this.db.put(doc).then(() => {
-                    resolve()
-                }).catch((err) => {
-                    console.error(err);
-                    resolve()
+            if (!doc._id) {
+                doc._id = doc.accountName + doc.notePath;
+            }
+
+            this.db.get(doc._id)
+                .then(existedDoc => {
+                    const existingDraft = existedDoc as LocalDraftItem;
+                    // Only update if content has actually changed
+                    if (doc.content !== existingDraft.content || 
+                        doc.title !== existingDraft.title ||
+                        doc.cover_image_url !== existingDraft.cover_image_url) {
+                        
+                        doc._rev = existedDoc._rev;
+                        return this.db.put(doc)
+                            .then(() => resolve(true))
+                            .catch(error => {
+                                console.error('Error updating draft:', error);
+                                reject(error);
+                            });
+                    }
+                    // No changes needed
+                    resolve(false);
                 })
-                resolve()
-            })
-
-        })
+                .catch(error => {
+                    if (error.status === 404) {
+                        // New document
+                        return this.db.put(doc)
+                            .then(() => resolve(true))
+                            .catch(err => {
+                                console.error('Error creating new draft:', err);
+                                reject(err);
+                            });
+                    }
+                    console.error('Error checking existing draft:', error);
+                    reject(error);
+                });
+        });
     }
 }

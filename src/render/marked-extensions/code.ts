@@ -11,11 +11,11 @@
  
 
 import domtoimage from 'dom-to-image';
-import * as htmlToImage from 'html-to-image';
 import { Tokens } from "marked";
 import { ObsidianMarkdownRenderer } from "../markdown-render";
 import { WeWriteMarkedExtension } from "./extension";
 import { MathRenderer } from "./math";
+import * as htmlToImage from 'html-to-image';
 
 export class CodeRenderer extends WeWriteMarkedExtension {
 	showLineNumber: boolean;
@@ -84,7 +84,7 @@ export class CodeRenderer extends WeWriteMarkedExtension {
 		return null;
 	}
 
-	renderAdmonition(token: Tokens.Generic, type: string) {
+	renderAdmonition(_token: Tokens.Generic, _type: string) {
 		let root = ObsidianMarkdownRenderer.getInstance(this.plugin.app).queryElement(this.admonitionIndex, '.callout.admonition')
 		if (!root) {
 			return '<span>admonition渲染失败</span>';
@@ -107,6 +107,43 @@ export class CodeRenderer extends WeWriteMarkedExtension {
 		}
 		return root.outerHTML
 	}
+	async renderAdmonitionAsync(_token: Tokens.Generic, _type: string) {
+		const renderer = ObsidianMarkdownRenderer.getInstance(this.plugin.app);
+		let root = renderer.queryElement(this.admonitionIndex, '.callout.admonition')
+		if (!root) {
+			return '<span>admonition渲染失败</span>';
+		}
+		this.admonitionIndex++
+		
+		const editDiv = root.querySelector('.edit-block-button');
+		if (editDiv) {
+			editDiv.parentNode!.removeChild(editDiv);
+		}
+		const foldDiv = root.querySelector('.callout-fold');
+		if (foldDiv) {
+
+			try {
+				foldDiv.parentNode!.removeChild(foldDiv);
+			} catch (e) {
+				console.error(e)
+			}
+
+		}
+		// Convert HTML to image
+		// try {
+		// 	const imageData = await renderer.domToImage(root);
+		// 	const img = document.createElement('img');
+		// 	img.src = imageData;
+		// 	img.alt = 'admonition content';
+		// 	img.addClass('admonition-image');
+		// 	img.style.maxWidth = '100%';
+		// 	return img.outerHTML;
+		//   } catch (error) {
+		// 	console.error('Failed to convert callout to image:', error);
+		// 	return '<span>Callout转换失败</span>';
+		//   }
+		return root.outerHTML
+	}
 
 	async renderMermaidAsync(token: Tokens.Generic) {
         // define default failed
@@ -116,7 +153,8 @@ export class CodeRenderer extends WeWriteMarkedExtension {
         const index = this.mermaidIndex;
         this.mermaidIndex++;
 
-        const root = ObsidianMarkdownRenderer.getInstance(this.plugin.app).queryElement(index, '.mermaid')
+		const renderer = ObsidianMarkdownRenderer.getInstance(this.plugin.app);
+        const root = renderer.queryElement(index, '.mermaid')
         if (!root) {
             return
         }
@@ -125,9 +163,7 @@ export class CodeRenderer extends WeWriteMarkedExtension {
 		svg?.setAttr('width', '100%')
 		svg?.setAttr('height', '100%')
 
-		//html-to-image doen't work here.
-        const blob = await domtoimage.toBlob(root)
-		const dataUrl = URL.createObjectURL(blob)
+		const dataUrl = await renderer.domToImage(root)
 		const style = root.querySelector('style')
 		if (style) {
 			style.parentNode!.removeChild(style)
@@ -135,7 +171,7 @@ export class CodeRenderer extends WeWriteMarkedExtension {
 		token.html = `<div id="wewrite-mermaid-${index}"> <img src="${dataUrl}" class="wewrite wewrite-mermaid"> </div>` 
 	}
 
-	renderCharts(token: Tokens.Generic) {
+	renderCharts(_token: Tokens.Generic) {
 		//the MarkdownRender doen't work well with it. use the preview instead.
 		const root = this.plugin.resourceManager.getMarkdownRenderedElement(this.chartsIndex, '.block-language-chart')
 
@@ -175,11 +211,12 @@ export class CodeRenderer extends WeWriteMarkedExtension {
 						// return this.renderCard(token);
 					}
 					if (token.lang && token.lang.trim().toLocaleLowerCase().startsWith('ad-')) {
+						return token.html
 						//admonition
-						let type = token.lang.trim().toLocaleLowerCase().replace('ad-', '');
-						if (type === '') type = 'note';
+						// let type = token.lang.trim().toLocaleLowerCase().replace('ad-', '');
+						// if (type === '') type = 'note';
 
-						return this.renderAdmonition(token, type);
+						// return this.renderAdmonition(token, type);
 					}
 					return this.codeRenderer(token.text, token.lang);
 				},
@@ -189,6 +226,13 @@ export class CodeRenderer extends WeWriteMarkedExtension {
 			walkTokens: async (token: Tokens.Generic) => {
 				if (token.lang && token.lang.trim().toLocaleLowerCase() == 'mermaid') {
 					await this.renderMermaidAsync(token);
+				}
+				if (token.lang && token.lang.trim().toLocaleLowerCase().startsWith('ad-')) {
+					//admonition
+					let type = token.lang.trim().toLocaleLowerCase().replace('ad-', '');
+					if (type === '') type = 'note';
+
+					token.html = await this.renderAdmonitionAsync(token, type);
 				}
 			}
 		}

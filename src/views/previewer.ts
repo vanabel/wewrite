@@ -14,6 +14,7 @@ import { WechatClient } from '../wechat-api/wechat-client';
 import { MPArticleHeader } from './mp-article-header';
 import { ThemeManager } from './theme-manager';
 import { ThemeSelector } from './theme-selector';
+import { WebViewModal} from './webview';
 
 export const VIEW_TYPE_NP_PREVIEW = 'wechat-np-article-preview';
 export interface ElectronWindow extends Window {
@@ -38,6 +39,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
     elementMap: Map<string, Node | string>;
     articleTitle: Setting;
     containerDiv: HTMLElement;
+    mpModal: WebViewModal;
     getViewType(): string {
         return VIEW_TYPE_NP_PREVIEW;
     }
@@ -134,7 +136,8 @@ export class PreviewPanel extends ItemView implements PreviewRender {
                     button.setIcon('newspaper')
                         .setTooltip('publish to MP directly.')
                     button.onClick(async () => {
-                        this.draftHeader.publishDraft()
+                        // this.draftHeader.publishDraft()
+                        this.openMPPlatform()
                     })
                 }
             )
@@ -164,6 +167,13 @@ export class PreviewPanel extends ItemView implements PreviewRender {
         this.containerDiv = shadowDom.createDiv({ cls: 'wewrite-article' });
         this.articleDiv = this.containerDiv.createDiv({ cls: 'article-div' });
 
+    }
+    openMPPlatform() {
+        // window.open('https://mp.weixin.qq.com/', '_blank');
+        if (this.mpModal === undefined) {
+            this.mpModal = new WebViewModal(this._plugin.app)
+        }
+        this.mpModal.open()
     }
     async checkCoverImage() {
         return this.draftHeader.checkCoverImage()
