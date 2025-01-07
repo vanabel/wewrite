@@ -2,6 +2,7 @@
  * the panel to show wechat materials
  */
 import { Menu, Notice, setIcon } from "obsidian";
+import { AssetsManager } from "src/assets/assets-manager";
 import WeWritePlugin from "src/main";
 import { MaterialMeidaItem, MediaType } from "src/wechat-api/wechat-types";
 
@@ -91,16 +92,20 @@ export class MaterialPanel {
 
     //if the item type is image/voice/video && it has not been used by any news or draft.
     if (mediaItem.type === 'image') {
-      if (!mediaItem.used) {
-
+      const urls = AssetsManager.getInstance(this._plugin.app, this._plugin).getImageUsedUrl(mediaItem)
+      if (urls === null || urls === undefined) {
         menu.addItem((item) => {
           item.setTitle('delete image')
-            .setIcon('eye')
+            .setIcon('image-minus')
             .setDisabled(mediaItem.used)
             .onClick(() => {
-              new Notice(`删除图片: ${mediaItem.name}`);
+              // new Notice(`删除图片: ${mediaItem.name}`);
+              this._plugin.messageService.sendMessage("delete-media-item", mediaItem)
             });
         });
+      }else{
+        console.log(`image used by:`, urls);
+        
       }
 
       //set as cover image
@@ -109,6 +114,7 @@ export class MaterialPanel {
           .setIcon('image-plus')
           .onClick(() => {
             new Notice(`set cover 图片: ${mediaItem.name}`);
+            this._plugin.messageService.sendMessage("set-image-as-cover", mediaItem)
           });
       });
     }
@@ -122,7 +128,8 @@ export class MaterialPanel {
             .setIcon('eye')
             .setDisabled(mediaItem.used)
             .onClick(() => {
-              new Notice(`删除媒体: ${mediaItem.name}`);
+              // new Notice(`删除媒体: ${mediaItem.name}`);
+              this._plugin.messageService.sendMessage("delete-media-item", mediaItem)
             });
         });
       }
@@ -133,9 +140,10 @@ export class MaterialPanel {
       //if it is a draft
       menu.addItem((item) => {
         item.setTitle('Delete draft')
-          .setIcon('delete')
+          .setIcon('trash-2')
           .onClick(async () => {
-            console.log('to delete draft:', item)
+            // console.log('to delete draft:', item)
+            this._plugin.messageService.sendMessage("delete-draft-item", mediaItem)
           });
       });
     }
@@ -174,22 +182,19 @@ export class MaterialPanel {
   addItem(item: any) {
     const itemDiv = this.content.createDiv({ cls: 'wewrite-material-panel-item' });
     itemDiv.style.cursor = 'pointer';
-    // Insert new items at the top
-    // this.items.unshift({item:item, el:itemDiv});
-
-    // if (this.content.firstChild) {
-    //   this.content.insertBefore(itemDiv, this.content.firstChild);
-    // } else {
-    //   this.content.appendChild(itemDiv);
-    // }
-    // Insert new items at the top
+    
     this.items.push({ item: item, el: itemDiv });
     this.content.appendChild(itemDiv);
-
+    
 
     if (this.type === 'draft' || this.type === 'news') {
-      itemDiv.innerHTML = `<a href=${item.content.news_item[0].url}> ${item.content.news_item[0].title}</a>`
+      let title = item.content.news_item[0].title
+      if (title === undefined || !title){
+        title = 'No title article.'
+      }
+      itemDiv.innerHTML = `<a href=${item.content.news_item[0].url}> ${title}</a>`
       itemDiv.addEventListener('click', () => { })
+      itemDiv.addClass("draft-news-item")
     } else if (this.type === 'image') {
       itemDiv.innerHTML = '<img src="' + item.url + '" alt="' + item.name + '" />'
       itemDiv.addEventListener('click', () => {
@@ -218,10 +223,12 @@ export class MaterialPanel {
   }
   removeItem(item: any) {
     const index = this.items.findIndex((i)=>{
-      i.item.media_id === item.media_id
+      return i.item.media_id === item.media_id
+      
     })
+    
     if (index !== -1) {
-      this.items[index].el.parentElement?.removeChild(this.items[index].el) 
+      this.items[index].el.remove(); //parentElement?.removeChild(this.items[index].el) 
       this.items.splice(index, 1)
     }
     this.setTotal(this.items.length)

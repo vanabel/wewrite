@@ -29,7 +29,11 @@ export type MSG_TYPE  =
   'thumb-item-updated' |
   'thumb-item-deleted' |
   'custom-theme-changed' |
-  'set-draft-cover-image' 
+  'set-draft-cover-image' |
+  'set-image-as-cover' |
+  'delete-media-item' |
+  'delete-draft-item' 
+
   
 
 export class MessageService {

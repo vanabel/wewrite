@@ -6,7 +6,7 @@ import { LocalDraftItem, LocalDraftManager } from 'src/assets/draft-manager';
 import WeWritePlugin from 'src/main';
 import { UrlUtils } from 'src/utils/urls';
 import { WechatClient } from "src/wechat-api/wechat-client";
-import ImageTransformer from "../../test/image-transformer";
+import { MaterialItem, MaterialMeidaItem } from "src/wechat-api/wechat-types";
 
 interface Point {
 	x: number;
@@ -69,6 +69,14 @@ export class MPArticleHeader {
             this.setCoverImage(url)
             if (this.activeLocalDraft) {
                 this.activeLocalDraft.thumb_media_id = undefined;
+                this.localDraftmanager.setDraft(this.activeLocalDraft)
+            }
+        })
+        this._plugin.messageService.registerListener('set-image-as-cover', (item: MaterialMeidaItem) => {
+            this.cover_image = item.url;
+            this.setCoverImage(item.url)
+            if (this.activeLocalDraft) {
+                this.activeLocalDraft.thumb_media_id = item.media_id;
                 this.localDraftmanager.setDraft(this.activeLocalDraft)
             }
         })
@@ -269,6 +277,8 @@ export class MPArticleHeader {
         return coverframe
     }
     setCoverImage(url: string|null) {
+        console.log(`setCoverImage:`, url);
+        
         if (!url){
             return
         }

@@ -225,7 +225,11 @@ export class WechatClient {
 
   public async getMaterialCounts(accountName: string) {
 
-    const accessToken = this._plugin.getAccessToken(accountName);
+    const accessToken = await this._plugin.refreshAccessToken(accountName);
+    if (!accessToken) {
+      return false;
+    }
+    
     const url = `${this.baseUrl}/material/get_materialcount?access_token=${accessToken}`
     const req: RequestUrlParam = {
       url: url,
@@ -319,4 +323,66 @@ export class WechatClient {
       return publish_id
     }
   }
+  public async deleteMedia(meida_id: string, accountName: string = "") {
+    if (!accountName) {
+      accountName = this._plugin.settings.selectedAccount!;
+    }
+    const accessToken = await this._plugin.refreshAccessToken(accountName);
+    if (!accessToken) {
+      return false;
+    }
+    // get all images by loop
+    const url = `${this.baseUrl}/material/del_material?access_token=${accessToken}`
+    const body = {
+      media_id: meida_id,
+    };
+
+    const req: RequestUrlParam = {
+      url: url,
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify(body)
+    };
+    const resp = await requestUrl(req);
+
+    const { errcode, errmsg } = resp.json;
+    console.log(`delete media ${meida_id}`, errmsg, errcode);
+    if (errcode !== undefined && errcode !== 0) {
+      new Notice(getErrorMessage(errcode), 0);
+      return false;
+    } else {
+      return true
+    }
+  }
+  public async deleteDraft(meida_id: string, accountName: string = "") {
+    if (!accountName) {
+      accountName = this._plugin.settings.selectedAccount!;
+    }
+    const accessToken = await this._plugin.refreshAccessToken(accountName);
+    if (!accessToken) {
+      return false;
+    }
+    // get all images by loop
+    const url = `${this.baseUrl}/draft/delete?access_token=${accessToken}`
+    const body = {
+      media_id: meida_id,
+    };
+
+    const req: RequestUrlParam = {
+      url: url,
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify(body)
+    };
+    const resp = await requestUrl(req);
+
+    const { errcode, errmsg } = resp.json;
+    if (errcode !== undefined && errcode !== 0) {
+      new Notice(getErrorMessage(errcode), 0);
+      return false;
+    } else {
+      return true
+    }
+  }
+  
 }

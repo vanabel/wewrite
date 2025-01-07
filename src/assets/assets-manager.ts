@@ -40,18 +40,18 @@ type DeletableMaterialItem = MaterialItem & {
 }
 
 
-type ThumbMideaIdSrc = {
-    thumb_media_id: string;
-    url: string;
-}
-type ImageSrcSrc = {
-    src: string;
-    url: string;
-}
-export type VerifyItem = {
-    src: string;
-    url: string;
-}
+// type ThumbMideaIdSrc = {
+//     thumb_media_id: string;
+//     url: string;
+// }
+// type ImageSrcSrc = {
+//     src: string;
+//     url: string;
+// }
+// export type VerifyItem = {
+//     src: string;
+//     url: string;
+// }
 // 启用 find 插件
 PouchDB.plugin(PouchDBFind);
 
@@ -70,23 +70,29 @@ export class AssetsManager {
     app: App;
     assets: Map<string, any[]>
     db: PouchDB.Database;
-    used: Map<string, boolean>
+    used: Map<string, string[]>
 
 
     private static instance: AssetsManager;
     private _plugin: WeWritePlugin;
-    private thumbUrlList: SrcThumbList;
-    private imgUrlList: SrcThumbList;
+    // private thumbUrlList: SrcThumbList;
+    // private imgUrlList: SrcThumbList;
     constructor(app: App, plugin: WeWritePlugin) {
         this.app = app;
         this._plugin = plugin
         this.assets = new Map()
         this.used = new Map()
         this.db = new PouchDB('wewrite-wechat-assets');
-        this.thumbUrlList = new SrcThumbList();
-        this.imgUrlList = new SrcThumbList();
+        // this.thumbUrlList = new SrcThumbList();
+        // this.imgUrlList = new SrcThumbList();
         this._plugin.messageService.registerListener('wechat-account-changed', (data: string) => {
             this.loadMaterial(data)
+        })
+        this._plugin.messageService.registerListener('delete-media-item', (item: MaterialItem) => {
+            this.deleteMediaItem(item as MaterialMeidaItem)
+        })
+        this._plugin.messageService.registerListener('delete-draft-item', (item: MaterialItem) => {
+            this.deleteDraftItem(item)
         })
 
     }
@@ -127,7 +133,7 @@ export class AssetsManager {
             }
         }
 
-        this.checkAssets()
+        // this.checkAssets()
 
     }
     public async loadMaterial(accountName: string) {
@@ -180,10 +186,15 @@ export class AssetsManager {
         }
 
         // assets check here.
-        this.checkAssets()
+        // this.checkAssets()
         // this._plugin.assetsUpdated()
+        this.scanDraftNewsUsedImages()
     }
     public async pullAllMaterial(accountName: string) {
+        const json = await this._plugin.wechatClient.getMaterialCounts(accountName)
+        console.log(`material count:`, json);
+        
+        
         this._plugin.messageService.sendMessage('clear-draft-list', null)
         this._plugin.messageService.sendMessage('clear-news-list', null)
         this._plugin.messageService.sendMessage('clear-image-list', null)
@@ -195,7 +206,8 @@ export class AssetsManager {
         this.getAllMaterialOfType('image', (item) => { this._plugin.messageService.sendMessage('image-item-updated', item) }, accountName)
         this.getAllMaterialOfType('video', (item) => { this._plugin.messageService.sendMessage('video-item-updated', item) }, accountName)
         this.getAllMaterialOfType('voice', (item) => { this._plugin.messageService.sendMessage('voice-item-updated', item) }, accountName)
-        this.checkAssets()
+        // this.checkAssets()
+        this.scanDraftNewsUsedImages()
         this._plugin.assetsUpdated()
     }
 
@@ -227,6 +239,7 @@ export class AssetsManager {
 
             this.pushMaterailToDB(item)
         })
+        this.scanDraftNewsUsedImages()
     }
     public async getAllDrafts(callback: (newsItem: DraftItem) => void, accountName: string | undefined) {
         const draftList = []
@@ -244,17 +257,22 @@ export class AssetsManager {
             offset += item_count;
             if (callback) {
                 item.forEach((i: any) => {
+                    i.accountName = accountName
+                    i.type = 'draft'
                     callback(i)
                 })
             }
         }
+        draftList.sort((a, b) => {
+            return b.update_time - a.update_time
+        })
         this.assets.set('draft', draftList)
+        console.log(`getAll type draft:`, draftList);
+        this.removeMediaItemsFromDB('draft')
         draftList.forEach((i: MaterialItem) => {
-            i.accountName = accountName
-            i.type = 'draft'
-
             this.pushMaterailToDB(i)
         })
+        this.scanDraftNewsUsedImages()
     }
     public async getAllMaterialOfType(type: MediaType, callback: (items: []) => void, accountName: string | undefined) {
         if (type === 'news') {
@@ -276,88 +294,168 @@ export class AssetsManager {
             if (callback) {
                 // callback(item)
                 item.forEach((i: any) => {
+                    item.accountName = accountName
+                    item.type = type
                     callback(i)
                 })
             }
         }
+        list.sort((a, b) => {
+            return b.update_time - a.update_time
+        })
+        console.log(`getAll type${type}:`, list);
+        
         this.assets.set(type, list)
+        this.removeMediaItemsFromDB(type)
         list.forEach((item: MaterialItem) => {
-            item.accountName = accountName
-            item.type = type
+
             this.pushMaterailToDB(item)
         })
     }
-    private getImageSrc(materialItem: MaterialNewsItem[] | DraftItem[]) {
-        if (materialItem === undefined || !materialItem) {
-        } else {
-            materialItem.forEach(news => {
-                news.content.news_item.forEach((item: NewsItem) => {
-                    if (item.thumb_media_id !== undefined && !item.thumb_media_id) {
-                        //not empty
-                        const url = this.findUrlOfMediaId('image', item.thumb_media_id)
-                        if (url !== undefined) {
-                            this.thumbUrlList.add(url, item.url)
-                        } else {
-                            // we do nothing here, maybe the old one has been deleted
-                        }
+    public getImageUsedUrl(imgItem: any) {
+        console.log(`getImageUsedUrl, item=>`, imgItem);
+        console.log(`getImageUsedUrl, used=>`, this.used);
 
-                    }
-                    const content = item.content
-
-                    const dom = sanitizeHTMLToDom(content)
-                    const imgs = dom.querySelectorAll('img')
-                    imgs.forEach(img => {
-                        const data_src = img.getAttribute('data-src')
-
-                        if (data_src !== null) {
-                            this.imgUrlList.add(data_src, item.url)
-                        }
-                    })
-                })
-            });
+        let urls = null
+        if (imgItem.url !== undefined && imgItem.url) {
+            const urlUrls = this.used.get(imgItem.url)
+            if (urlUrls !== undefined) {
+                urls = urlUrls
+            }
         }
+        if (imgItem.media_id !== undefined && imgItem.media_id) {
+            const idUrls = this.used.get(imgItem.media_id)
+            if (idUrls !== undefined) {
+                if (urls === null) {
+                    urls = idUrls
+                } else {
+                    urls = urls.concat(idUrls)
+                }
+            }
+        }
+        return urls
     }
-    public scanUsedMedia(){
-        //check all news and draft items
-        //put all the thumb_media_id in item and url to this.used Map 
+    // private getImageSrc(materialItem: MaterialNewsItem[] | DraftItem[]) {
+    //     if (materialItem === undefined || !materialItem) {
+    //     } else {
+    //         materialItem.forEach(news => {
+    //             news.content.news_item.forEach((item: NewsItem) => {
+    //                 if (item.thumb_media_id !== undefined && !item.thumb_media_id) {
+    //                     //not empty
+    //                     const url = this.findUrlOfMediaId('image', item.thumb_media_id)
+    //                     if (url !== undefined) {
+    //                         this.thumbUrlList.add(url, item.url)
+    //                     } else {
+    //                         // we do nothing here, maybe the old one has been deleted
+    //                     }
 
+    //                 }
+    //                 const content = item.content
+
+    //                 const dom = sanitizeHTMLToDom(content)
+    //                 const imgs = dom.querySelectorAll('img')
+    //                 imgs.forEach(img => {
+    //                     const data_src = img.getAttribute('data-src')
+
+    //                     if (data_src !== null) {
+    //                         this.imgUrlList.add(data_src, item.url)
+    //                     }
+    //                 })
+    //             })
+    //         });
+    //     }
+    // }
+    public scanUsedImage(type: MediaType) {
+
+        // Process news items
+        const newsItems = this.assets.get(type) || [];
+        newsItems.forEach(news => {
+            news.content.news_item.forEach((item: NewsItem) => {
+                if (item.thumb_media_id) {
+                    this.setUsed(item.thumb_media_id, item.url);
+                }
+                this.scanUsedImageInContent(item.content, item.url)
+            });
+        });
     }
-    public async checkAssets() {
-        //the function is to findout if a image is used as cover image or embedded in an news or draft article.
-        // scope: news, draft.
-        // link to the image: data-src
-        // media_id in thumb_media_id 
-        const images = this.assets.get('image')
-        if (images === undefined || !images) {
+    public scanDraftNewsUsedImages() {
+        // Clear existing used media map
+        this.used.clear();
+        this.scanUsedImage('draft')
+        this.scanUsedImage('news')
+    }
+    public setUsed(media_id: string, url: string) {
+        let v = this.used.get(media_id)
+        if (v === undefined) {
+            v = []
+        }
+        v.push(url)
+        this.used.set(media_id, v)
+    }
+    public unUsed(media_id: string, url: string) {
+        let v = this.used.get(media_id)
+        if (v === undefined) {
             return
         }
+        v = v.filter(i => i !== url)
+        this.used.set(media_id, v)
+    }
+    public updateUsed(url: string) {
+        Array.from(this.used.entries()).forEach(([media_id, urls]) => {
+            urls = urls.filter(i => i !== url)
+            this.used.set(media_id, urls)
+        });
+    }
+    public scanUsedImageInContent(content: string, url: string) {
 
-        //reset the list
-        this.thumbUrlList.clear()
-        this.imgUrlList.clear()
+        const dom = sanitizeHTMLToDom(content)
+        const imgs = dom.querySelectorAll('img')
+        imgs.forEach(img => {
+            const data_src = img.getAttribute('data-src')
 
-
-        const newses = this.assets.get('news')
-        this.getImageSrc(newses as MaterialNewsItem[])
-
-        const drafts = this.assets.get('draft')
-        this.getImageSrc(drafts as DraftItem[])
-
-        const verifyList = new SrcThumbList()
-        this.thumbUrlList.list.forEach((articles, url) => {
-            verifyList.add(url, articles)
-        })
-        this.imgUrlList.list.forEach((articles, url) => {
-            verifyList.add(url, articles)
-        })
-
-        this._plugin.messageService.sendMessage('src-thumb-list-updated', verifyList)
-        images.forEach(image => {
-            const used = verifyList.get(image.url) !== undefined
-            image.used = used
-            this._plugin.messageService.sendMessage('image-used-updated', image)
+            if (data_src !== null) {
+                this.setUsed(data_src, url)
+            }
         })
     }
+
+
+    // public async checkAssets() {
+    //     //the function is to findout if a image is used as cover image or embedded in an news or draft article.
+    //     // scope: news, draft.
+    //     // link to the image: data-src
+    //     // media_id in thumb_media_id 
+    //     const images = this.assets.get('image')
+    //     if (images === undefined || !images) {
+    //         return
+    //     }
+
+    //     //reset the list
+    //     this.thumbUrlList.clear()
+    //     this.imgUrlList.clear()
+
+
+    //     const newses = this.assets.get('news')
+    //     this.getImageSrc(newses as MaterialNewsItem[])
+
+    //     const drafts = this.assets.get('draft')
+    //     this.getImageSrc(drafts as DraftItem[])
+
+    //     const verifyList = new SrcThumbList()
+    //     this.thumbUrlList.list.forEach((articles, url) => {
+    //         verifyList.add(url, articles)
+    //     })
+    //     this.imgUrlList.list.forEach((articles, url) => {
+    //         verifyList.add(url, articles)
+    //     })
+
+    //     this._plugin.messageService.sendMessage('src-thumb-list-updated', verifyList)
+    //     images.forEach(image => {
+    //         const used = verifyList.get(image.url) !== undefined
+    //         image.used = used
+    //         this._plugin.messageService.sendMessage('image-used-updated', image)
+    //     })
+    // }
 
     async fetchAllMeterialOfTypeFromDB(accountName: string, type: MediaType): Promise<MaterialItem[]> {
         return new Promise((resolve) => {
@@ -505,7 +603,6 @@ export class AssetsManager {
     }
     removeMediaItemsFromDB(type: MediaType) {
         const accountName = this._plugin.settings.selectedAccount;
-
         this.db.find({
             selector: {
                 accountName: { $eq: accountName },
@@ -524,6 +621,50 @@ export class AssetsManager {
         }).catch((err) => {
             console.error('Error deleting documents:', err);
         });
+    }
+    public async deleteMediaItem(item: MaterialMeidaItem) {
+        const type = item.type
+        if (type === undefined) {
+            console.error('deleteMediaItem type is undefined', item)
+            return;
+        }
+        //1. delete from remote
+        if (!await this._plugin.wechatClient.deleteMedia(item.media_id)) {
+            console.error('delete media failed', item)
+            return false;
+        }
+        //2. delete from local
+        this.removeDocFromDB(item._id!)
+        //3. 
+        this._plugin.messageService.sendMessage(`${type}-item-deleted`, item)
+        //4. 
+        this.updateUsed(item.url)
+        return true
+    }
+    public async deleteDraftItem(item: any) {
+        //1. delete from remote
+        if (!await this._plugin.wechatClient.deleteDraft(item.media_id)) {
+            console.error('delete draft failed', item)
+            return false;
+        }
+        //2. delete from local
+        this.removeDocFromDB(item._id)
+        //3. 
+        this._plugin.messageService.sendMessage('draft-item-deleted', item)
+        //4. 
+        this.updateUsed(item.url)
+        return true;
+    }
+    public removeDocFromDB(_id: string) {
+        this.db.get(_id).then((doc) => {
+            return this.db.remove(doc);
+        })
+            .then((result) => {
+                // console.log('Document deleted successfully:', result);
+            })
+            .catch((err) => {
+                console.error('Error deleting document:', err);
+            });
 
     }
 }
@@ -534,4 +675,3 @@ export interface MaterialPanelItem {
     timestamp: number;
     url: string;
 }
-
