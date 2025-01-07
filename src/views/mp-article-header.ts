@@ -122,9 +122,9 @@ export class MPArticleHeader {
             })
 
         new Setting(details).setName('Digest')
-        .addButton(button => {
-            button.setButtonText('Generate')
-            .setIcon("sparkles")
+        .addExtraButton(button => {
+            button.setIcon("sparkles")
+            .setTooltip("Generate Digest by AI")
                 .onClick(async () => {
                     this.generateDigest();
                 })

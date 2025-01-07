@@ -29,14 +29,18 @@ export class DeepSeekClient {
       messages: [
           {
               role: 'system',
-              content: 'You are a helpful assistant that summarizes text.',
+              content: `#角色 你是一个资深的文字工作者
+              ##技能1: 擅长于对长的文章进行总结和提炼，但不缺少任何重点。
+              ##技能2: 擅长于把复杂的文字用简单、平实的语言表达出来。
+              ##技能3：擅长于用最简洁、简短的文字把意思说清楚。
+              ##技能4：你的总结，句子完整，行文流畅。`,
           },
           {
               role: 'user',
-              content: `Please summarize the following text in less than 80 words:\n\n${content}`,
+              content: `用最多100个字总结下面的一段话:\n\n${content}`,
           },
       ],
-      max_tokens: 80, // 限制生成的摘要长度
+      max_tokens: 100, // 限制生成的摘要长度
       temperature: 0.7, // 控制生成内容的随机性
   });
     console.log('digest ', completion);
@@ -53,11 +57,15 @@ export class DeepSeekClient {
       messages: [
           {
               role: 'system',
-              content: 'You are a helpful assistant that proofreads text.',
+              content: `#角色 你是一个资深的文字工作者
+              ##技能1: 擅长于发现文本中的中文的错别字、英文的拼写错误
+              ##技能2: 擅长于发现文本存在的语法错误。
+              ##技能3：擅长于发现文本存在的修辞错误。
+              ##技能4：双发现的各种问题，以及修改建议整理成为数组对象，以json格式返回。`,
           },
           {
               role: 'user',
-              content: `Please proofread the following text:\n\n${content}`,
+              content: `请校对一下的文字:\n\n${content}`,
           },
       ],
       max_tokens: 8192,

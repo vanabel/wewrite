@@ -34,6 +34,12 @@ export const MediaTypeLable = new Map([
     ['draft', '草稿']
 ]);
 
+// 扩展 MaterialItem 类型以包含 _deleted 属性
+type DeletableMaterialItem = MaterialItem & {
+    _deleted?: boolean;
+}
+
+
 type ThumbMideaIdSrc = {
     thumb_media_id: string;
     url: string;
@@ -64,6 +70,7 @@ export class AssetsManager {
     app: App;
     assets: Map<string, any[]>
     db: PouchDB.Database;
+    used: Map<string, boolean>
 
 
     private static instance: AssetsManager;
@@ -74,6 +81,7 @@ export class AssetsManager {
         this.app = app;
         this._plugin = plugin
         this.assets = new Map()
+        this.used = new Map()
         this.db = new PouchDB('wewrite-wechat-assets');
         this.thumbUrlList = new SrcThumbList();
         this.imgUrlList = new SrcThumbList();
@@ -123,7 +131,7 @@ export class AssetsManager {
 
     }
     public async loadMaterial(accountName: string) {
-        
+
         this._plugin.messageService.sendMessage('clear-news-list', null)
         let list = await this.getAllMeterialOfTypeFromDB(accountName, 'news')
 
@@ -244,7 +252,7 @@ export class AssetsManager {
         draftList.forEach((i: MaterialItem) => {
             i.accountName = accountName
             i.type = 'draft'
-            
+
             this.pushMaterailToDB(i)
         })
     }
@@ -293,7 +301,7 @@ export class AssetsManager {
                             // we do nothing here, maybe the old one has been deleted
                         }
 
-                    } 
+                    }
                     const content = item.content
 
                     const dom = sanitizeHTMLToDom(content)
@@ -308,6 +316,11 @@ export class AssetsManager {
                 })
             });
         }
+    }
+    public scanUsedMedia(){
+        //check all news and draft items
+        //put all the thumb_media_id in item and url to this.used Map 
+
     }
     public async checkAssets() {
         //the function is to findout if a image is used as cover image or embedded in an news or draft article.
@@ -422,7 +435,7 @@ export class AssetsManager {
             let offset = 0; // 当前偏移量
             let total = 10; // 总记录数
             const items: Array<MaterialItem> = []
-            if (accountName === undefined || !accountName){
+            if (accountName === undefined || !accountName) {
                 resolve(items)
                 return
             }
@@ -445,6 +458,9 @@ export class AssetsManager {
 
                 offset += docs.length;
             }
+            items.sort((a, b) => {
+                return b.update_time - a.update_time
+            })
             resolve(items)
         })
     }
@@ -471,7 +487,7 @@ export class AssetsManager {
 
     getMaterialPanels(): MaterialPanelItem[] {
         const panels: MaterialPanelItem[] = [];
-        
+
         // Get all material types and map to panel items
         const types: MediaType[] = [
             'draft', 'image', 'video', 'voice', 'news'
@@ -486,6 +502,29 @@ export class AssetsManager {
         });
 
         return panels;
+    }
+    removeMediaItemsFromDB(type: MediaType) {
+        const accountName = this._plugin.settings.selectedAccount;
+
+        this.db.find({
+            selector: {
+                accountName: { $eq: accountName },
+                type: { $eq: type }
+            }
+        }).then((result: PouchDB.Find.FindResponse<DeletableMaterialItem>) => {
+            const docsToDelete = result.docs.map((doc) => {
+                doc._deleted = true; // Mark the document for deletion
+                return doc;
+            });
+
+            // Perform bulk deletion
+            return this.db.bulkDocs(docsToDelete);
+        }).then((result) => {
+            console.log('Documents deleted successfully:', result);
+        }).catch((err) => {
+            console.error('Error deleting documents:', err);
+        });
+
     }
 }
 

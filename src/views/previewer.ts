@@ -15,6 +15,7 @@ import { MPArticleHeader } from './mp-article-header';
 import { ThemeManager } from './theme-manager';
 import { ThemeSelector } from './theme-selector';
 import { WebViewModal} from './webview';
+import { AssetsManager } from "src/assets/assets-manager";
 
 export const VIEW_TYPE_NP_PREVIEW = 'wechat-np-article-preview';
 export interface ElectronWindow extends Window {
@@ -170,10 +171,13 @@ export class PreviewPanel extends ItemView implements PreviewRender {
     }
     openMPPlatform() {
         // window.open('https://mp.weixin.qq.com/', '_blank');
-        if (this.mpModal === undefined) {
-            this.mpModal = new WebViewModal(this._plugin.app)
-        }
-        this.mpModal.open()
+        // if (this.mpModal === undefined) {
+        //     this.mpModal = new WebViewModal(this._plugin.app)
+        // }
+        // this.mpModal.open()
+        const am = AssetsManager.getInstance(this._plugin.app, this._plugin)
+        am.removeMediaItemsFromDB('draft')
+
     }
     async checkCoverImage() {
         return this.draftHeader.checkCoverImage()
