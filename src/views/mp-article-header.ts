@@ -122,6 +122,13 @@ export class MPArticleHeader {
             })
 
         new Setting(details).setName('Digest')
+        .addButton(button => {
+            button.setButtonText('Generate')
+            .setIcon("sparkles")
+                .onClick(async () => {
+                    this.generateDigest();
+                })
+        })
 
         this._digest = details.createEl('textarea', { cls: 'wechat-mp-article-preview-digest', attr: { rows: 3, placeholder: '图文消息的摘要，仅有单图文消息才有摘要，多图文此处为空。如果本字段为没有填写，则默认抓取正文前54个字。' } })
         this._digest.onkeyup = (event: KeyboardEvent) => {
@@ -159,6 +166,25 @@ export class MPArticleHeader {
                 })
             })
 
+    }
+    async generateDigest() {
+        if (!this._plugin.deepseekClient) {
+            new Notice('Please set DeepSeek API Key in plugin settings first.')
+            return
+        }
+        if (this.activeLocalDraft === undefined) {
+            new Notice('No Active Note')
+            return
+        }
+        if (this.activeLocalDraft.notePath === undefined) {
+            new Notice('No Active Note')
+            return
+        }
+        const md = await this._plugin.app.vault.adapter.read(this.activeLocalDraft.notePath)
+        const summary = await  this._plugin.deepseekClient?.generateSummary(md)
+        if (summary){
+            this._digest.value = summary
+        }
     }
     private createCoverFrame(details: HTMLElement) {
         new Setting(details)

@@ -1,7 +1,15 @@
 /**
  * Url handling
  */
-import { TFile, App, arrayBufferToBase64, sanitizeHTMLToDom } from 'obsidian';
+import { App, arrayBufferToBase64, sanitizeHTMLToDom, TAbstractFile, TFile } from 'obsidian';
+
+export function isMarkdownFile(file: TFile | TAbstractFile) {
+	return ['md', 'markdown'].includes((file as TFile)?.extension ?? '');
+}
+
+export function getMetadata(file: TFile, app: App) {
+	return app.metadataCache.getFileCache(file)?.frontmatter;
+}
 
 export class UrlUtils {
     private app:App;

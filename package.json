@@ -38,6 +38,7 @@
 		"jimp": "^1.6.0",
 		"marked": "^15.0.0",
 		"marked-highlight": "^2.2.1",
+		"openai": "^4.77.3",
 		"postcss": "^8.4.49",
 		"pouchdb": "^9.0.0",
 		"pouchdb-find": "^9.0.0"

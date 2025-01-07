@@ -11,29 +11,34 @@ interface REROUCE_ITEM {
 }
 
 export class MaterialPanel {
+  public name: string;
+  public containerEl: HTMLElement;
+  public timestamp: number;
   private container: HTMLElement;
   private header: HTMLElement;
   private content: HTMLElement;
   private titleSpan: HTMLSpanElement;
   private totalSpan: HTMLSpanElement;
-  private toggleButton: HTMLElement;
+  // private toggleButton: HTMLElement;
   private refreshButton: HTMLElement;
   private _plugin: WeWritePlugin;
-  private type: MediaType;
+  public type: MediaType;
   private items: REROUCE_ITEM[] = [];
 
   constructor(plugin: WeWritePlugin, parent: HTMLElement, title: string, type: MediaType) {
     this._plugin = plugin;
     this.type = type;
-    this.container = parent.createDiv({ cls: 'collapsible-container' });
-    this.header = parent.createDiv({ cls: 'collapsible-header' });
+    this.name = title;
+    this.container = parent.createDiv({ cls: 'wewrite-material-panel-container' });
+    this.containerEl = this.container;
+    this.header = parent.createDiv({ cls: 'wewrite-material-panel-header' });
     this.refreshButton = this.header.createEl('i', { cls: 'refresh-material-button' });
-    this.titleSpan = this.header.createSpan({ cls: 'collapsible-title' });
-    this.totalSpan = this.header.createSpan({ cls: 'collapsible-total' });
+    this.titleSpan = this.header.createSpan({ cls: 'wewrite-material-panel-title' });
+    this.totalSpan = this.header.createSpan({ cls: 'wewrite-material-panel-total' });
 
-    this.content = parent.createDiv({ cls: 'collapsible-content' });
-    this.toggleButton = parent.createEl<'i'>('i', { cls: 'toggle-icon chevron-right ' });
-    setIcon(this.toggleButton, 'chevron-right')
+    this.content = parent.createDiv({ cls: 'wewrite-material-panel-content' });
+    // this.toggleButton = parent.createEl<'i'>('i', { cls: 'toggle-icon chevron-right ' });
+    // setIcon(this.toggleButton, 'chevron-right')
     setIcon(this.refreshButton, 'folder-sync')
 
 
@@ -41,11 +46,11 @@ export class MaterialPanel {
     this.totalSpan.textContent = '0';
     this.content.innerHTML = 'content';
 
-    this.header.appendChild(this.toggleButton);
+    // this.header.appendChild(this.toggleButton);
     this.container.appendChild(this.header);
     this.container.appendChild(this.content);
 
-    this.toggleButton.addEventListener('click', () => this.toggleContent());
+    // this.toggleButton.addEventListener('click', () => this.toggleContent());
     this.refreshButton.addEventListener('click', () => this.refreshContent());
     this.initContent()
     
@@ -84,6 +89,7 @@ export class MaterialPanel {
   showContextMenu(img: MaterialMeidaItem, event: MouseEvent) {
     const menu = new Menu();
     
+    //if the item type is image/voice/video && it has not been used by any news or draft.
     menu.addItem((item) => {
         item.setTitle('delete image')
             .setIcon('eye')
@@ -92,6 +98,8 @@ export class MaterialPanel {
                 new Notice(`删除图片: ${img.name}`);
             });
     });
+
+    //if it is a image
     menu.addItem((item) => {
         item.setTitle('set as cover of current draft')
             .setIcon('image-plus')
@@ -99,87 +107,28 @@ export class MaterialPanel {
                 
             });
     });
+
+    //if it is a draft
     menu.addItem((item) => {
-        item.setTitle('Generate Summary')
-            .setIcon('file-text')
+        item.setTitle('Delete draft')
+            .setIcon('delete')
             .onClick(async () => {
-                // if (!img.notePath) {
-                //   new Notice('Note path is missing');
-                //   return;
-                // }
-                // const content = await this._plugin.app.vault.read(img.notePath);
-                // const result = await this._plugin.deepseekClient.generateSummary(content);
-                // if (result.summary) {
-                //   new Notice(`Summary: ${result.summary}`);
-                // } else {
-                //   new Notice('Failed to generate summary');
-                // }
+                console.log('to delete draft:', item)
             });
     });
-    menu.addItem((item) => {
-        item.setTitle('Proofread Content')
-            .setIcon('edit')
-            .onClick(async () => {
-                // if (!img.notePath) {
-                //   new Notice('Note path is missing');
-                //   return;
-                // }
-                // const content = await this._plugin.app.vault.read(img.notePath);
-                // const result = await this._plugin.deepseekClient.proofreadContent(content);
-                // if (result.corrections) {
-                //   new Notice(`Found ${result.corrections.length} corrections`);
-                // } else {
-                //   new Notice('Failed to proofread content');
-                // }
-            });
-    });
-    menu.addItem((item) => {
-        item.setTitle('Polish Content')
-            .setIcon('sparkles')
-            .onClick(async () => {
-                // if (!img.notePath) {
-                //   new Notice('Note path is missing');
-                //   return;
-                // }
-                // const content = await this._plugin.app.vault.read(img.notePath);
-                // const result = await this._plugin.deepseekClient.polishContent(content);
-                // if (result.polished) {
-                //   await this._plugin.app.vault.modify(img.notePath, result.polished);
-                //   new Notice('Content polished successfully');
-                // } else {
-                //   new Notice('Failed to polish content');
-                // }
-            });
-    });
-    menu.addItem((item) => {
-        item.setTitle('Generate Cover Image')
-            .setIcon('image')
-            .onClick(async () => {
-                // if (!img.notePath) {
-                //   new Notice('Note path is missing');
-                //   return;
-                // }
-                // const content = await this._plugin.app.vault.read(img.notePath);
-                // const result = await this._plugin.deepseekClient.generateCoverImage(content);
-                // if (result.coverImage) {
-                //   new Notice(`Cover image generated: ${result.coverImage}`);
-                // } else {
-                //   new Notice('Failed to generate cover image');
-                // }
-            });
-    });
+    
     menu.showAtPosition({ x: event.clientX, y: event.clientY });
   }
 
-  private toggleContent() {
-    if (this.content.style.display === 'none') {
-      this.content.style.display = 'block';
-      setIcon(this.toggleButton, 'chevron-up')
-    } else {
-      this.content.style.display = 'none';
-      setIcon(this.toggleButton, 'chevron-right')
-    }
-  }
+  // private toggleContent() {
+  //   if (this.content.style.display === 'none') {
+  //     this.content.style.display = 'block';
+  //     setIcon(this.toggleButton, 'chevron-up')
+  //   } else {
+  //     this.content.style.display = 'none';
+  //     setIcon(this.toggleButton, 'chevron-right')
+  //   }
+  // }
 
   public getElement(): HTMLElement {
     return this.container;
@@ -200,9 +149,20 @@ export class MaterialPanel {
     
   }
   addItem(item: any){
-    const itemDiv = this.content.createDiv({ cls: 'collapsible-item' });
+    const itemDiv = this.content.createDiv({ cls: 'wewrite-material-panel-item' });
     itemDiv.style.cursor = 'pointer';
+    // Insert new items at the top
+    // this.items.unshift({item:item, el:itemDiv});
+
+    // if (this.content.firstChild) {
+    //   this.content.insertBefore(itemDiv, this.content.firstChild);
+    // } else {
+    //   this.content.appendChild(itemDiv);
+    // }
+        // Insert new items at the top
     this.items.push({item:item, el:itemDiv});
+    this.content.appendChild(itemDiv);
+    
 
     if (this.type === 'draft' || this.type === 'news') {
         itemDiv.innerHTML = `<a href=${item.content.news_item[0].url}> ${item.content.news_item[0].title}</a>`
@@ -212,15 +172,16 @@ export class MaterialPanel {
         itemDiv.addEventListener('click', () => {
           //TODO 
         })
-        itemDiv.addEventListener('contextmenu', (event) => {
-          event.preventDefault();
-          this.showContextMenu(item, event)
-        })
-    }else{
-      console.error(`other type has not been implemented.`);
-      
-    }
-    this.setTotal(this.items.length)
+      }else{
+        console.error(`other type has not been implemented.`);
+        
+      }
+      this.setTotal(this.items.length)
+
+      itemDiv.addEventListener('contextmenu', (event) => {
+        event.preventDefault();
+        this.showContextMenu(item, event)
+      })
   }
   updateItemUsed(item:any){
     const old_item = this.items.find((i)=>{
@@ -247,7 +208,7 @@ export class MaterialPanel {
     this.setTotal(0);
     let total = 0;
     this.content.style.display = 'block';
-    setIcon(this.toggleButton, 'chevron-up')
+    // setIcon(this.toggleButton, 'chevron-up')
 
     const items = this._plugin.assetsManager.assets.get(this.type)
     if (items === undefined || items === null) {

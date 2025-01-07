@@ -26,6 +26,13 @@ import PouchDB from 'pouchdb';
 import PouchDBFind from 'pouchdb-find';
 import { SrcThumbList } from "src/utils/src-thumb-list";
 import { areObjectsEqual } from "./draft-manager";
+export const MediaTypeLable = new Map([
+    ['image', '图片'],
+    ['voice', '语音'],
+    ['video', '视频'],
+    ['news', '图文消息'],
+    ['draft', '草稿']
+]);
 
 type ThumbMideaIdSrc = {
     thumb_media_id: string;
@@ -461,4 +468,31 @@ export class AssetsManager {
             }
         }
     }
+
+    getMaterialPanels(): MaterialPanelItem[] {
+        const panels: MaterialPanelItem[] = [];
+        
+        // Get all material types and map to panel items
+        const types: MediaType[] = [
+            'draft', 'image', 'video', 'voice', 'news'
+        ];
+        types.forEach(type => {
+            panels.push({
+                name: MediaTypeLable.get(type)!,
+                type: type,
+                timestamp: Date.now(),
+                url: ''
+            });
+        });
+
+        return panels;
+    }
 }
+
+export interface MaterialPanelItem {
+    name: string;
+    type: MediaType;
+    timestamp: number;
+    url: string;
+}
+
