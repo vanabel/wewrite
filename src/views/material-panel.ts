@@ -73,7 +73,7 @@ export class MaterialPanel {
   }
   getLocalItems(){
     const list = this._plugin.assetsManager.assets.get(this.type)
-    console.log(`getLocalItems:${this.type}`, list);
+    // console.log(`getLocalItems:${this.type}`, list);
     
     if (list !== undefined) {
       list.forEach((item) => {
@@ -116,7 +116,7 @@ export class MaterialPanel {
             });
         });
       }else{
-        console.log(`image used by:`, urls);
+        // console.log(`image used by:`, urls);
         
       }
 
@@ -162,7 +162,7 @@ export class MaterialPanel {
         item.setTitle('publish draft')
           .setIcon('send')
           .onClick(async () => {
-            console.log('to delete draft:', item)
+            // console.log('to delete draft:', item)
             this._plugin.messageService.sendMessage("publish-draft-item", mediaItem)
           });
       });
@@ -207,7 +207,7 @@ export class MaterialPanel {
   }
   addItem(item: any) {
     if (this.isItemExist(item)){
-      console.log(`item exist, do nothing.`);
+      // console.log(`item exist, do nothing.`);
       return
     }
     const itemDiv = this.content.createDiv({ cls: 'wewrite-material-panel-item' });
@@ -218,6 +218,7 @@ export class MaterialPanel {
     
 
     if (this.type === 'draft' || this.type === 'news') {
+      // console.log(`draft/news item=>`, item);
       let title = item.content.news_item[0].title
       if (title === undefined || !title){
         title = 'No title article.'

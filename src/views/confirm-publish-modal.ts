@@ -22,7 +22,7 @@ export class ConfirmPublishModal extends Modal {
         this.draftItem = item
     }
     onOpen() {
-        console.log(`onOpen!`);
+        // console.log(`onOpen!`);
 
         const { contentEl, containerEl } = this;
         // containerEl.addClass('confirm-pulbish-dialog');

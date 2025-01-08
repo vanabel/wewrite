@@ -45,12 +45,8 @@ export default class WeWritePlugin extends Plugin {
 
 	// Add context menu for polish operation
 	async addContextMenu() {
-		console.log(`addContextMenu of polish`);
-
 		this.registerEvent(
 			this.app.workspace.on('file-menu', (menu, file: TFile) => {
-				console.log(`on File-menu:`, file);
-
 				if (file instanceof TFile && isMarkdownFile(file)) {
 					menu.addItem((item) => {
 						item
@@ -59,7 +55,6 @@ export default class WeWritePlugin extends Plugin {
 							.onClick(async () => {
 								const content = await this.app.vault.read(file);
 								const polished = await this.polishContent(content);
-								console.log(`polished:`, polished);
 
 								if (polished) {
 									await this.app.vault.modify(file, polished);
@@ -96,7 +91,6 @@ export default class WeWritePlugin extends Plugin {
 								.setTitle("Polish Selected Text")
 								.setIcon('text-select')
 								.onClick(async () => {
-									console.log(`polish selected ...`);
 									const content = editor.getSelection();
 									const polished = await this.polishContent(content);
 									console.log(`polished:`, polished);

@@ -24,6 +24,8 @@ import PouchDBFind from 'pouchdb-find';
 import WeWritePlugin from "src/main";
 import { areObjectsEqual } from "src/utils/utils";
 import { getErrorMessage } from "src/wechat-api/error-code";
+import { ConfirmDeleteModal } from "src/views/confirm-delete-modal";
+import { ConfirmPublishModal } from "src/views/confirm-publish-modal";
 import { DraftItem, MaterialItem, MaterialMeidaItem, MaterialNewsItem, MediaType, NewsItem } from "src/wechat-api/wechat-types";
 export const MediaTypeLable = new Map([
     ['image', '图片'],
@@ -38,24 +40,7 @@ type DeletableMaterialItem = MaterialItem & {
     _deleted?: boolean;
 }
 
-
-// type ThumbMideaIdSrc = {
-//     thumb_media_id: string;
-//     url: string;
-// }
-// type ImageSrcSrc = {
-//     src: string;
-//     url: string;
-// }
-// export type VerifyItem = {
-//     src: string;
-//     url: string;
-// }
-// 启用 find 插件
 PouchDB.plugin(PouchDBFind);
-
-// import { JSONFilePreset} from 'lowdb/node'
-// import { Low } from "lowdb/lib";
 
 type ASSETS = {
     images: Array<MaterialMeidaItem>,
@@ -70,34 +55,41 @@ export class AssetsManager {
     assets: Map<string, any[]>
     db: PouchDB.Database;
     used: Map<string, string[]>
+    confirmPublishModal: ConfirmPublishModal;
+    confirmDeleteModal: ConfirmDeleteModal;
 
 
     private static instance: AssetsManager;
     private _plugin: WeWritePlugin;
-    // private thumbUrlList: SrcThumbList;
-    // private imgUrlList: SrcThumbList;
     constructor(app: App, plugin: WeWritePlugin) {
         this.app = app;
         this._plugin = plugin
         this.assets = new Map()
         this.used = new Map()
         this.db = new PouchDB('wewrite-wechat-assets');
-        // this.thumbUrlList = new SrcThumbList();
-        // this.imgUrlList = new SrcThumbList();
+
         this._plugin.messageService.registerListener('wechat-account-changed', (data: string) => {
             this.loadMaterial(data)
         })
         this._plugin.messageService.registerListener('delete-media-item', (item: MaterialItem) => {
-            this.deleteMediaItem(item as MaterialMeidaItem)
+            //this.deleteMediaItem(item as MaterialMeidaItem)
+            this.confirmDelete(item)
         })
         this._plugin.messageService.registerListener('delete-draft-item', (item: MaterialItem) => {
-            this.deleteDraftItem(item)
+            //this.deleteDraftItem(item)
+            this.confirmDelete(item)
         })
         this._plugin.messageService.registerListener('image-item-updated', (item: MaterialItem) => {
             this.addImageItem(item)
         })
         this._plugin.messageService.registerListener('draft-item-updated', (item: MaterialItem) => {
             this.addImageItem(item)
+        })
+        this._plugin.messageService.registerListener('publish-draft-item', async (item: DraftItem) => {
+            this.confirmPublish(item)
+        })
+        this._plugin.messageService.registerListener('delete-media-item', async (item: MaterialItem) => {
+            this.confirmDelete(item)
         })
 
     }
@@ -149,7 +141,6 @@ export class AssetsManager {
 
     }
     public async loadMaterial(accountName: string) {
-        console.log(`loadMaterial:`, accountName);
         const types: MediaType[] = [
             'draft', 'image', 'video', 'voice', 'news'
         ];
@@ -165,7 +156,6 @@ export class AssetsManager {
     }
     public async pullAllMaterial(accountName: string) {
         const json = await this._plugin.wechatClient.getMaterialCounts(accountName)
-        console.log(`material count:`, json);
 
         const types: MediaType[] = [
             'draft', 'image', 'video', 'voice', 'news'
@@ -174,19 +164,6 @@ export class AssetsManager {
             this._plugin.messageService.sendMessage(`clear-${type}-list`, null)
             this.getAllMaterialOfType(type, (item) => { this._plugin.messageService.sendMessage(`${type}-item-updated`, item) }, accountName)
         }
-        // this._plugin.messageService.sendMessage('clear-draft-list', null)
-        // this._plugin.messageService.sendMessage('clear-news-list', null)
-        // this._plugin.messageService.sendMessage('clear-image-list', null)
-        // this._plugin.messageService.sendMessage('clear-video-list', null)
-        // this._plugin.messageService.sendMessage('clear-voice-list', null)
-        // this._plugin.messageService.sendMessage('clear-thumb-list', null)
-        // this.getAllDrafts((item) => { this._plugin.messageService.sendMessage('draft-item-updated', item) }, accountName)
-        // this.getAllNews((item) => { this._plugin.messageService.sendMessage('news-item-updated', item) }, accountName)
-        // this.getAllMaterialOfType('image', (item) => { this._plugin.messageService.sendMessage('image-item-updated', item) }, accountName)
-        // this.getAllMaterialOfType('video', (item) => { this._plugin.messageService.sendMessage('video-item-updated', item) }, accountName)
-        // this.getAllMaterialOfType('voice', (item) => { this._plugin.messageService.sendMessage('voice-item-updated', item) }, accountName)
-        // this.checkAssets()
-        // this.scanDraftNewsUsedImages()
         this._plugin.assetsUpdated()
     }
 
@@ -238,7 +215,6 @@ export class AssetsManager {
             return b.update_time - a.update_time
         })
         this.assets.set('draft', draftList)
-        console.log(`getAll type draft:`, draftList);
         await this.removeMediaItemsFromDB('draft')
         draftList.forEach((i: DraftItem) => {
             i.accountName = accountName
@@ -250,7 +226,7 @@ export class AssetsManager {
         })
         this.scanDraftNewsUsedImages()
     }
-    public async getAllMaterialOfType(type: MediaType, callback: (item:MaterialItem) => void, accountName: string | undefined) {
+    public async getAllMaterialOfType(type: MediaType, callback: (item: MaterialItem) => void, accountName: string | undefined) {
         if (type === 'news') {
             return await this.getAllNews(callback, accountName);
         }
@@ -270,12 +246,11 @@ export class AssetsManager {
             list.push(...item);
             total = total_count
             offset += item_count;
-            
+
         }
         list.sort((a, b) => {
             return b.update_time - a.update_time
         })
-        console.log(`getAll type${type}:`, list);
 
         this.assets.set(type, list)
         await this.removeMediaItemsFromDB(type)
@@ -284,13 +259,11 @@ export class AssetsManager {
             item.type = type
             if (callback) {
                 callback(item)
-            } 
+            }
             this.pushMaterailToDB(item)
         })
     }
     public getImageUsedUrl(imgItem: any) {
-        console.log(`getImageUsedUrl, item=>`, imgItem);
-        console.log(`getImageUsedUrl, used=>`, this.used);
 
         let urls = null
         if (imgItem.url !== undefined && imgItem.url) {
@@ -311,36 +284,6 @@ export class AssetsManager {
         }
         return urls
     }
-    // private getImageSrc(materialItem: MaterialNewsItem[] | DraftItem[]) {
-    //     if (materialItem === undefined || !materialItem) {
-    //     } else {
-    //         materialItem.forEach(news => {
-    //             news.content.news_item.forEach((item: NewsItem) => {
-    //                 if (item.thumb_media_id !== undefined && !item.thumb_media_id) {
-    //                     //not empty
-    //                     const url = this.findUrlOfMediaId('image', item.thumb_media_id)
-    //                     if (url !== undefined) {
-    //                         this.thumbUrlList.add(url, item.url)
-    //                     } else {
-    //                         // we do nothing here, maybe the old one has been deleted
-    //                     }
-
-    //                 }
-    //                 const content = item.content
-
-    //                 const dom = sanitizeHTMLToDom(content)
-    //                 const imgs = dom.querySelectorAll('img')
-    //                 imgs.forEach(img => {
-    //                     const data_src = img.getAttribute('data-src')
-
-    //                     if (data_src !== null) {
-    //                         this.imgUrlList.add(data_src, item.url)
-    //                     }
-    //                 })
-    //             })
-    //         });
-    //     }
-    // }
     public scanUsedImage(type: MediaType) {
 
         // Process news items
@@ -394,44 +337,6 @@ export class AssetsManager {
             }
         })
     }
-
-
-    // public async checkAssets() {
-    //     //the function is to findout if a image is used as cover image or embedded in an news or draft article.
-    //     // scope: news, draft.
-    //     // link to the image: data-src
-    //     // media_id in thumb_media_id 
-    //     const images = this.assets.get('image')
-    //     if (images === undefined || !images) {
-    //         return
-    //     }
-
-    //     //reset the list
-    //     this.thumbUrlList.clear()
-    //     this.imgUrlList.clear()
-
-
-    //     const newses = this.assets.get('news')
-    //     this.getImageSrc(newses as MaterialNewsItem[])
-
-    //     const drafts = this.assets.get('draft')
-    //     this.getImageSrc(drafts as DraftItem[])
-
-    //     const verifyList = new SrcThumbList()
-    //     this.thumbUrlList.list.forEach((articles, url) => {
-    //         verifyList.add(url, articles)
-    //     })
-    //     this.imgUrlList.list.forEach((articles, url) => {
-    //         verifyList.add(url, articles)
-    //     })
-
-    //     this._plugin.messageService.sendMessage('src-thumb-list-updated', verifyList)
-    //     images.forEach(image => {
-    //         const used = verifyList.get(image.url) !== undefined
-    //         image.used = used
-    //         this._plugin.messageService.sendMessage('image-used-updated', image)
-    //     })
-    // }
 
     async fetchAllMeterialOfTypeFromDB(accountName: string, type: MediaType): Promise<MaterialItem[]> {
         return new Promise((resolve) => {
@@ -587,7 +492,7 @@ export class AssetsManager {
             // Perform bulk deletion
             return this.db.bulkDocs(docsToDelete);
         }).then((result) => {
-            console.log('Documents deleted successfully:', result);
+            // console.log('Documents deleted successfully:', result);
         }).catch((err) => {
             console.error('Error deleting documents:', err);
         });
@@ -636,6 +541,31 @@ export class AssetsManager {
                 console.error('Error deleting document:', err);
             });
 
+    }
+    confirmPublish(item: DraftItem) {
+        // console.log(`confirm publish`);
+        if (this.confirmPublishModal === undefined) {
+            this.confirmPublishModal = new ConfirmPublishModal(this._plugin, item)
+        } else {
+            this.confirmPublishModal.update(item)
+        }
+        this.confirmPublishModal.open()
+    }
+    confirmDelete(item: MaterialItem) {
+        // console.log(`confirm delete`);
+        let callback = this.deleteMediaItem.bind(this)
+        if (item.type === 'draft') {
+            callback = this.deleteDraftItem.bind(this)
+        }
+
+        if (this.confirmDeleteModal === undefined) {
+            this.confirmDeleteModal = new ConfirmDeleteModal(this._plugin, item, callback)
+
+        } else {
+            this.confirmDeleteModal.update(item, callback)
+        }
+
+        this.confirmDeleteModal.open()
     }
 }
 

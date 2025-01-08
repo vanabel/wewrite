@@ -3,23 +3,21 @@
  * credits to Sun Booshi, and another author of wechat public platform. 
 */
 
-import { App, getBlobArrayBuffer, Notice, requestUrl, RequestUrlParam } from "obsidian";
-import WeWritePlugin from "src/main";
-import { getErrorMessage } from "./error-code";
-import { DraftArticle, DraftItem } from "./wechat-types";
+import { getBlobArrayBuffer, Notice, requestUrl, RequestUrlParam } from "obsidian";
 import { LocalDraftItem } from "src/assets/draft-manager";
-import { ConfirmPublishModal as ConfirmPublishDialog } from "src/views/confirm-publish-modal";
+import WeWritePlugin from "src/main";
+
+import { getErrorMessage } from "./error-code";
+import { DraftItem, MaterialItem } from "./wechat-types";
 
 export class WechatClient {
   private static instance: WechatClient;
   private _plugin: WeWritePlugin;
   readonly baseUrl: string = 'https://api.weixin.qq.com/cgi-bin';
-  confirmPublishModal: ConfirmPublishDialog;
+
   private constructor(plugin: WeWritePlugin) {
     this._plugin = plugin
-    this._plugin.messageService.registerListener('publish-draft-item', async (item: DraftItem) => {
-      this.confirmPublish(item)
-    })
+    
   }
   public static getInstance(plugin: WeWritePlugin): WechatClient {
     if (!WechatClient.instance) {
@@ -354,7 +352,6 @@ export class WechatClient {
     const resp = await requestUrl(req);
 
     const { errcode, errmsg } = resp.json;
-    console.log(`delete media ${meida_id}`, errmsg, errcode);
     if (errcode !== undefined && errcode !== 0) {
       new Notice(getErrorMessage(errcode), 0);
       return false;
@@ -392,14 +389,5 @@ export class WechatClient {
       return true
     }
   }
-  confirmPublish(item: DraftItem) {
-    console.log(`confirm publish`);
-    if (this.confirmPublishModal === undefined) {
-      this.confirmPublishModal = new ConfirmPublishDialog(this._plugin, item)
-    } else {
-      this.confirmPublishModal.update(item)
-    }
-    const modal = new ConfirmPublishDialog(this._plugin, item)
-    modal.open()
-  }
+ 
 }

@@ -185,11 +185,12 @@ export class PreviewPanel extends ItemView implements PreviewRender {
             this.draftHeader.updateDraftDraftId(media_id)
             const news_item = await this.wechatClient.getDraftById(this._plugin.settings.selectedAccount!, media_id)
             if (news_item) {
+                
                 open(news_item[0].url)
                 const item = {
                     media_id: media_id,
                     content: {
-                        news_item:[news_item]
+                        news_item:news_item
                     },
                     update_time: Date.now()
                 }
