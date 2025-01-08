@@ -28,7 +28,7 @@ export class MPArticleHeader {
     private current_x: number = 0
     private current_y: number = 0
     private cover_image: string | null
-    private coverframe: HTMLElement;
+    private coverFrame: HTMLElement;
     // private draft:LocalDraftItem
     private activeLocalDraft: LocalDraftItem | undefined
     private localDraftmanager: LocalDraftManager
@@ -135,7 +135,7 @@ export class MPArticleHeader {
             }
         };
 
-        this.coverframe = this.createCoverFrame(details)
+        this.coverFrame = this.createCoverFrame(details)
 
         new Setting(details)
             .setName('Need Open Comments')
@@ -238,28 +238,44 @@ export class MPArticleHeader {
         }
         coverframe.addEventListener('drop', async (e) => {
             e.preventDefault()
+
             this.current_x = 0
             this.current_y = 0
 
             const url = e.dataTransfer?.getData('text/uri-list')
+            // console.log(`drop url:${url}`);
+            
             if (url) {
                 if (url.startsWith('obsidian://')) {
+                    //image from vault
 
                     const urlParser = new UrlUtils(this._plugin.app);
 
                     const appurl = await urlParser.getInternalLinkDisplayUrl(url)
                     this.cover_image = appurl;
 
-                } else {
-
+                } else if (url.startsWith('http') || url.startsWith('https')) {
                     this.cover_image = url;
                     const media_id = await this.getCoverImageMediaId(url)
                     coverframe.setAttr('data-media_id', media_id)
                     if (this.activeLocalDraft !== undefined) {
                         this.activeLocalDraft.thumb_media_id = media_id
+                        
                     }
+                } else if (url.startsWith('file://')) {
+                    //image from local file
+                    const filePath = url.replace('file://', '');
+                    const file = await this._plugin.app.vault.adapter.readBinary(filePath);
+                    const base64 = await this.arrayBufferToBase64(file);
+                    this.cover_image = `data:image/png;base64,${base64}`;
+                }else{
+                    // console.log(`unsupport image url:`, url);
+                    this.cover_image = ''
+                    this.setCoverImageXY();
                 }
-
+                if (this.activeLocalDraft !== undefined) {
+                    this.activeLocalDraft.cover_image_url = this.cover_image!     
+                }
                 // coverframe.setAttr('style', `background-image: url('${url}'); background-size:cover; background-position: 0px 0px;`);
                 this.localDraftmanager.setDraft(this.activeLocalDraft!)
                 this.setCoverImage(this.cover_image!)
@@ -270,10 +286,22 @@ export class MPArticleHeader {
 
         return coverframe
     }
+    private async arrayBufferToBase64(buffer: ArrayBuffer): Promise<string> {
+        const bytes = new Uint8Array(buffer);
+        let binary = '';
+        for (let i = 0; i < bytes.byteLength; i++) {
+            binary += String.fromCharCode(bytes[i]);
+        }
+        return btoa(binary);
+    }
     setCoverImage(url: string | null) {
         // console.log(`setCoverImage:`, url);
-
+        while (this.coverFrame.firstChild) {
+            this.coverFrame.firstChild.remove()
+        }
         if (!url) {
+            console.log(`null image url for cover image`);
+            
             return
         }
 
@@ -285,10 +313,13 @@ export class MPArticleHeader {
 
         canvas.width = 900
         canvas.height = 383
-
-        let scale = Math.min(900 / img.width, 383 / img.height);
-        let offsetX = (canvas.width - img.width * scale) / 2;
-        let offsetY = (canvas.height - img.height * scale) / 2;
+        
+        let scale = Math.max(900 / img.width, 383 / img.height);
+        let offsetX = 0 //(canvas.width - img.width * scale) / 2;
+        let offsetY = 0 // (canvas.height - img.height * scale) / 2;
+        
+        // console.log(`orignial image size:`, img.width, img.height, scale);
+        // console.log(`scaled image size:`, img.width * scale, img.height*scale, scale);
 
         ctx.drawImage(img, offsetX, offsetY, img.width * scale, img.height * scale);
 
@@ -297,64 +328,79 @@ export class MPArticleHeader {
         canvas.style.left = `${offsetX}px`;
         canvas.style.top = `${offsetY}px`;
 
-        let lastMousePosition: Point | null = null;
-        this.draggedImage = canvas;
+        // let lastMousePosition: Point | null = null;
+        // this.draggedImage = canvas;
 
-        const mouseDownHandler = (e: MouseEvent) => {
-            lastMousePosition = { x: e.clientX, y: e.clientY };
-            this.draggedImage = canvas;
-        };
+        // const mouseDownHandler = (e: MouseEvent) => {
+        //     lastMousePosition = { x: e.clientX, y: e.clientY };
+        //     this.draggedImage = canvas;
+        // };
 
-        const mouseMoveHandler = (e: MouseEvent) => {
-            if (!this.draggedImage || !lastMousePosition) return;
+        // const mouseMoveHandler = (e: MouseEvent) => {
+        //     if (!this.draggedImage || !lastMousePosition) return;
 
-            const deltaX = e.clientX - lastMousePosition.x;
-            const deltaY = e.clientY - lastMousePosition.y;
+        //     const deltaX = e.clientX - lastMousePosition.x;
+        //     const deltaY = e.clientY - lastMousePosition.y;
 
-            offsetX += deltaX;
-            offsetY += deltaY;
+        //     offsetX += deltaX;
+        //     offsetY += deltaY;
+        //     let x = e.clientX
+        //     let y = e.clientY
 
-            this.draggedImage.style.left = `${offsetX}px`;
-            this.draggedImage.style.top = `${offsetY}px`;
+        //     if (offsetX > 0) {
+        //         offsetX = 0;
+        //         x = lastMousePosition.x
+        //     } else if (offsetX + img.width * scale < canvas.width) {
+        //         offsetX = canvas.width - img.width * scale;
+        //         x = lastMousePosition.x
+        //     }
 
-            lastMousePosition = { x: e.clientX, y: e.clientY };
-        };
+        //     if (offsetY > 0) {
+        //         offsetY = 0;
+        //         y = lastMousePosition.y
+        //     } else if (offsetY + img.height * scale < canvas.height) {
+        //         offsetY = canvas.height - img.height * scale;
+        //         y = lastMousePosition.y
+        //     }
+        //     this.draggedImage.style.left = `${offsetX}px`;
+        //     this.draggedImage.style.top = `${offsetY}px`;
 
-        const mouseUpHandler = () => {
-            lastMousePosition = null;
-            // this.draggedImage = null;
-        };
+        //     lastMousePosition = { x: x, y: y };
+        // };
 
-        const wheelHandler = (e: WheelEvent) => {
-            e.preventDefault();
+        // const mouseUpHandler = () => {
+        //     lastMousePosition = null;
+        //     // this.draggedImage = null;
+        // };
 
-            const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
-            scale *= zoomFactor;
+        // const wheelHandler = (e: WheelEvent) => {
+        //     e.preventDefault();
 
-            if (scale > 1 || (img.width * scale <= 900 && img.height * scale <= 383)) {
-                offsetX = (canvas.width - img.width * scale) / 2;
-                offsetY = (canvas.height - img.height * scale) / 2;
+        //     const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
+        //     scale *= zoomFactor;
 
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.drawImage(img, offsetX, offsetY, img.width * scale, img.height * scale);
-                // if (this.draggedImage){
-                //     this.draggedImage.style.left = `${offsetX}px`;
-                //     this.draggedImage.style.top = `${offsetY}px`;
-                // }
+        //     if (scale > 1 || (img.width * scale <= 900 && img.height * scale <= 383)) {
+        //         offsetX = (canvas.width - img.width * scale) / 2;
+        //         offsetY = (canvas.height - img.height * scale) / 2;
 
-                // 更新 lastMousePosition 为当前鼠标位置
-                lastMousePosition = { x: e.clientX, y: e.clientY };
-            }
-        };
+        //         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        //         ctx.drawImage(img, offsetX, offsetY, img.width * scale, img.height * scale);
+        //         // if (this.draggedImage){
+        //         //     this.draggedImage.style.left = `${offsetX}px`;
+        //         //     this.draggedImage.style.top = `${offsetY}px`;
+        //         // }
 
-        canvas.addEventListener('mousedown', mouseDownHandler);
-        document.addEventListener('mousemove', mouseMoveHandler);
-        document.addEventListener('mouseup', mouseUpHandler);
-        canvas.addEventListener('wheel', wheelHandler, { passive: false });
-        this.coverframe.innerHTML = ''
-        this.coverframe.appendChild(canvas)
+        //         // 更新 lastMousePosition 为当前鼠标位置
+        //         lastMousePosition = { x: e.clientX, y: e.clientY };
+        //     }
+        // };
 
-
+        // canvas.addEventListener('mousedown', mouseDownHandler);
+        // document.addEventListener('mousemove', mouseMoveHandler);
+        // document.addEventListener('mouseup', mouseUpHandler);
+        // canvas.addEventListener('wheel', wheelHandler, { passive: false });
+        // this.coverFrame.innerHTML = ''
+        this.coverFrame.appendChild(canvas)
     }
     updateCoverImage() {
         //TODO
