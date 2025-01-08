@@ -32,7 +32,8 @@ export type MSG_TYPE  =
   'set-draft-cover-image' |
   'set-image-as-cover' |
   'delete-media-item' |
-  'delete-draft-item' 
+  'delete-draft-item' |
+  'publish-draft-item'
 
   
 

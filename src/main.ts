@@ -36,6 +36,9 @@ const DEFAULT_SETTINGS: WeWriteSetting = {
 }
 
 export default class WeWritePlugin extends Plugin {
+	private spinnerEl: HTMLElement;
+	spinnerText: HTMLDivElement;
+
 	updateArticleTitle(value: string) {
 
 	}
@@ -192,15 +195,23 @@ export default class WeWritePlugin extends Plugin {
 	messageService: MessageService;
 	resourceManager = ResourceManager.getInstance(this);
 
+	createSpinner() {
+		this.spinnerEl = this.addStatusBarItem();
+		this.spinnerEl.addClass('wewrite-spinner');
+		this.spinnerEl.addClass('wewrite-spinner-hidden');
+		this.spinnerText = this.spinnerEl.createDiv({
+			text: 'Please wait...',
+			cls: 'wewrite-spinner-text',
+		});
+	}
 	async onload() {
 		this.messageService = new MessageService();
 		await this.loadSettings();
 		this.wechatClient = WechatClient.getInstance(this);
 		this.assetsManager = await AssetsManager.getInstance(this.app, this);
-		if (this.settings.selectedAccount !== undefined) {
-			await this.assetsManager.loadMaterial(this.settings.selectedAccount)
-		}
-
+		// if (this.settings.selectedAccount !== undefined) {
+		// 	await this.assetsManager.loadMaterial(this.settings.selectedAccount)
+		// }
 		// Initialize DeepSeek client if configured
 		if (this.settings.deepseekApiUrl && this.settings.deepseekApiKey) {
 			this.deepseekClient = DeepSeekClient.getInstance(this);
@@ -228,12 +239,23 @@ export default class WeWritePlugin extends Plugin {
 		// Register context menu for DeepSeek polish operation
 		// this.addContextMenu();
 		this.addEditorMenu();
+		this.createSpinner()
+		
 	}
+	showSpinner(text: string="") {
+        this.spinnerEl.style.display = 'block';
+		this.spinnerText.setText(text);
+    }
 
+    hideSpinner() {
+        this.spinnerEl.style.display = 'none';
+    }
 	onunload() {
 		if (this.editorChangeListener) {
 			this.app.workspace.offref(this.editorChangeListener);
 		}
+		// 移除 spinner 元素
+        this.spinnerEl.remove();
 	}
 
 	async loadSettings() {

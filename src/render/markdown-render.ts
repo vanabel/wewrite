@@ -5,7 +5,7 @@
 
 import { App, Component, MarkdownRenderChild, MarkdownRenderer, MarkdownView } from "obsidian";
 import { DeepSeekResult } from "../types";
-import domtoimage  from 'dom-to-image';
+import domtoimage from 'dom-to-image';
 async function delay(milliseconds: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, milliseconds));
 }
@@ -26,26 +26,26 @@ export class ObsidianMarkdownRenderer {
 
     private createDeepSeekControls(): HTMLElement {
         const controls = createDiv('deepseek-controls');
-        
+
         const summaryBtn = createEl('button', { text: '生成摘要' });
         summaryBtn.onclick = () => this.handleDeepSeekAction('summary');
-        
+
         const proofreadBtn = createEl('button', { text: '校对文本' });
         proofreadBtn.onclick = () => this.handleDeepSeekAction('proofread');
-        
+
         const polishBtn = createEl('button', { text: '润色文本' });
         polishBtn.onclick = () => this.handleDeepSeekAction('polish');
-        
+
         const coverBtn = createEl('button', { text: '生成封面' });
         coverBtn.onclick = () => this.handleDeepSeekAction('cover');
-        
+
         controls.append(summaryBtn, proofreadBtn, polishBtn, coverBtn);
         return controls;
     }
 
     private async handleDeepSeekAction(action: string) {
         const markdown = await this.app.vault.adapter.read(this.path);
-        
+
         try {
             const result = await this.callDeepSeekAPI(markdown, action);
             this.showDeepSeekResult(result, action);
@@ -67,15 +67,15 @@ export class ObsidianMarkdownRenderer {
 
     private showDeepSeekResult(result: DeepSeekResult, action: string) {
         this.deepseekResult.empty();
-        
+
         switch (action) {
             case 'summary':
-                this.deepseekResult.createEl('div', { 
+                this.deepseekResult.createEl('div', {
                     text: result.summary,
                     cls: 'deepseek-summary'
                 });
                 break;
-                
+
             case 'proofread':
                 if (result.corrections?.length) {
                     const list = this.deepseekResult.createEl('ul');
@@ -91,14 +91,14 @@ export class ObsidianMarkdownRenderer {
                     });
                 }
                 break;
-                
+
             case 'polish':
                 this.deepseekResult.createEl('div', {
                     text: result.polished,
                     cls: 'deepseek-polished'
                 });
                 break;
-                
+
             case 'cover':
                 if (result.coverImage) {
                     const img = this.deepseekResult.createEl('img', {
@@ -148,10 +148,11 @@ export class ObsidianMarkdownRenderer {
             || this.app.workspace.activeLeaf?.view
             || new MarkdownRenderChild(this.el)
         )
-        this.container.appendChild(this.el)
 
+        this.container.appendChild(this.el)
         await delay(100);
         this.rendering = false
+        // this.container.removeChild(this.el)
     }
     public queryElement(index: number, query: string) {
         if (this.el === undefined || !this.el) {

@@ -4,22 +4,22 @@
 import { App, arrayBufferToBase64, sanitizeHTMLToDom, TAbstractFile, TFile } from 'obsidian';
 
 export function isMarkdownFile(file: TFile | TAbstractFile) {
-	return ['md', 'markdown'].includes((file as TFile)?.extension ?? '');
+    return ['md', 'markdown'].includes((file as TFile)?.extension ?? '');
 }
 
 export function getMetadata(file: TFile, app: App) {
-	return app.metadataCache.getFileCache(file)?.frontmatter;
+    return app.metadataCache.getFileCache(file)?.frontmatter;
 }
 
 export class UrlUtils {
-    private app:App;
+    private app: App;
     constructor(app: App) {
         this.app = app;
     }
     public parseObsidianUrl(url: string): string | null {
         const regex = /obsidian:\/\/open\?vault=(.*?)&file=([^,]*),?(.*)$/;
         const match = url.match(regex);
-        
+
         if (match && match[2]) {
             return decodeURIComponent(match[2]);
         }
@@ -47,10 +47,10 @@ export class UrlUtils {
     }
     public async getInternalLinkDisplayUrl(internalLink: string): Promise<string | null> {
         const filePath = this.parseObsidianUrl(internalLink);
-        
+
         if (filePath) {
             const file = this.getFileFromPath(filePath);
-            
+
             if (file) {
                 return this.getDisplayUrl(file);
             }
@@ -59,9 +59,9 @@ export class UrlUtils {
     }
 }
 
-export function DomToDom(node:HTMLElement, queies:string[]){
+export function DomToDom(node: HTMLElement, queies: string[]) {
     let index = 0;
-    const nodeMap = new Map<string, HTMLElement >();
+    const nodeMap = new Map<string, HTMLElement>();
     for (const query of queies) {
         const elements = node.querySelectorAll(query);
         for (const element of elements) {
@@ -82,3 +82,4 @@ export function DomToDom(node:HTMLElement, queies:string[]){
     }
     return root
 }
+

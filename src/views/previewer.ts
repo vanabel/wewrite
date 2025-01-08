@@ -14,8 +14,7 @@ import { WechatClient } from '../wechat-api/wechat-client';
 import { MPArticleHeader } from './mp-article-header';
 import { ThemeManager } from './theme-manager';
 import { ThemeSelector } from './theme-selector';
-import { WebViewModal} from './webview';
-import { AssetsManager } from "src/assets/assets-manager";
+import { WebViewModal } from './webview';
 
 export const VIEW_TYPE_NP_PREVIEW = 'wechat-np-article-preview';
 export interface ElectronWindow extends Window {
@@ -85,6 +84,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
         this.startWatchActiveNoteChange()
         this._plugin.messageService.registerListener('custom-theme-changed', async (theme: string) => {
         })
+        
 
     }
 
@@ -103,7 +103,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
         const container = this.containerEl.children[1];
         container.empty();
 
-        const mainDiv = container.createDiv({ cls: 'previewer-container' });
+        const mainDiv = container.createDiv({ cls: 'wewrite-previewer-container' });
         this.articleTitle = new Setting(mainDiv)
             .setName('Article Title')
             .setHeading()
@@ -135,10 +135,12 @@ export class PreviewPanel extends ItemView implements PreviewRender {
             .addExtraButton(
                 (button) => {
                     button.setIcon('newspaper')
-                        .setTooltip('publish to MP directly.')
+                        .setTooltip('for testing')
                     button.onClick(async () => {
                         // this.draftHeader.publishDraft()
-                        this.openMPPlatform()
+                        // this.openMPPlatform()
+                        console.log(`for testing.....`);
+                        
                     })
                 }
             )
@@ -154,9 +156,9 @@ export class PreviewPanel extends ItemView implements PreviewRender {
 
         this.draftHeader = new MPArticleHeader(this._plugin, mainDiv)
 
-        this.renderDiv = mainDiv.createDiv({ cls: 'render-div' });
+        this.renderDiv = mainDiv.createDiv({ cls: 'render-container' });
         this.renderDiv.id = 'render-div';
-        this.renderDiv.setAttribute('style', '-webkit-user-select: text; user-select: text;');
+        // this.renderDiv.setAttribute('style', '-webkit-user-select: text; user-select: text;');
 
         //TODO: keep the shadow dom for future use, here for computed style from obsidian and all other plugins
         let shadowDom = this.renderDiv.shawdowRoot;
@@ -167,16 +169,6 @@ export class PreviewPanel extends ItemView implements PreviewRender {
 
         this.containerDiv = shadowDom.createDiv({ cls: 'wewrite-article' });
         this.articleDiv = this.containerDiv.createDiv({ cls: 'article-div' });
-
-    }
-    openMPPlatform() {
-        // window.open('https://mp.weixin.qq.com/', '_blank');
-        // if (this.mpModal === undefined) {
-        //     this.mpModal = new WebViewModal(this._plugin.app)
-        // }
-        // this.mpModal.open()
-        const am = AssetsManager.getInstance(this._plugin.app, this._plugin)
-        am.removeMediaItemsFromDB('draft')
 
     }
     async checkCoverImage() {
@@ -194,6 +186,14 @@ export class PreviewPanel extends ItemView implements PreviewRender {
             const news_item = await this.wechatClient.getDraftById(this._plugin.settings.selectedAccount!, media_id)
             if (news_item) {
                 open(news_item[0].url)
+                const item = {
+                    media_id: media_id,
+                    content: {
+                        news_item:[news_item]
+                    },
+                    update_time: Date.now()
+                }
+                this._plugin.messageService.sendMessage('draft-item-updated', item)
             }
         }
     }
@@ -307,4 +307,5 @@ export class PreviewPanel extends ItemView implements PreviewRender {
 
         }
     }
+    
 }

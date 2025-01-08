@@ -9,28 +9,10 @@
 import WeWritePlugin from "src/main";
 import PouchDB from 'pouchdb';
 import PouchDBFind from 'pouchdb-find';
+import { areObjectsEqual } from "src/utils/utils";
 PouchDB.plugin(PouchDBFind);
 
-export function areObjectsEqual(obj1: any, obj2: any): boolean {
-    if (obj1 === obj2) return true;
 
-    if (typeof obj1 !== 'object' || obj1 === null || typeof obj2 !== 'object' || obj2 === null) {
-        return false;
-    }
-
-    const keys1 = Object.keys(obj1);
-    const keys2 = Object.keys(obj2);
-
-    if (keys1.length !== keys2.length) return false;
-
-    for (const key of keys1) {
-        if (!keys2.includes(key) || !areObjectsEqual(obj1[key], obj2[key])) {
-            return false;
-        }
-    }
-
-    return true;
-}
 
 export type LocalDraftItem = {
     accountName?: string;
@@ -96,7 +78,7 @@ export class LocalDraftManager {
         if (draft === undefined && activeFile === null) {
             return true
         }
-        if (draft !== undefined && activeFile ) {
+        if (draft !== undefined && activeFile) {
             return draft.notePath === activeFile.path
         }
         return false
@@ -127,11 +109,12 @@ export class LocalDraftManager {
             this.db.get(doc._id)
                 .then(existedDoc => {
                     const existingDraft = existedDoc as LocalDraftItem;
-                    // Only update if content has actually changed
-                    if (doc.content !== existingDraft.content || 
-                        doc.title !== existingDraft.title ||
-                        doc.cover_image_url !== existingDraft.cover_image_url) {
-                        
+                    if (areObjectsEqual(doc, existingDraft)) {
+                        // No changes needed
+                        resolve(true);
+                        return;
+                    }
+                    else {
                         doc._rev = existedDoc._rev;
                         return this.db.put(doc)
                             .then(() => resolve(true))

@@ -6,15 +6,20 @@
 import { App, getBlobArrayBuffer, Notice, requestUrl, RequestUrlParam } from "obsidian";
 import WeWritePlugin from "src/main";
 import { getErrorMessage } from "./error-code";
-import { DraftArticle } from "./wechat-types";
+import { DraftArticle, DraftItem } from "./wechat-types";
 import { LocalDraftItem } from "src/assets/draft-manager";
+import { ConfirmPublishModal as ConfirmPublishDialog } from "src/views/confirm-publish-modal";
 
 export class WechatClient {
   private static instance: WechatClient;
   private _plugin: WeWritePlugin;
   readonly baseUrl: string = 'https://api.weixin.qq.com/cgi-bin';
+  confirmPublishModal: ConfirmPublishDialog;
   private constructor(plugin: WeWritePlugin) {
     this._plugin = plugin
+    this._plugin.messageService.registerListener('publish-draft-item', async (item: DraftItem) => {
+      this.confirmPublish(item)
+    })
   }
   public static getInstance(plugin: WeWritePlugin): WechatClient {
     if (!WechatClient.instance) {
@@ -106,7 +111,7 @@ export class WechatClient {
 
     return media_id;
   }
-  
+
   public async uploadImage(data: Blob, filename: string, type?: string) {
     const accessToken = await this._plugin.refreshAccessToken(this._plugin.settings.selectedAccount);
     if (!accessToken) {
@@ -147,6 +152,9 @@ export class WechatClient {
     const res = await requestUrl(options);
 
     const resData = await res.json;
+    if (resData.errcode === undefined || resData.errcode == 0) {
+      this._plugin.messageService.sendMessage("image-item-updated", resData)
+    }
     return {
       url: resData.url || '',
       media_id: resData.media_id || '',
@@ -229,7 +237,7 @@ export class WechatClient {
     if (!accessToken) {
       return false;
     }
-    
+
     const url = `${this.baseUrl}/material/get_materialcount?access_token=${accessToken}`
     const req: RequestUrlParam = {
       url: url,
@@ -384,5 +392,14 @@ export class WechatClient {
       return true
     }
   }
-  
+  confirmPublish(item: DraftItem) {
+    console.log(`confirm publish`);
+    if (this.confirmPublishModal === undefined) {
+      this.confirmPublishModal = new ConfirmPublishDialog(this._plugin, item)
+    } else {
+      this.confirmPublishModal.update(item)
+    }
+    const modal = new ConfirmPublishDialog(this._plugin, item)
+    modal.open()
+  }
 }

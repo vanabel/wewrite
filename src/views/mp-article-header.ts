@@ -6,11 +6,11 @@ import { LocalDraftItem, LocalDraftManager } from 'src/assets/draft-manager';
 import WeWritePlugin from 'src/main';
 import { UrlUtils } from 'src/utils/urls';
 import { WechatClient } from "src/wechat-api/wechat-client";
-import { MaterialItem, MaterialMeidaItem } from "src/wechat-api/wechat-types";
+import { MaterialMeidaItem } from "src/wechat-api/wechat-types";
 
 interface Point {
-	x: number;
-	y: number;
+    x: number;
+    y: number;
 }
 
 
@@ -20,20 +20,6 @@ export class MPArticleHeader {
             this.activeLocalDraft.last_draft_id = media_id
         }
     }
-    publishDraft() {
-        if (this.activeLocalDraft !== undefined) {
-            if (this.activeLocalDraft.last_draft_id !== undefined && this.activeLocalDraft.last_draft_id) {
-                WechatClient.getInstance(this._plugin).publishDraft(this.activeLocalDraft.last_draft_id)
-                    .then(() => {
-                        new Notice('Publish Successfully')
-                    })
-                    .catch((error: any) => {
-                        new Notice('Publish Failed')
-                    })
-            }
-        }
-    }
-
 
     private _plugin: WeWritePlugin;
     private panning: boolean = false
@@ -103,8 +89,10 @@ export class MPArticleHeader {
         return this.activeLocalDraft
     }
     private BuildUI(containerEl: HTMLElement) {
-        const details = containerEl.createEl('details', { cls: 'wechat-mp-article-preview', attr: {} })
-        const summary = details.createEl('summary', { cls: 'wechat-mp-article-preview-summary', text: 'WeChat MP Article Properties' })
+        const container = containerEl.createEl('div', { cls: 'wechat-mp-article-header' })
+        const details = container.createEl('details')
+        details.createEl('summary', { text: 'WeChat MP Article Properties' })
+
         new Setting(details).setName('Title')
             .addText(text => {
                 this._title = text;
@@ -130,15 +118,15 @@ export class MPArticleHeader {
             })
 
         new Setting(details).setName('Digest')
-        .addExtraButton(button => {
-            button.setIcon("sparkles")
-            .setTooltip("Generate Digest by AI")
-                .onClick(async () => {
-                    this.generateDigest();
-                })
-        })
+            .addExtraButton(button => {
+                button.setIcon("sparkles")
+                    .setTooltip("Generate Digest by AI")
+                    .onClick(async () => {
+                        this.generateDigest();
+                    })
+            })
 
-        this._digest = details.createEl('textarea', { cls: 'wechat-mp-article-preview-digest', attr: { rows: 3, placeholder: '图文消息的摘要，仅有单图文消息才有摘要，多图文此处为空。如果本字段为没有填写，则默认抓取正文前54个字。' } })
+        this._digest = details.createEl('textarea', { cls: 'digest', attr: { rows: 3, placeholder: '图文消息的摘要，仅有单图文消息才有摘要，多图文此处为空。如果本字段为没有填写，则默认抓取正文前54个字。' } })
         this._digest.onkeyup = (event: KeyboardEvent) => {
             const target = event.target as HTMLTextAreaElement;
             if (this.activeLocalDraft !== undefined) {
@@ -153,7 +141,9 @@ export class MPArticleHeader {
             .setName('Need Open Comments')
             .setDesc('是否打开评论，0不打开(默认)，1打开')
             .addToggle(toggle => {
-                this._needOpenComment = toggle; toggle.setValue(false); toggle.onChange(value => {
+                this._needOpenComment = toggle; 
+                toggle.setValue(false); 
+                toggle.onChange(value => {
                     if (this.activeLocalDraft !== undefined) {
                         this.activeLocalDraft.need_open_comment = value ? 1 : 0
                         this.localDraftmanager.setDraft(this.activeLocalDraft)
@@ -188,11 +178,15 @@ export class MPArticleHeader {
             new Notice('No Active Note')
             return
         }
+        this._plugin.showSpinner()
         const md = await this._plugin.app.vault.adapter.read(this.activeLocalDraft.notePath)
-        const summary = await  this._plugin.deepseekClient?.generateSummary(md)
-        if (summary){
+        const summary = await this._plugin.deepseekClient?.generateSummary(md)
+        if (summary) {
             this._digest.value = summary
+            this.activeLocalDraft.digest = summary
+            this.localDraftmanager.setDraft(this.activeLocalDraft)
         }
+        this._plugin.hideSpinner()
     }
     private createCoverFrame(details: HTMLElement) {
         new Setting(details)
@@ -224,10 +218,10 @@ export class MPArticleHeader {
                         this.updateCoverImage()
                     })
             )
-        const container = details.createDiv({ cls: 'wechat-mp-article-preview-cover-container' })
+        const container = details.createDiv({ cls: 'cover-container' })
         // const it = new ImageTransformer(container)    
         // return it.container
-        const coverframe = container.createDiv({ cls: 'wechat-mp-article-preview-cover', attr: { droppable: true } })
+        const coverframe = container.createDiv({ cls: 'cover-frame', attr: { droppable: true } })
 
         // const img = coverframe.createEl('img', {attr:{dragable:false}})
 
@@ -273,94 +267,94 @@ export class MPArticleHeader {
             coverframe.removeClass('image-on-dragover')
         })
 
-        
+
         return coverframe
     }
-    setCoverImage(url: string|null) {
-        console.log(`setCoverImage:`, url);
-        
-        if (!url){
+    setCoverImage(url: string | null) {
+        // console.log(`setCoverImage:`, url);
+
+        if (!url) {
             return
         }
-        
+
         const img = new Image()
         img.src = url
 
         const canvas = document.createElement('canvas');
-		const ctx = canvas.getContext('2d')!;
+        const ctx = canvas.getContext('2d')!;
 
         canvas.width = 900
         canvas.height = 383
 
         let scale = Math.min(900 / img.width, 383 / img.height);
-		let offsetX = (canvas.width - img.width * scale) / 2;
-		let offsetY = (canvas.height - img.height * scale) / 2;
+        let offsetX = (canvas.width - img.width * scale) / 2;
+        let offsetY = (canvas.height - img.height * scale) / 2;
 
-		ctx.drawImage(img, offsetX, offsetY, img.width * scale, img.height * scale);
+        ctx.drawImage(img, offsetX, offsetY, img.width * scale, img.height * scale);
 
-		canvas.style.position = 'absolute';
-		canvas.style.cursor = 'move';
-		canvas.style.left = `${offsetX}px`;
-		canvas.style.top = `${offsetY}px`;
+        canvas.style.position = 'absolute';
+        canvas.style.cursor = 'move';
+        canvas.style.left = `${offsetX}px`;
+        canvas.style.top = `${offsetY}px`;
 
         let lastMousePosition: Point | null = null;
         this.draggedImage = canvas;
 
-		const mouseDownHandler = (e: MouseEvent) => {
-			lastMousePosition = { x: e.clientX, y: e.clientY };
-			this.draggedImage = canvas;
-		};
+        const mouseDownHandler = (e: MouseEvent) => {
+            lastMousePosition = { x: e.clientX, y: e.clientY };
+            this.draggedImage = canvas;
+        };
 
-		const mouseMoveHandler = (e: MouseEvent) => {
-			if (!this.draggedImage || !lastMousePosition) return;
+        const mouseMoveHandler = (e: MouseEvent) => {
+            if (!this.draggedImage || !lastMousePosition) return;
 
-			const deltaX = e.clientX - lastMousePosition.x;
-			const deltaY = e.clientY - lastMousePosition.y;
+            const deltaX = e.clientX - lastMousePosition.x;
+            const deltaY = e.clientY - lastMousePosition.y;
 
-			offsetX += deltaX;
-			offsetY += deltaY;
+            offsetX += deltaX;
+            offsetY += deltaY;
 
-			this.draggedImage.style.left = `${offsetX}px`;
-			this.draggedImage.style.top = `${offsetY}px`;
+            this.draggedImage.style.left = `${offsetX}px`;
+            this.draggedImage.style.top = `${offsetY}px`;
 
-			lastMousePosition = { x: e.clientX, y: e.clientY };
-		};
+            lastMousePosition = { x: e.clientX, y: e.clientY };
+        };
 
-		const mouseUpHandler = () => {
-			lastMousePosition = null;
-			// this.draggedImage = null;
-		};
+        const mouseUpHandler = () => {
+            lastMousePosition = null;
+            // this.draggedImage = null;
+        };
 
-		const wheelHandler = (e: WheelEvent) => {
-			e.preventDefault();
+        const wheelHandler = (e: WheelEvent) => {
+            e.preventDefault();
 
-			const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
-			scale *= zoomFactor;
+            const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
+            scale *= zoomFactor;
 
-			if (scale > 1 || (img.width * scale <= 900 && img.height * scale <= 383)) {
-				offsetX = (canvas.width - img.width * scale) / 2;
-				offsetY = (canvas.height - img.height * scale) / 2;
+            if (scale > 1 || (img.width * scale <= 900 && img.height * scale <= 383)) {
+                offsetX = (canvas.width - img.width * scale) / 2;
+                offsetY = (canvas.height - img.height * scale) / 2;
 
-				ctx.clearRect(0, 0, canvas.width, canvas.height);
-				ctx.drawImage(img, offsetX, offsetY, img.width * scale, img.height * scale);
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, offsetX, offsetY, img.width * scale, img.height * scale);
                 // if (this.draggedImage){
                 //     this.draggedImage.style.left = `${offsetX}px`;
                 //     this.draggedImage.style.top = `${offsetY}px`;
                 // }
 
-				// 更新 lastMousePosition 为当前鼠标位置
-				lastMousePosition = { x: e.clientX, y: e.clientY };
-			}
-		};
+                // 更新 lastMousePosition 为当前鼠标位置
+                lastMousePosition = { x: e.clientX, y: e.clientY };
+            }
+        };
 
-		canvas.addEventListener('mousedown', mouseDownHandler);
-		document.addEventListener('mousemove', mouseMoveHandler);
-		document.addEventListener('mouseup', mouseUpHandler);
-		canvas.addEventListener('wheel', wheelHandler, { passive: false });
+        canvas.addEventListener('mousedown', mouseDownHandler);
+        document.addEventListener('mousemove', mouseMoveHandler);
+        document.addEventListener('mouseup', mouseUpHandler);
+        canvas.addEventListener('wheel', wheelHandler, { passive: false });
         this.coverframe.innerHTML = ''
         this.coverframe.appendChild(canvas)
 
-        
+
     }
     updateCoverImage() {
         //TODO
@@ -372,7 +366,7 @@ export class MPArticleHeader {
         this.current_y = 0;
         this.setCoverImageXY(0, 0)
     }
-    
+
     async checkCoverImage() {
         if (this.activeLocalDraft !== undefined) {
             if (this.activeLocalDraft.thumb_media_id === undefined || !this.activeLocalDraft.thumb_media_id) {
@@ -407,7 +401,7 @@ export class MPArticleHeader {
         return _media_id
 
     }
-    private setCoverImageXY(x: number, y: number) {
+    private setCoverImageXY(x: number = 0, y: number = 0) {
 
         // this.coverframe.setAttr('style', `background-image: url('${this.cover_image}'); background-size:cover; background-repeat: no-repeat; background-position:  ${x}px ${y}px;`);
         // if (this.activeLocalDraft !== undefined) {
@@ -428,6 +422,7 @@ export class MPArticleHeader {
         return true;
     }
     updateHeaderProporties() {
+        // console.log(`updateHeaderProporties:`, this.activeLocalDraft);
         if (this.activeLocalDraft !== undefined) {
             this._title.setValue(this.activeLocalDraft.title)
             this._author.setValue(this.activeLocalDraft.author || "")
@@ -435,6 +430,7 @@ export class MPArticleHeader {
             this._needOpenComment.setValue((this.activeLocalDraft.need_open_comment || 0) > 0)
             this._onlyFansCanComment.setValue((this.activeLocalDraft.only_fans_can_comment || 0) > 0)
             this.cover_image = this.activeLocalDraft.cover_image_url || ""
+            this.setCoverImageXY()
             const x = this.activeLocalDraft.pic_crop_235_1?.split(' ')[0] || 0
             const y = this.activeLocalDraft.pic_crop_235_1?.split(' ')[1] || 0
             // this.coverframe.setAttr('style', `background-image: url('${this.cover_image}'); background-size:cover; background-repeat: no-repeat; background-position:  ${x}px ${y}px;`);
@@ -449,8 +445,9 @@ export class MPArticleHeader {
             const y = 0
             // this.coverframe.setAttr('style', `background-image: url('${this.cover_image}'); background-size:cover; background-repeat: no-repeat; background-position:  ${x}px ${y}px;`);
         }
-        if (this.cover_image){
-            this.setCoverImage(this.cover_image)
+        if (this.cover_image) {
+            // this.setCoverImage(this.cover_image)
+            this.setCoverImageXY()
         }
         this._plugin.messageService.sendMessage('draft-title-updated', this._title.getValue())
     }

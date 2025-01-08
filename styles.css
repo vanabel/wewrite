@@ -54,7 +54,7 @@ left side view
 }
 
 .wewrite-material-panel-header {
-  background-color:bisque;
+  /* background-color: bisque; */
   padding: 5px;
   cursor: pointer;
   font-weight: bold;
@@ -117,40 +117,45 @@ left side view
 
 .wechat-mp-account-info-div .wechat-mp-account-info-content {
   padding: 10px;
+  font-size: 0.8em;
+  font-weight: 500;
 }
 
-details {
+/* article header */
+.wechat-mp-article-header {
+  padding: 5px;
+  border: 2px solid #ccc;
+  /* background-color: bisque; papayawhip */
+  border-radius: 6px;
+  margin-bottom: 0.5em;
+}
+
+.wechat-mp-article-header details {
   margin: 5px;
-  /* border: 1px solid #ccc;
-  border-radius: 4px;
-  padding: 10px; */
 }
 
-summary {
+.wechat-mp-article-header summary {
   font-weight: normal;
   cursor: pointer;
   outline: none;
-  padding: 20px 0;
+  margin-left: 0px;
+
 }
 
-summary::-webkit-details-marker {
+.wechat-mp-article-header summary::-webkit-details-marker {
   display: none;
 }
 
-.wechat-mp-article-preview-summary {
-  margin-left: 0px;
-}
-
-summary::before {
+.wechat-mp-article-header summary::before {
   content: "";
   font-weight: normal;
 }
 
-details[open] summary::before {
+.wechat-mp-article-header details[open] summary::before {
   content: "";
 }
 
-.wechat-mp-article-preview-cover-container {
+.wechat-mp-article-header .cover-container {
   max-width: 500px;
   position: relative;
   width: 100%;
@@ -160,27 +165,14 @@ details[open] summary::before {
   margin: auto;
 }
 
-.wechat-mp-article-preview-cover-container::before {
+.wechat-mp-article-header .cover-container::before {
   content: "";
   display: block;
   padding-top: 42.55%;
   /* 1 / 2.35 * 100%，计算得到的百分比 */
 }
 
-.wechat-mp-article-preview-cover-old {
-  margin: auto;
-  border: 1px dashed #ccc;
-  border-radius: 4px;
-  /* height: 900px; */
-  max-width: 500px;
-  width: 100%;
-  padding-top: 42.55%;
-  overflow: hidden;
-  position: relative;
-  /* 确保子元素可以相对于此容器定位 */
-}
-
-.wechat-mp-article-preview-cover {
+.wechat-mp-article-header .cover-frame {
   margin: auto;
   position: absolute;
   top: 0;
@@ -192,7 +184,7 @@ details[open] summary::before {
 }
 
 
-.wechat-mp-article-preview-cover>* {
+.wechat-mp-article-header .cover-frame>* {
   position: absolute;
   top: 0;
   left: 0;
@@ -200,7 +192,7 @@ details[open] summary::before {
   height: 100%;
 }
 
-.wechat-mp-article-preview-cover img {
+.wechat-mp-article-header .cover-frame img {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -209,11 +201,11 @@ details[open] summary::before {
   /* 设置图片的宽高比 */
 }
 
-.image-on-dragover {
+.wechat-mp-article-header .cover-frame .image-on-dragover {
   border: 2px dashed red;
 }
 
-.wechat-mp-article-preview-digest {
+.wechat-mp-article-header .digest {
   width: 100%;
   /* 全宽 */
   height: auto;
@@ -228,56 +220,39 @@ details[open] summary::before {
   /* 包含边框和内边距 */
 }
 
-.article-preview-content {
-  padding: 5px;
-  border: 1px solid #ccc;
-  background-color: white;
-  flex-grow: 1;
-  /* 占据剩余的空间 */
-  overflow-y: auto;
-  /* 超出时显示滚动条 */
-}
-
-.previewer-container {
+/* previewer */
+.wewrite-previewer-container {
   display: flex;
   flex-direction: column;
   height: 88vh;
   /* 100% 视口高度 */
 }
 
-/* image editor */
-.image-editor-modal {
-  width: 90vw;
-  height: 80vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px;
-  gap: 10px;
-}
-
-.container {
-  position: relative;
-  border: 2px dashed #ccc;
-  overflow: hidden;
-  margin-bottom: 10px;
-}
-
-#regionA {
-  width: 300px;
-  height: 127.6px;
+.wewrite-previewer-container .render-container {
+  border: 2px solid #ccc;
+  border-radius: 6px;
   background-color: #fff;
+  padding: 5px;
+  -webkit-user-select: text;
+  user-select: text;
+
 }
 
-#regionB {
-  width: 127.6px;
-  height: 127.6px;
-  background-color: #fff;
+.wewrite-previewer-container .wewrite-article {
+  margin: 0;
+  padding: 0;
+  border: 1px dashed lightgray;
 }
 
-canvas {
-  cursor: move;
+.wewrite-previewer-container .article-div {
+  border: none;
 }
+
+
+
+/* 
+material view 
+*/
 
 .wewrite-material-view-tabs {
   width: 100%;
@@ -292,11 +267,11 @@ canvas {
 }
 
 .wewrite-material-view-tab {
-  background: transparent!important;
+  background: transparent !important;
   /* Remove background */
-  border: none!important;
+  border: none !important;
   /* Remove border */
-  box-shadow: none!important;
+  box-shadow: none !important;
   /* Remove shadow */
   color: var(--text-normal);
   /* Use Obsidian's default text color */
@@ -306,18 +281,94 @@ canvas {
 }
 
 .wewrite-material-view-tab:hover {
-  background: var(--background-modifier-hover); /* Add hover effect */
-  color:var(--interactive-accent)
+  background: var(--background-modifier-hover);
+  /* Add hover effect */
+  color: var(--interactive-accent)
 }
+
 .wewrite-material-view-tab.active {
-  background: var(--background-modifier-active); /* Add active effect */
+  background: var(--background-modifier-active);
+  /* Add active effect */
 }
 
 .wewrite-material-view-tab-content {
   padding: 0;
 }
 
-.draft-news-item{
+.draft-news-item {
   margin-top: 0.5em;
   font-size: 0.8em;
+}
+
+/* confirm pulbish */
+.confirm-pulbish-dialog {
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+
+}
+
+.confirm-pulbish-dialog-content {
+
+  display: flex;
+  padding: 10px;
+  flex-direction: column;
+
+}
+
+.confirm-pulbish-dialog-content .description {
+  border: gray 2px solid;
+  padding: 1em;
+  line-height: 1.8em;
+  flex-grow: 1;
+  text-align: justify;
+}
+
+.confirm-pulbish-dialog-tool-bar {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  flex: auto
+    /* width: 100%; */
+}
+
+.confirm-pulbish-dialog-content button {
+  margin-top: 2em;
+  margin: 1em;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.danger-button {
+  background-color: rgb(139, 22, 4) !important;
+  color: azure !important;
+}
+
+@keyframes spin {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+.wewrite-spinner {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.wewrite-spinner-hidden {
+  display: none;
 }

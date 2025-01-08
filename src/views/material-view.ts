@@ -36,6 +36,9 @@ export class MaterialView extends ItemView {
 
   async onOpen() {
     this.redraw();
+    if (this._plugin.settings.selectedAccount !== undefined) {
+			this._plugin.assetsManager.loadMaterial(this._plugin.settings.selectedAccount)
+		}
   }
 
   async onClose() { }

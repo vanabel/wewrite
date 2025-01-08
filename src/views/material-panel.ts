@@ -69,6 +69,18 @@ export class MaterialPanel {
         this.updateItemUsed(item)
       })
     }
+    // this.getLocalItems()
+  }
+  getLocalItems(){
+    const list = this._plugin.assetsManager.assets.get(this.type)
+    console.log(`getLocalItems:${this.type}`, list);
+    
+    if (list !== undefined) {
+      list.forEach((item) => {
+        
+        this.addItem(item)
+      })
+    }
   }
   async refreshContent(): Promise<any> {
     this.content.innerHTML = '';
@@ -146,6 +158,14 @@ export class MaterialPanel {
             this._plugin.messageService.sendMessage("delete-draft-item", mediaItem)
           });
       });
+      menu.addItem((item) => {
+        item.setTitle('publish draft')
+          .setIcon('send')
+          .onClick(async () => {
+            console.log('to delete draft:', item)
+            this._plugin.messageService.sendMessage("publish-draft-item", mediaItem)
+          });
+      });
     }
 
     menu.showAtPosition({ x: event.clientX, y: event.clientY });
@@ -179,7 +199,17 @@ export class MaterialPanel {
     this.setTotal(0);
 
   }
+
+  isItemExist(item:any){
+    return this.items.some((i)=>{
+      return i.item.media_id === item.media_id
+    })
+  }
   addItem(item: any) {
+    if (this.isItemExist(item)){
+      console.log(`item exist, do nothing.`);
+      return
+    }
     const itemDiv = this.content.createDiv({ cls: 'wewrite-material-panel-item' });
     itemDiv.style.cursor = 'pointer';
     

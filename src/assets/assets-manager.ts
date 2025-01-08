@@ -19,13 +19,12 @@
  */
 
 import { App, Notice, sanitizeHTMLToDom } from "obsidian";
-import WeWritePlugin from "src/main";
-import { getErrorMessage } from "src/wechat-api/error-code";
-import { DraftItem, MaterialItem, MaterialMeidaItem, MaterialNewsItem, MediaType, NewsItem } from "src/wechat-api/wechat-types";
 import PouchDB from 'pouchdb';
 import PouchDBFind from 'pouchdb-find';
-import { SrcThumbList } from "src/utils/src-thumb-list";
-import { areObjectsEqual } from "./draft-manager";
+import WeWritePlugin from "src/main";
+import { areObjectsEqual } from "src/utils/utils";
+import { getErrorMessage } from "src/wechat-api/error-code";
+import { DraftItem, MaterialItem, MaterialMeidaItem, MaterialNewsItem, MediaType, NewsItem } from "src/wechat-api/wechat-types";
 export const MediaTypeLable = new Map([
     ['image', '图片'],
     ['voice', '语音'],
@@ -94,7 +93,20 @@ export class AssetsManager {
         this._plugin.messageService.registerListener('delete-draft-item', (item: MaterialItem) => {
             this.deleteDraftItem(item)
         })
+        this._plugin.messageService.registerListener('image-item-updated', (item: MaterialItem) => {
+            this.addImageItem(item)
+        })
+        this._plugin.messageService.registerListener('draft-item-updated', (item: MaterialItem) => {
+            this.addImageItem(item)
+        })
 
+    }
+    addImageItem(item: MaterialItem) {
+        this.assets.get('image')?.push(item)
+    }
+    addDraftItem(item: MaterialItem) {
+        this.assets.get('draft')?.push(item)
+        this.scanDraftNewsUsedImages()
     }
     public static getInstance(app: App, plugin: WeWritePlugin): AssetsManager {
         if (!AssetsManager.instance) {
@@ -137,81 +149,48 @@ export class AssetsManager {
 
     }
     public async loadMaterial(accountName: string) {
-
-        this._plugin.messageService.sendMessage('clear-news-list', null)
-        let list = await this.getAllMeterialOfTypeFromDB(accountName, 'news')
-
-        if (list !== undefined || list !== null) {
-            this.assets.set('news', list)
+        console.log(`loadMaterial:`, accountName);
+        const types: MediaType[] = [
+            'draft', 'image', 'video', 'voice', 'news'
+        ];
+        for (const type of types) {
+            this._plugin.messageService.sendMessage(`clear-${type}-list`, null)
+            const list = await this.getAllMeterialOfTypeFromDB(accountName, type)
+            this.assets.set(type, list)
             list.forEach(item => {
-                this._plugin.messageService.sendMessage('news-item-updated', item)
+                this._plugin.messageService.sendMessage(`${type}-item-updated`, item)
             });
         }
-
-        this._plugin.messageService.sendMessage('clear-image-list', null)
-        list = await this.getAllMeterialOfTypeFromDB(accountName, 'image')
-        if (list !== undefined || list !== null) {
-            this.assets.set('image', list)
-            list.forEach(item => {
-                this._plugin.messageService.sendMessage('image-item-updated', item)
-            });
-        }
-
-        this._plugin.messageService.sendMessage('clear-voice-list', null)
-        list = await this.getAllMeterialOfTypeFromDB(accountName, 'voice')
-        if (list !== undefined || list !== null) {
-            this.assets.set('voice', list)
-            list.forEach(item => {
-                this._plugin.messageService.sendMessage('voice-item-updated', item)
-            });
-        }
-
-
-        this._plugin.messageService.sendMessage('clear-video-list', null)
-        list = await this.getAllMeterialOfTypeFromDB(accountName, 'video')
-        if (list !== undefined || list !== null) {
-            this.assets.set('video', list)
-            list.forEach(item => {
-                this._plugin.messageService.sendMessage('video-item-updated', item)
-            });
-        }
-
-        this._plugin.messageService.sendMessage('clear-draft-list', null)
-        list = await this.getAllMeterialOfTypeFromDB(accountName, 'draft')
-        if (list !== undefined || list !== null) {
-            this.assets.set('draft', list)
-            list.forEach(item => {
-                this._plugin.messageService.sendMessage('draft-item-updated', item)
-            });
-        }
-
-        // assets check here.
-        // this.checkAssets()
-        // this._plugin.assetsUpdated()
         this.scanDraftNewsUsedImages()
     }
     public async pullAllMaterial(accountName: string) {
         const json = await this._plugin.wechatClient.getMaterialCounts(accountName)
         console.log(`material count:`, json);
-        
-        
-        this._plugin.messageService.sendMessage('clear-draft-list', null)
-        this._plugin.messageService.sendMessage('clear-news-list', null)
-        this._plugin.messageService.sendMessage('clear-image-list', null)
-        this._plugin.messageService.sendMessage('clear-video-list', null)
-        this._plugin.messageService.sendMessage('clear-voice-list', null)
-        this._plugin.messageService.sendMessage('clear-thumb-list', null)
-        this.getAllDrafts((item) => { this._plugin.messageService.sendMessage('draft-item-updated', item) }, accountName)
-        this.getAllNews((item) => { this._plugin.messageService.sendMessage('news-item-updated', item) }, accountName)
-        this.getAllMaterialOfType('image', (item) => { this._plugin.messageService.sendMessage('image-item-updated', item) }, accountName)
-        this.getAllMaterialOfType('video', (item) => { this._plugin.messageService.sendMessage('video-item-updated', item) }, accountName)
-        this.getAllMaterialOfType('voice', (item) => { this._plugin.messageService.sendMessage('voice-item-updated', item) }, accountName)
+
+        const types: MediaType[] = [
+            'draft', 'image', 'video', 'voice', 'news'
+        ];
+        for (const type of types) {
+            this._plugin.messageService.sendMessage(`clear-${type}-list`, null)
+            this.getAllMaterialOfType(type, (item) => { this._plugin.messageService.sendMessage(`${type}-item-updated`, item) }, accountName)
+        }
+        // this._plugin.messageService.sendMessage('clear-draft-list', null)
+        // this._plugin.messageService.sendMessage('clear-news-list', null)
+        // this._plugin.messageService.sendMessage('clear-image-list', null)
+        // this._plugin.messageService.sendMessage('clear-video-list', null)
+        // this._plugin.messageService.sendMessage('clear-voice-list', null)
+        // this._plugin.messageService.sendMessage('clear-thumb-list', null)
+        // this.getAllDrafts((item) => { this._plugin.messageService.sendMessage('draft-item-updated', item) }, accountName)
+        // this.getAllNews((item) => { this._plugin.messageService.sendMessage('news-item-updated', item) }, accountName)
+        // this.getAllMaterialOfType('image', (item) => { this._plugin.messageService.sendMessage('image-item-updated', item) }, accountName)
+        // this.getAllMaterialOfType('video', (item) => { this._plugin.messageService.sendMessage('video-item-updated', item) }, accountName)
+        // this.getAllMaterialOfType('voice', (item) => { this._plugin.messageService.sendMessage('voice-item-updated', item) }, accountName)
         // this.checkAssets()
-        this.scanDraftNewsUsedImages()
+        // this.scanDraftNewsUsedImages()
         this._plugin.assetsUpdated()
     }
 
-    public async getAllNews(callback: (newsItems: DraftItem[]) => void, accountName: string | undefined) {
+    public async getAllNews(callback: (newsItems: MaterialNewsItem) => void, accountName: string | undefined) {
         const list = []
         let offset = 0;
         let total = MAX_COUNT;
@@ -225,19 +204,16 @@ export class AssetsManager {
             list.push(...item);
             total = total_count
             offset += item_count;
-            if (callback) {
-                // callback(item)
-                item.forEach((i: any) => {
-                    callback(i)
-                })
-            }
         }
         this.assets.set('news', list)
-        list.forEach((item: MaterialItem) => {
+        list.forEach((item: MaterialNewsItem) => {
             item.accountName = accountName
             item.type = 'news'
 
             this.pushMaterailToDB(item)
+            if (callback) {
+                callback(item)
+            }
         })
         this.scanDraftNewsUsedImages()
     }
@@ -255,28 +231,31 @@ export class AssetsManager {
             draftList.push(...item);
             total = total_count
             offset += item_count;
-            if (callback) {
-                item.forEach((i: any) => {
-                    i.accountName = accountName
-                    i.type = 'draft'
-                    callback(i)
-                })
-            }
+
+
         }
         draftList.sort((a, b) => {
             return b.update_time - a.update_time
         })
         this.assets.set('draft', draftList)
         console.log(`getAll type draft:`, draftList);
-        this.removeMediaItemsFromDB('draft')
-        draftList.forEach((i: MaterialItem) => {
+        await this.removeMediaItemsFromDB('draft')
+        draftList.forEach((i: DraftItem) => {
+            i.accountName = accountName
+            i.type = 'draft'
+            if (callback) {
+                callback(i)
+            }
             this.pushMaterailToDB(i)
         })
         this.scanDraftNewsUsedImages()
     }
-    public async getAllMaterialOfType(type: MediaType, callback: (items: []) => void, accountName: string | undefined) {
+    public async getAllMaterialOfType(type: MediaType, callback: (item:MaterialItem) => void, accountName: string | undefined) {
         if (type === 'news') {
             return await this.getAllNews(callback, accountName);
+        }
+        if (type === 'draft') {
+            return await this.getAllDrafts(callback, accountName);
         }
         const list = []
         let offset = 0;
@@ -291,24 +270,21 @@ export class AssetsManager {
             list.push(...item);
             total = total_count
             offset += item_count;
-            if (callback) {
-                // callback(item)
-                item.forEach((i: any) => {
-                    item.accountName = accountName
-                    item.type = type
-                    callback(i)
-                })
-            }
+            
         }
         list.sort((a, b) => {
             return b.update_time - a.update_time
         })
         console.log(`getAll type${type}:`, list);
-        
-        this.assets.set(type, list)
-        this.removeMediaItemsFromDB(type)
-        list.forEach((item: MaterialItem) => {
 
+        this.assets.set(type, list)
+        await this.removeMediaItemsFromDB(type)
+        list.forEach((item: MaterialItem) => {
+            item.accountName = accountName
+            item.type = type
+            if (callback) {
+                callback(item)
+            } 
             this.pushMaterailToDB(item)
         })
     }
@@ -478,12 +454,6 @@ export class AssetsManager {
         return new Promise((resolve) => {
             if (doc._id === undefined) {
                 doc._id = doc.media_id
-                // this.db.put(doc).then(()=> {
-                //     resolve()
-                // }).catch((err)=> {
-                //     console.error(err);
-                //     resolve()
-                // })
             }
 
             this.db.get(doc._id).then(existedDoc => {
@@ -601,9 +571,9 @@ export class AssetsManager {
 
         return panels;
     }
-    removeMediaItemsFromDB(type: MediaType) {
+    async removeMediaItemsFromDB(type: MediaType) {
         const accountName = this._plugin.settings.selectedAccount;
-        this.db.find({
+        await this.db.find({
             selector: {
                 accountName: { $eq: accountName },
                 type: { $eq: type }
@@ -634,7 +604,7 @@ export class AssetsManager {
             return false;
         }
         //2. delete from local
-        this.removeDocFromDB(item._id!)
+        await this.removeDocFromDB(item._id!)
         //3. 
         this._plugin.messageService.sendMessage(`${type}-item-deleted`, item)
         //4. 
@@ -655,8 +625,8 @@ export class AssetsManager {
         this.updateUsed(item.url)
         return true;
     }
-    public removeDocFromDB(_id: string) {
-        this.db.get(_id).then((doc) => {
+    public async removeDocFromDB(_id: string) {
+        await this.db.get(_id).then((doc) => {
             return this.db.remove(doc);
         })
             .then((result) => {
