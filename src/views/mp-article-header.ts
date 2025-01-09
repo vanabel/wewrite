@@ -476,7 +476,7 @@ export class MPArticleHeader {
             this._needOpenComment.setValue((this.activeLocalDraft.need_open_comment || 0) > 0)
             this._onlyFansCanComment.setValue((this.activeLocalDraft.only_fans_can_comment || 0) > 0)
             this.cover_image = this.activeLocalDraft.cover_image_url || ""
-            this.setCoverImageXY()
+            // this.setCoverImageXY()
             const x = this.activeLocalDraft.pic_crop_235_1?.split(' ')[0] || 0
             const y = this.activeLocalDraft.pic_crop_235_1?.split(' ')[1] || 0
             // this.coverframe.setAttr('style', `background-image: url('${this.cover_image}'); background-size:cover; background-repeat: no-repeat; background-position:  ${x}px ${y}px;`);

@@ -28,7 +28,8 @@
     "node_modules",
     "test",
     "icons",
-    "src/assets/css/build-template-css.js"
+    "src/assets/css/build-template-css.js",
+    "*.mjs"
     
   ]
 }

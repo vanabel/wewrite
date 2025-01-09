@@ -10,12 +10,10 @@
 
  
 
-import domtoimage from 'dom-to-image';
 import { Tokens } from "marked";
 import { ObsidianMarkdownRenderer } from "../markdown-render";
 import { WeWriteMarkedExtension } from "./extension";
 import { MathRenderer } from "./math";
-import * as htmlToImage from 'html-to-image';
 
 export class CodeRenderer extends WeWriteMarkedExtension {
 	showLineNumber: boolean;
@@ -164,6 +162,7 @@ export class CodeRenderer extends WeWriteMarkedExtension {
 		svg?.setAttr('height', '100%')
 
 		const dataUrl = await renderer.domToImage(root)
+
 		const style = root.querySelector('style')
 		if (style) {
 			style.parentNode!.removeChild(style)
