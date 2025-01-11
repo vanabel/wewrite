@@ -208,9 +208,10 @@ export class ObsidianMarkdownRenderer {
         });
     }
     public async domToImage(element: HTMLElement): Promise<string> {
-        const blob = await domtoimage.toBlob(element)
-        const dataUrl = URL.createObjectURL(blob)
-        return dataUrl
+        // const blob = await domtoimage.toBlob(element)
+        // const dataUrl = URL.createObjectURL(blob)
+        // return dataUrl
+        return await domtoimage.toPng(element)
     }
 
     private async loadComponents(view: Component) {

@@ -2,7 +2,9 @@
  * Procesing the image data for a valid WeChat MP article for upload.
  * 
  */
+import { requestUrl } from 'obsidian';
 import { WechatClient } from './../wechat-api/wechat-client';
+import { fetchImageBlob } from 'src/utils/utils';
 function imageFileName(mime:string){
     const type = mime.split('/')[1]
     return `image-${new Date().getTime()}.${type}`
@@ -120,7 +122,19 @@ export async function uploadURLImage(root:HTMLElement, wechatClient:WechatClient
         else if (img.src.startsWith('data:image/')){
             blob = dataURLtoBlob(img.src);
         }else{
-            blob = await fetch(img.src).then(res => res.blob());
+            // blob = await fetch(img.src).then(res => res.blob());
+            blob = await fetchImageBlob(img.src)
+            // try {
+            //     const response = await requestUrl(img.src);
+            //     if (!response.arrayBuffer) {
+            //         console.error(`Failed to fetch image from ${img.src}`);
+            //         return;
+            //     }
+            //     blob = new Blob([response.arrayBuffer]);
+            // } catch (error) {
+            //     console.error(`Error fetching image from ${img.src}:`, error);
+            //     return;
+            // }
         }
         
         if (blob === undefined){

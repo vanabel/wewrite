@@ -9,7 +9,7 @@ CSS for wewrite plugin.
   color: rgb(8, 203, 138);
 }
 
-.wechat-mp-web-image {
+.wewrite-web-image {
   display: flex;
   justify-content: center;
   /* 水平居中 */
@@ -22,7 +22,7 @@ CSS for wewrite plugin.
     border: solid 2px #ddd; */
 }
 
-.wechat-mp-web-image img {
+.wewrite-web-image img {
   width: 100%;
   height: auto;
 }
@@ -92,15 +92,25 @@ left side view
   display: none;
 }
 
-
-.wechat-mp-account-info-div {
-  padding: 5px;
+.wewrite-setting-frame,
+.wewrite-account-info-div {
+  padding: 1em;
   border: 2px solid #ccc;
   background-color: #fff;
   border-radius: 5px;
+  margin-top: 0.5em;
+  margin-bottom: 1em;
 }
 
-.wechat-mp-account-info-div .wechat-mp-account-info-title {
+.wewrite-setting-input {
+  display: flex!important;
+  flex-direction: row!important;
+}
+.wewrite-setting-input  input{
+  flex-grow: 1;
+}
+
+.wewrite-account-info-div .wewrite-account-info-title {
   position: absolute;
   top: -15px;
   /* 调整标题距离顶部的距离 */
@@ -115,26 +125,27 @@ left side view
 
 }
 
-.wechat-mp-account-info-div .wechat-mp-account-info-content {
+
+.wewrite-account-info-div .wewrite-account-info-content {
   padding: 10px;
   font-size: 0.8em;
   font-weight: 500;
 }
 
 /* article header */
-.wechat-mp-article-header {
+.wewrite-article-header {
   padding: 5px;
-  border: 2px solid #ccc;
+  border: 1px solid #ccc;
   /* background-color: bisque; papayawhip */
   border-radius: 6px;
   margin-bottom: 0.5em;
 }
 
-.wechat-mp-article-header details {
+.wewrite-article-header details {
   margin: 5px;
 }
 
-.wechat-mp-article-header summary {
+.wewrite-article-header summary {
   font-weight: normal;
   cursor: pointer;
   outline: none;
@@ -142,20 +153,20 @@ left side view
 
 }
 
-.wechat-mp-article-header summary::-webkit-details-marker {
+.wewrite-article-header summary::-webkit-details-marker {
   display: none;
 }
 
-.wechat-mp-article-header summary::before {
+.wewrite-article-header summary::before {
   content: "";
   font-weight: normal;
 }
 
-.wechat-mp-article-header details[open] summary::before {
+.wewrite-article-header details[open] summary::before {
   content: "";
 }
 
-.wechat-mp-article-header .cover-container {
+.wewrite-article-header .cover-container {
   max-width: 500px;
   position: relative;
   width: 100%;
@@ -165,14 +176,14 @@ left side view
   margin: auto;
 }
 
-.wechat-mp-article-header .cover-container::before {
+.wewrite-article-header .cover-container::before {
   content: "";
   display: block;
   padding-top: 42.55%;
   /* 1 / 2.35 * 100%，计算得到的百分比 */
 }
 
-.wechat-mp-article-header .cover-frame {
+.wewrite-article-header .cover-frame {
   margin: auto;
   position: absolute;
   top: 0;
@@ -184,7 +195,7 @@ left side view
 }
 
 
-.wechat-mp-article-header .cover-frame>* {
+.wewrite-article-header .cover-frame>* {
   position: absolute;
   top: 0;
   left: 0;
@@ -192,7 +203,7 @@ left side view
   height: 100%;
 }
 
-.wechat-mp-article-header .cover-frame img {
+.wewrite-article-header .cover-frame img {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -201,11 +212,11 @@ left side view
   /* 设置图片的宽高比 */
 }
 
-.wechat-mp-article-header .cover-frame .image-on-dragover {
+.wewrite-article-header .cover-frame .image-on-dragover {
   border: 2px dashed red;
 }
 
-.wechat-mp-article-header .digest {
+.wewrite-article-header .digest {
   width: 100%;
   /* 全宽 */
   height: auto;
@@ -229,7 +240,7 @@ left side view
 }
 
 .wewrite-previewer-container .render-container {
-  border: 2px solid #ccc;
+  border: 1px solid #ccc;
   border-radius: 6px;
   background-color: #fff;
   padding: 5px;
@@ -346,6 +357,14 @@ material view
   color: azure !important;
 }
 
+.danger-extra-button {
+ color:red;
+}
+
+.danger-extra-button .extra-setting-button {
+  background-color: rgb(139, 22, 4) !important;
+  color: azure !important;
+}
 @keyframes spin {
   0% {
     transform: translate(-50%, -50%) rotate(0deg);
@@ -371,4 +390,68 @@ material view
 
 .wewrite-spinner-hidden {
   display: none;
+}
+
+/* image generation modal */
+
+.image-generate-dialog-content {
+  display: flex;
+  padding: 10px;
+  flex-direction: column;
+}
+
+.image-generate-dialog-size-bar{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  flex: auto;
+  vertical-align: middle;
+
+}
+.image-generate-dialog-size-bar input{
+  flex-grow: 1;
+  margin-left: 1em;
+  
+  /* margin-left: 1em; */
+  padding: 0.5em 1em 0.5em;
+  margin: 0;
+  line-height: 1em;
+  height: min-content;
+}
+.image-generate-dialog-tool-bar {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  flex: auto
+
+}
+.image-generate-dialog-tool-bar button{
+  margin-top: 2em;
+  margin: 1em;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+.image-generate-dialog-prompt{
+  border: gray 1px solid;
+  border-radius: 5px;
+  padding: 0.5em;
+  line-height: 1.8em;
+  flex-grow: 1;
+  text-align: justify;
+  margin-bottom: 5px;
+  resize:none;
+  text-wrap:pretty;
+  overflow-y: auto;
+  height: 6em;
+}
+.image-generate-dialog-size-label{
+  vertical-align: middle;
+  margin-right: 1em;
+  padding: auto;
+}
+.wewrite-list-frame {
+  width: 100%;
+  height: 100%;
+  border: solid 1px #ccc;
 }

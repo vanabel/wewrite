@@ -22,12 +22,12 @@ export class MaterialPanel {
   private totalSpan: HTMLSpanElement;
   // private toggleButton: HTMLElement;
   private refreshButton: HTMLElement;
-  private _plugin: WeWritePlugin;
+  private plugin: WeWritePlugin;
   public type: MediaType;
   private items: REROUCE_ITEM[] = [];
 
   constructor(plugin: WeWritePlugin, parent: HTMLElement, title: string, type: MediaType) {
-    this._plugin = plugin;
+    this.plugin = plugin;
     this.type = type;
     this.name = title;
     this.container = parent.createDiv({ cls: 'wewrite-material-panel-container' });
@@ -55,24 +55,24 @@ export class MaterialPanel {
     this.refreshButton.addEventListener('click', () => this.refreshContent());
     this.initContent()
 
-    this._plugin.messageService.registerListener(`clear-${this.type}-list`, () => {
+    this.plugin.messageService.registerListener(`clear-${this.type}-list`, () => {
       this.clearContent()
     })
-    this._plugin.messageService.registerListener(`${this.type}-item-updated`, (item) => {
+    this.plugin.messageService.registerListener(`${this.type}-item-updated`, (item) => {
       this.addItem(item)
     })
-    this._plugin.messageService.registerListener(`${this.type}-item-deleted`, (item) => {
+    this.plugin.messageService.registerListener(`${this.type}-item-deleted`, (item) => {
       this.removeItem(item)
     })
     if (this.type === 'image') {
-      this._plugin.messageService.registerListener(`image-used-updated`, (item) => {
+      this.plugin.messageService.registerListener(`image-used-updated`, (item) => {
         this.updateItemUsed(item)
       })
     }
     // this.getLocalItems()
   }
   getLocalItems(){
-    const list = this._plugin.assetsManager.assets.get(this.type)
+    const list = this.plugin.assetsManager.assets.get(this.type)
     // console.log(`getLocalItems:${this.type}`, list);
     
     if (list !== undefined) {
@@ -89,13 +89,13 @@ export class MaterialPanel {
 
     if (this.type === 'draft') {
 
-      return await this._plugin.assetsManager.getAllDrafts((item) => {
+      return await this.plugin.assetsManager.getAllDrafts((item) => {
         this.addItem(item)
-      }, this._plugin.settings.selectedAccount)
+      }, this.plugin.settings.selectedAccount)
     }
-    await this._plugin.assetsManager.getAllMaterialOfType(this.type, (item) => {
+    await this.plugin.assetsManager.getAllMaterialOfType(this.type, (item) => {
       this.addItem(item)
-    }, this._plugin.settings.selectedAccount)
+    }, this.plugin.settings.selectedAccount)
     //TODO: enable after all content 
 
   }
@@ -104,7 +104,7 @@ export class MaterialPanel {
 
     //if the item type is image/voice/video && it has not been used by any news or draft.
     if (mediaItem.type === 'image') {
-      const urls = AssetsManager.getInstance(this._plugin.app, this._plugin).getImageUsedUrl(mediaItem)
+      const urls = AssetsManager.getInstance(this.plugin.app, this.plugin).getImageUsedUrl(mediaItem)
       if (urls === null || urls === undefined) {
         menu.addItem((item) => {
           item.setTitle('delete image')
@@ -112,7 +112,7 @@ export class MaterialPanel {
             .setDisabled(mediaItem.used)
             .onClick(() => {
               // new Notice(`删除图片: ${mediaItem.name}`);
-              this._plugin.messageService.sendMessage("delete-media-item", mediaItem)
+              this.plugin.messageService.sendMessage("delete-media-item", mediaItem)
             });
         });
       }else{
@@ -126,7 +126,7 @@ export class MaterialPanel {
           .setIcon('image-plus')
           .onClick(() => {
             new Notice(`set cover 图片: ${mediaItem.name}`);
-            this._plugin.messageService.sendMessage("set-image-as-cover", mediaItem)
+            this.plugin.messageService.sendMessage("set-image-as-cover", mediaItem)
           });
       });
     }
@@ -141,7 +141,7 @@ export class MaterialPanel {
             .setDisabled(mediaItem.used)
             .onClick(() => {
               // new Notice(`删除媒体: ${mediaItem.name}`);
-              this._plugin.messageService.sendMessage("delete-media-item", mediaItem)
+              this.plugin.messageService.sendMessage("delete-media-item", mediaItem)
             });
         });
       }
@@ -155,15 +155,33 @@ export class MaterialPanel {
           .setIcon('trash-2')
           .onClick(async () => {
             // console.log('to delete draft:', item)
-            this._plugin.messageService.sendMessage("delete-draft-item", mediaItem)
+            this.plugin.messageService.sendMessage("delete-draft-item", mediaItem)
+          });
+      });
+      // menu.addItem((item) => {
+      //   item.setTitle('publish draft')
+      //     .setIcon('send')
+      //     .onClick(async () => {
+      //       // console.log('to delete draft:', item)
+      //       this.plugin.messageService.sendMessage("publish-draft-item", mediaItem)
+      //     });
+      // });
+      menu.addItem((item) => {
+        item.setTitle('preview draft')
+          .setIcon('eye')
+          .onClick(async () => {
+            // console.log('to delete draft:', item)
+            this.plugin.wechatClient.senfForPreview(mediaItem.media_id, this.plugin.settings.previewer_wxname, this.plugin.settings.selectedAccount)
+
           });
       });
       menu.addItem((item) => {
-        item.setTitle('publish draft')
+        item.setTitle('send mass message')
           .setIcon('send')
           .onClick(async () => {
             // console.log('to delete draft:', item)
-            this._plugin.messageService.sendMessage("publish-draft-item", mediaItem)
+            this.plugin.wechatClient.massSendAll(mediaItem.media_id, this.plugin.settings.selectedAccount)
+            
           });
       });
     }
@@ -291,7 +309,7 @@ export class MaterialPanel {
     this.content.style.display = 'block';
     // setIcon(this.toggleButton, 'chevron-up')
 
-    const items = this._plugin.assetsManager.assets.get(this.type)
+    const items = this.plugin.assetsManager.assets.get(this.type)
     if (items === undefined || items === null) {
       return;
     }

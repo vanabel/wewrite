@@ -1,12 +1,14 @@
 /** 
  *  WeChat MP Article Header settings 
  */
-import { Notice, Setting, TextComponent, TFile, ToggleComponent } from "obsidian";
+import { Notice, requestUrl, Setting, TextComponent, TFile, ToggleComponent } from "obsidian";
 import { LocalDraftItem, LocalDraftManager } from 'src/assets/draft-manager';
 import WeWritePlugin from 'src/main';
 import { UrlUtils } from 'src/utils/urls';
 import { WechatClient } from "src/wechat-api/wechat-client";
 import { MaterialMeidaItem } from "src/wechat-api/wechat-types";
+import { ImageGenerateModal } from "./image-generate-modal";
+import { fetchImageBlob } from "src/utils/utils";
 
 interface Point {
     x: number;
@@ -21,7 +23,7 @@ export class MPArticleHeader {
         }
     }
 
-    private _plugin: WeWritePlugin;
+    private plugin: WeWritePlugin;
     private panning: boolean = false
     private origin_x: number
     private origin_y: number
@@ -40,17 +42,18 @@ export class MPArticleHeader {
     private _cover_image: string | null
     private _cover_image_url: string | null
     private draggedImage: HTMLCanvasElement | null = null;
+    private imageGenerateModal: ImageGenerateModal | undefined;
     constructor(plugin: WeWritePlugin, containerEl: HTMLElement) {
-        this._plugin = plugin;
+        this.plugin = plugin;
         this.localDraftmanager = LocalDraftManager.getInstance(plugin)
         this.BuildUI(containerEl)
-        this._plugin.messageService.registerListener('wechat-account-changed', (data: string) => {
+        this.plugin.messageService.registerListener('wechat-account-changed', (data: string) => {
             this.updateLocalDraft();
         })
-        this._plugin.messageService.registerListener('active-file-changed', (data: string) => {
+        this.plugin.messageService.registerListener('active-file-changed', (data: string) => {
             this.updateLocalDraft();
         })
-        this._plugin.messageService.registerListener('set-draft-cover-image', (url: string) => {
+        this.plugin.messageService.registerListener('set-draft-cover-image', (url: string) => {
             this.cover_image = url;
             this.setCoverImage(url)
             if (this.activeLocalDraft) {
@@ -58,7 +61,7 @@ export class MPArticleHeader {
                 this.localDraftmanager.setDraft(this.activeLocalDraft)
             }
         })
-        this._plugin.messageService.registerListener('set-image-as-cover', (item: MaterialMeidaItem) => {
+        this.plugin.messageService.registerListener('set-image-as-cover', (item: MaterialMeidaItem) => {
             this.cover_image = item.url;
             this.setCoverImage(item.url)
             if (this.activeLocalDraft) {
@@ -67,19 +70,28 @@ export class MPArticleHeader {
             }
         })
         this.updateLocalDraft()
+        this.imageGenerateModal = new ImageGenerateModal(this.plugin, (url: string) => {
+            this.cover_image = url;
+            this.setCoverImage(url)
+            if (this.activeLocalDraft) {
+                this.activeLocalDraft.thumb_media_id = undefined;
+                this.activeLocalDraft.cover_image_url = url;
+                this.localDraftmanager.setDraft(this.activeLocalDraft)
+            }
+        })
 
     }
 
     onNoteRename(file: TFile) {
         //TODO: only if the file is the active file
-        const activeFile = this._plugin.app.workspace.getActiveFile()
+        const activeFile = this.plugin.app.workspace.getActiveFile()
         if (activeFile === undefined || file !== activeFile) {
             return;
         }
 
         if (this.activeLocalDraft !== undefined) {
             this.activeLocalDraft.notePath = file.path
-            const dm = LocalDraftManager.getInstance(this._plugin)
+            const dm = LocalDraftManager.getInstance(this.plugin)
             dm.setDraft(this.activeLocalDraft)
         }
 
@@ -89,7 +101,7 @@ export class MPArticleHeader {
         return this.activeLocalDraft
     }
     private BuildUI(containerEl: HTMLElement) {
-        const container = containerEl.createEl('div', { cls: 'wechat-mp-article-header' })
+        const container = containerEl.createEl('div', { cls: 'wewrite-article-header' })
         const details = container.createEl('details')
         details.createEl('summary', { text: 'WeChat MP Article Properties' })
 
@@ -101,7 +113,7 @@ export class MPArticleHeader {
                         if (this.activeLocalDraft !== undefined) {
                             this.activeLocalDraft.title = value
                             this.localDraftmanager.setDraft(this.activeLocalDraft)
-                            this._plugin.messageService.sendMessage('draft-title-updated', value)
+                            this.plugin.messageService.sendMessage('draft-title-updated', value)
                         }
                     })
             })
@@ -141,8 +153,8 @@ export class MPArticleHeader {
             .setName('Need Open Comments')
             .setDesc('是否打开评论，0不打开(默认)，1打开')
             .addToggle(toggle => {
-                this._needOpenComment = toggle; 
-                toggle.setValue(false); 
+                this._needOpenComment = toggle;
+                toggle.setValue(false);
                 toggle.onChange(value => {
                     if (this.activeLocalDraft !== undefined) {
                         this.activeLocalDraft.need_open_comment = value ? 1 : 0
@@ -166,7 +178,7 @@ export class MPArticleHeader {
 
     }
     async generateDigest() {
-        if (!this._plugin.deepseekClient) {
+        if (!this.plugin.aiClient) {
             new Notice('Please set DeepSeek API Key in plugin settings first.')
             return
         }
@@ -178,44 +190,43 @@ export class MPArticleHeader {
             new Notice('No Active Note')
             return
         }
-        this._plugin.showSpinner()
-        const md = await this._plugin.app.vault.adapter.read(this.activeLocalDraft.notePath)
-        const summary = await this._plugin.deepseekClient?.generateSummary(md)
+        this.plugin.showSpinner()
+        const md = await this.plugin.app.vault.adapter.read(this.activeLocalDraft.notePath)
+        const summary = await this.plugin.aiClient?.generateSummary(md)
         if (summary) {
             this._digest.value = summary
             this.activeLocalDraft.digest = summary
             this.localDraftmanager.setDraft(this.activeLocalDraft)
         }
-        this._plugin.hideSpinner()
+        this.plugin.hideSpinner()
     }
     private createCoverFrame(details: HTMLElement) {
         new Setting(details)
             .setName('Cover')
             .setDesc('Cover image for this article. Its mandatory if you want to publish this article to WeChat Official Account. You may drag and drop an image from vault, or from uploaded images in your WeChat Official Account.')
-            .addExtraButton(
-                button => button
-                    .setIcon('panel-left-close')
-                    .setTooltip('pick image in WeChat Official Account from left side view')
-                    .onClick(async () => {
-                        this._plugin.showLeftView()
-                    })
-            )
-            .addExtraButton(
-                button => button
-                    .setIcon('rotate-ccw')
-                    .setTooltip('reset image')
-                    .onClick(async () => {
+            // .addExtraButton(
+            //     button => button
+            //         .setIcon('panel-left-close')
+            //         .setTooltip('pick image in WeChat Official Account from left side view')
+            //         .onClick(async () => {
+            //             this.plugin.showLeftView()
+            //         })
+            // )
+            // .addExtraButton(
+            //     button => button
+            //         .setIcon('rotate-ccw')
+            //         .setTooltip('reset image')
+            //         .onClick(async () => {
 
-                        this.resetImage()
-                    })
-            )
+            //             this.resetImage()
+            //         })
+            // )
             .addExtraButton(
                 button => button
-                    .setIcon('square-check-big')
-                    .setTooltip('use the change image as cover ')
+                    .setIcon('sparkles')
+                    .setTooltip('Generate Cover Image by AI ')
                     .onClick(async () => {
-
-                        this.updateCoverImage()
+                        this.imageGenerateModal?.open()
                     })
             )
         const container = details.createDiv({ cls: 'cover-container' })
@@ -244,12 +255,12 @@ export class MPArticleHeader {
 
             const url = e.dataTransfer?.getData('text/uri-list')
             // console.log(`drop url:${url}`);
-            
+
             if (url) {
                 if (url.startsWith('obsidian://')) {
                     //image from vault
 
-                    const urlParser = new UrlUtils(this._plugin.app);
+                    const urlParser = new UrlUtils(this.plugin.app);
 
                     const appurl = await urlParser.getInternalLinkDisplayUrl(url)
                     this.cover_image = appurl;
@@ -260,21 +271,21 @@ export class MPArticleHeader {
                     coverframe.setAttr('data-media_id', media_id)
                     if (this.activeLocalDraft !== undefined) {
                         this.activeLocalDraft.thumb_media_id = media_id
-                        
+
                     }
                 } else if (url.startsWith('file://')) {
                     //image from local file
                     const filePath = url.replace('file://', '');
-                    const file = await this._plugin.app.vault.adapter.readBinary(filePath);
+                    const file = await this.plugin.app.vault.adapter.readBinary(filePath);
                     const base64 = await this.arrayBufferToBase64(file);
                     this.cover_image = `data:image/png;base64,${base64}`;
-                }else{
+                } else {
                     // console.log(`unsupport image url:`, url);
                     this.cover_image = ''
                     this.setCoverImageXY();
                 }
                 if (this.activeLocalDraft !== undefined) {
-                    this.activeLocalDraft.cover_image_url = this.cover_image!     
+                    this.activeLocalDraft.cover_image_url = this.cover_image!
                 }
                 // coverframe.setAttr('style', `background-image: url('${url}'); background-size:cover; background-position: 0px 0px;`);
                 this.localDraftmanager.setDraft(this.activeLocalDraft!)
@@ -301,111 +312,57 @@ export class MPArticleHeader {
         }
         if (!url) {
             console.log(`null image url for cover image`);
-            
+
             return
         }
 
         const img = new Image()
         img.src = url
 
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d')!;
+        img.onload = () => {
+            // console.log(`image loaded`);
 
-        canvas.width = 900
-        canvas.height = 383
-        
-        let scale = Math.max(900 / img.width, 383 / img.height);
-        let offsetX = 0 //(canvas.width - img.width * scale) / 2;
-        let offsetY = 0 // (canvas.height - img.height * scale) / 2;
-        
-        // console.log(`orignial image size:`, img.width, img.height, scale);
-        // console.log(`scaled image size:`, img.width * scale, img.height*scale, scale);
 
-        ctx.drawImage(img, offsetX, offsetY, img.width * scale, img.height * scale);
 
-        canvas.style.position = 'absolute';
-        canvas.style.cursor = 'move';
-        canvas.style.left = `${offsetX}px`;
-        canvas.style.top = `${offsetY}px`;
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d')!;
 
-        // let lastMousePosition: Point | null = null;
-        // this.draggedImage = canvas;
+            canvas.width = 900
+            canvas.height = 383
 
-        // const mouseDownHandler = (e: MouseEvent) => {
-        //     lastMousePosition = { x: e.clientX, y: e.clientY };
-        //     this.draggedImage = canvas;
-        // };
+            let scale = Math.max(900 / img.width, 383 / img.height);
+            let offsetX = 0 //(canvas.width - img.width * scale) / 2;
+            let offsetY = 0 // (canvas.height - img.height * scale) / 2;
 
-        // const mouseMoveHandler = (e: MouseEvent) => {
-        //     if (!this.draggedImage || !lastMousePosition) return;
+            ctx.drawImage(img, offsetX, offsetY, img.width * scale, img.height * scale);
 
-        //     const deltaX = e.clientX - lastMousePosition.x;
-        //     const deltaY = e.clientY - lastMousePosition.y;
+            canvas.style.position = 'absolute';
+            canvas.style.cursor = 'move';
+            canvas.style.left = `${offsetX}px`;
+            canvas.style.top = `${offsetY}px`;
 
-        //     offsetX += deltaX;
-        //     offsetY += deltaY;
-        //     let x = e.clientX
-        //     let y = e.clientY
-
-        //     if (offsetX > 0) {
-        //         offsetX = 0;
-        //         x = lastMousePosition.x
-        //     } else if (offsetX + img.width * scale < canvas.width) {
-        //         offsetX = canvas.width - img.width * scale;
-        //         x = lastMousePosition.x
-        //     }
-
-        //     if (offsetY > 0) {
-        //         offsetY = 0;
-        //         y = lastMousePosition.y
-        //     } else if (offsetY + img.height * scale < canvas.height) {
-        //         offsetY = canvas.height - img.height * scale;
-        //         y = lastMousePosition.y
-        //     }
-        //     this.draggedImage.style.left = `${offsetX}px`;
-        //     this.draggedImage.style.top = `${offsetY}px`;
-
-        //     lastMousePosition = { x: x, y: y };
-        // };
-
-        // const mouseUpHandler = () => {
-        //     lastMousePosition = null;
-        //     // this.draggedImage = null;
-        // };
-
-        // const wheelHandler = (e: WheelEvent) => {
-        //     e.preventDefault();
-
-        //     const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
-        //     scale *= zoomFactor;
-
-        //     if (scale > 1 || (img.width * scale <= 900 && img.height * scale <= 383)) {
-        //         offsetX = (canvas.width - img.width * scale) / 2;
-        //         offsetY = (canvas.height - img.height * scale) / 2;
-
-        //         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        //         ctx.drawImage(img, offsetX, offsetY, img.width * scale, img.height * scale);
-        //         // if (this.draggedImage){
-        //         //     this.draggedImage.style.left = `${offsetX}px`;
-        //         //     this.draggedImage.style.top = `${offsetY}px`;
-        //         // }
-
-        //         // 更新 lastMousePosition 为当前鼠标位置
-        //         lastMousePosition = { x: e.clientX, y: e.clientY };
-        //     }
-        // };
-
-        // canvas.addEventListener('mousedown', mouseDownHandler);
-        // document.addEventListener('mousemove', mouseMoveHandler);
-        // document.addEventListener('mouseup', mouseUpHandler);
-        // canvas.addEventListener('wheel', wheelHandler, { passive: false });
-        // this.coverFrame.innerHTML = ''
-        this.coverFrame.appendChild(canvas)
+            this.coverFrame.appendChild(canvas)
+        }
     }
-    updateCoverImage() {
-        //TODO
-        //clear media_id
-        // use the canvas to URLdata and update url 
+    async updateCoverImage() {
+
+        this.imageGenerateModal?.open()
+        // //TODO
+        // //clear media_id
+        // // use the canvas to URLdata and update url 
+        // const url = await this.plugin.aiClient?.generateCoverImageFromText()
+        // console.log(`updateCoverImage:`, url);
+
+        // if (url) {
+        //     // this.setCoverImage(url)
+        //     this.cover_image = url;
+        //     if (this.activeLocalDraft !== undefined) {
+        //         this.activeLocalDraft.cover_image_url = this.cover_image!
+        //     }
+        //     this.setCoverImage(url)
+        //     console.log(`replaced:`, url);
+
+        // }
     }
     resetImage() {
         this.current_x = 0;
@@ -417,7 +374,7 @@ export class MPArticleHeader {
         if (this.activeLocalDraft !== undefined) {
             if (this.activeLocalDraft.thumb_media_id === undefined || !this.activeLocalDraft.thumb_media_id) {
                 if (this.cover_image) {
-                    const media_id = await this.getCoverImageMediaId(this.cover_image)
+                    const media_id = await this.getCoverImageMediaId(this.cover_image, true)
                     this.activeLocalDraft.thumb_media_id = media_id
                     return true;
                 }
@@ -428,10 +385,15 @@ export class MPArticleHeader {
         return false
     }
     async getCoverImageMediaId(url: string, upload: boolean = false) {
-        let _media_id = this._plugin.findImageMediaId(url)
+        let _media_id = this.plugin.findImageMediaId(url)
         if (_media_id === undefined && upload) {
-            const blob = await fetch(url).then(res => res.blob());
-            const res = await WechatClient.getInstance(this._plugin).uploadImage(blob, 'banner-cover.png', 'image')
+            // const blob = await fetch(url).then(res => res.blob());
+           const blob = await fetchImageBlob(url)
+           if (blob === undefined || !blob){
+               return
+           }
+
+            const res = await WechatClient.getInstance(this.plugin).uploadImage(blob, 'banner-cover.png', 'image')
 
             if (res) {
                 const { errcode, media_id } = res
@@ -495,6 +457,6 @@ export class MPArticleHeader {
             // this.setCoverImage(this.cover_image)
             this.setCoverImageXY()
         }
-        this._plugin.messageService.sendMessage('draft-title-updated', this._title.getValue())
+        this.plugin.messageService.sendMessage('draft-title-updated', this._title.getValue())
     }
 }

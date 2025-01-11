@@ -6,12 +6,12 @@ import WeWritePlugin from "src/main";
 import { ThemeManager } from "./theme-manager";
 
 export class ThemeSelector {
-    private _plugin: WeWritePlugin;
+    private plugin: WeWritePlugin;
     private _themeDropdown: DropdownComponent;
     private _themeManager: ThemeManager
 
     constructor(plugin: WeWritePlugin) {
-        this._plugin = plugin;
+        this.plugin = plugin;
         this._themeManager = ThemeManager.getInstance(plugin)
     }
     public async dropdown(themDropdown: DropdownComponent) {
@@ -19,9 +19,9 @@ export class ThemeSelector {
         await this.updateThemeOptions()
 
         themDropdown.onChange(async (value) => {
-            this._plugin.settings.custom_theme = value
+            this.plugin.settings.custom_theme = value
             
-            this._plugin.messageService.sendMessage('custom-theme-changed', value)
+            this.plugin.messageService.sendMessage('custom-theme-changed', value)
         })
     }
     private async updateThemeOptions() {
@@ -33,45 +33,45 @@ export class ThemeSelector {
         themes.forEach(theme => {
             this._themeDropdown.addOption(theme.path, theme.name)
         })
-        if (this._plugin.settings.custom_theme === undefined || !this._plugin.settings.custom_theme) {
+        if (this.plugin.settings.custom_theme === undefined || !this.plugin.settings.custom_theme) {
             this._themeDropdown.setValue('')
         } else {
-            this._themeDropdown.setValue(this._plugin.settings.custom_theme)
+            this._themeDropdown.setValue(this.plugin.settings.custom_theme)
         }
 
     }
     onThemeChange(file: TFile) {
-        if (file instanceof TFile && file.extension === 'md' && file.path.startsWith(this._plugin.settings.css_styles_folder)) {
+        if (file instanceof TFile && file.extension === 'md' && file.path.startsWith(this.plugin.settings.css_styles_folder)) {
             this.updateThemeOptions()
         } else {
 
         }
     }
     public startWatchThemes() {
-        this._plugin.registerEvent(
-            this._plugin.app.vault.on('rename', (file: TFile) => {
+        this.plugin.registerEvent(
+            this.plugin.app.vault.on('rename', (file: TFile) => {
                 // 在这里处理文件修改的逻辑
                 this.onThemeChange(file)
 
             })
         );
-        this._plugin.registerEvent(
-            this._plugin.app.vault.on('modify', (file: TFile) => {
+        this.plugin.registerEvent(
+            this.plugin.app.vault.on('modify', (file: TFile) => {
                 // 在这里处理文件修改的逻辑
                 this.onThemeChange(file)
 
             })
         );
 
-        this._plugin.registerEvent(
-            this._plugin.app.vault.on('create', (file: TFile) => {
+        this.plugin.registerEvent(
+            this.plugin.app.vault.on('create', (file: TFile) => {
                 // 在这里处理文件创建的逻辑
                 this.onThemeChange(file)
             })
         );
 
-        this._plugin.registerEvent(
-            this._plugin.app.vault.on('delete', (file: TFile) => {
+        this.plugin.registerEvent(
+            this.plugin.app.vault.on('delete', (file: TFile) => {
                 // 在这里处理文件删除的逻辑
                 this.onThemeChange(file)
             })

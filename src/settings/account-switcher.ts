@@ -5,28 +5,28 @@ import { DropdownComponent, Setting } from "obsidian";
 import WeWritePlugin from "src/main";
 
 export class WeChatMPAccountSwitcher extends Setting {
-    private _plugin: WeWritePlugin;
+    private plugin: WeWritePlugin;
     private accountDropdown: DropdownComponent;
     constructor(plugin: WeWritePlugin, containerEl: HTMLElement) {
         super(containerEl);
-        this._plugin = plugin;
+        this.plugin = plugin;
         this.setName('Select WeChat MP Account')
         .addDropdown((dropdown) => {
             this.accountDropdown = dropdown
-            this._plugin.settings.mpAccounts.forEach(account => {
+            this.plugin.settings.mpAccounts.forEach(account => {
                 dropdown.addOption(account.accountName, account.accountName)
             })
-            dropdown.setValue(this._plugin.settings.selectedAccount ?? 'Select WeChat MP Account')
+            dropdown.setValue(this.plugin.settings.selectedAccount ?? 'Select WeChat MP Account')
 						.onChange(async (value) => {
-							// this._plugin.onWeChantMPAccountChange(value)
-                            this._plugin.messageService.sendMessage('wechat-account-changed', value)
-                            this._plugin.saveSettings()
+							// this.plugin.onWeChantMPAccountChange(value)
+                            this.plugin.messageService.sendMessage('wechat-account-changed', value)
+                            this.plugin.saveSettings()
 						});
         }).addExtraButton((button) => {
             button.setIcon('cloud-download')
             .setTooltip('Force to refresh all material from remote.')
             .onClick(async () => {
-                this._plugin.pullAllWeChatMPMaterial();
+                this.plugin.pullAllWeChatMPMaterial();
             })
         }
         )

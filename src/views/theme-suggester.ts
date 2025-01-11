@@ -7,14 +7,14 @@ import WeWritePlugin from "src/main";
 import { ThemeManager, WeChatTheme } from "./theme-manager";
 
 export class ThemeSuggest extends TextInputSuggest<WeChatTheme> {
-    private _plugin: WeWritePlugin;
+    private plugin: WeWritePlugin;
     constructor(plugin: WeWritePlugin, inputEl: HTMLInputElement | HTMLTextAreaElement) {
         super(plugin.app, inputEl);
-        this._plugin = plugin;
+        this.plugin = plugin;
     }
 
     async getSuggestions(inputStr: string): Promise<WeChatTheme[]> {
-        const manager = ThemeManager.getInstance(this._plugin);
+        const manager = ThemeManager.getInstance(this.plugin);
         const themes = await manager.loadThemes()
         return themes.filter(theme => theme.name.toLowerCase().contains(inputStr.toLowerCase()))
     }

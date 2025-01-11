@@ -15,10 +15,10 @@ export const MediaTypeIcon = new Map([
 
 
 export class MaterialView extends ItemView {
-  private readonly _plugin: WeWritePlugin;
+  private readonly plugin: WeWritePlugin;
   constructor(leaf: WorkspaceLeaf, plugin: WeWritePlugin) {
     super(leaf);
-    this._plugin = plugin;
+    this.plugin = plugin;
 
   }
 
@@ -36,8 +36,8 @@ export class MaterialView extends ItemView {
 
   async onOpen() {
     this.redraw();
-    if (this._plugin.settings.selectedAccount !== undefined) {
-			this._plugin.assetsManager.loadMaterial(this._plugin.settings.selectedAccount)
+    if (this.plugin.settings.selectedAccount !== undefined) {
+			this.plugin.assetsManager.loadMaterial(this.plugin.settings.selectedAccount)
 		}
   }
 
@@ -45,7 +45,7 @@ export class MaterialView extends ItemView {
 
   public readonly redraw = (): void => {
     const rootEl = createDiv({ cls: 'nav-folder mod-root' });
-    const accountEl = new WeChatMPAccountSwitcher(this._plugin, rootEl)
+    const accountEl = new WeChatMPAccountSwitcher(this.plugin, rootEl)
     accountEl.setName('MP Account: ')
 
     // Create tab container
@@ -54,9 +54,9 @@ export class MaterialView extends ItemView {
     const tabContent = tabContainer.createDiv({ cls: 'wewrite-material-view-tab-content' });
 
     // Get material panels from plugin and sort newest first
-    const panels = this._plugin.assetsManager.getMaterialPanels()
+    const panels = this.plugin.assetsManager.getMaterialPanels()
       .map(material => new MaterialPanel(
-        this._plugin,
+        this.plugin,
         tabContent,
         material.name,
         material.type

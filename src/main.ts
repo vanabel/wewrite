@@ -2,19 +2,20 @@
  * wewrite plugin for Obsidian
  * author: Learner Chen.
  */
-import { EventRef, Notice, Plugin, TFile, WorkspaceLeaf, Menu, MenuItem, Modal, App } from 'obsidian';
+import { EventRef, Notice, Plugin, TFile, WorkspaceLeaf, Menu, MenuItem, Modal, App, getIcon } from 'obsidian';
 import { getPublicIpAddress } from "src/utils/ip-address";
 import { AssetsManager } from './assets/assets-manager';
 import { ResourceManager } from './assets/resource-manager';
 import { WeWriteSettingTab } from './settings/setting-tab';
-import { getWeChatMPSetting, saveWeWriteSetting, WeWriteSetting } from './settings/wewrite-setting';
+import { getWeWriteSetting, saveWeWriteSetting, WeWriteSetting } from './settings/wewrite-setting';
 import { MessageService } from './utils/message-service';
 // import { ImageEditorModal } from './views/draft-modal';
-import { DeepSeekClient } from './utils/deepseek-client';
+import { AiClient } from './utils/ai-client';
 import { MaterialView, VIEW_TYPE_MP_MATERIAL } from './views/material-view';
 import { PreviewPanel, VIEW_TYPE_NP_PREVIEW } from './views/previewer';
 import { WechatClient } from './wechat-api/wechat-client';
 import { getMetadata, isMarkdownFile } from './utils/urls';
+import { loadWeWriteIcons } from './assets/icons';
 
 
 const DEFAULT_SETTINGS: WeWriteSetting = {
@@ -31,8 +32,8 @@ const DEFAULT_SETTINGS: WeWriteSetting = {
 	useFontAwesome: true,
 	rpgDownloadedOnce: false,
 	accountDataPath: 'wewrite-accounts',
-	deepseekApiUrl: '',
-	deepseekApiKey: ''
+	chatLLMBaseUrl: '',
+	chatLLMApiKey: '',
 }
 
 export default class WeWritePlugin extends Plugin {
@@ -43,6 +44,9 @@ export default class WeWritePlugin extends Plugin {
 
 	}
 
+	addIcons(){
+		this
+	}
 	// Add context menu for polish operation
 	async addContextMenu() {
 		this.registerEvent(
@@ -183,7 +187,7 @@ export default class WeWritePlugin extends Plugin {
 	settings: WeWriteSetting;
 	wechatClient: WechatClient;
 	assetsManager: AssetsManager;
-	deepseekClient: DeepSeekClient | null = null;
+	aiClient: AiClient | null = null;
 	private editorChangeListener: EventRef | null = null;
 	matierialView: MaterialView;
 	messageService: MessageService;
@@ -200,6 +204,8 @@ export default class WeWritePlugin extends Plugin {
 	}
 	async onload() {
 		this.messageService = new MessageService();
+		loadWeWriteIcons()
+		
 		await this.loadSettings();
 		this.wechatClient = WechatClient.getInstance(this);
 		this.assetsManager = await AssetsManager.getInstance(this.app, this);
@@ -207,9 +213,9 @@ export default class WeWritePlugin extends Plugin {
 		// 	await this.assetsManager.loadMaterial(this.settings.selectedAccount)
 		// }
 		// Initialize DeepSeek client if configured
-		if (this.settings.deepseekApiUrl && this.settings.deepseekApiKey) {
-			this.deepseekClient = DeepSeekClient.getInstance(this);
-		}
+		// if (this.settings.chatLLMBaseUrl && this.settings.chatLLMApiKey) {
+			this.aiClient = AiClient.getInstance(this);
+		// }
 
 		this.registerView(
 			VIEW_TYPE_NP_PREVIEW,
@@ -222,10 +228,10 @@ export default class WeWritePlugin extends Plugin {
 		);
 
 		// This creates an icon in the left ribbon.
-		const ribbonIconEl = this.addRibbonIcon('scan-eye', 'WeWrite', (evt: MouseEvent) => {
+		const ribbonIconEl = this.addRibbonIcon('pen-tool', 'WeWrite', (evt: MouseEvent) => {
 			this.activateView();
 		});
-		ribbonIconEl.addClass('wewrite-ribbon-icon');
+		// ribbonIconEl.addClass('wewrite-ribbon-icon');
 
 		// This adds a settings tab so the user can configure various aspects of the plugin
 		this.addSettingTab(new WeWriteSettingTab(this.app, this));
@@ -253,7 +259,7 @@ export default class WeWritePlugin extends Plugin {
 	}
 
 	async loadSettings() {
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, await getWeChatMPSetting());
+		this.settings = Object.assign({}, DEFAULT_SETTINGS, await getWeWriteSetting());
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
 	}
 	async updateIpAddress(): Promise<string> {
@@ -384,20 +390,20 @@ export default class WeWritePlugin extends Plugin {
 	}
 
 	async generateSummary(content: string): Promise<string | null> {
-		if (!this.deepseekClient) {
-			new Notice('DeepSeek API is not configured');
+		if (!this.aiClient) {
+			new Notice('AI API is not configured');
 			return null;
 		}
-		const result = await this.deepseekClient.generateSummary(content);
+		const result = await this.aiClient.generateSummary(content);
 		return result;
 	}
 
 	async proofreadContent(content: string): Promise<{ original: string, corrected: string }[] | null> {
-		if (!this.deepseekClient) {
-			new Notice('DeepSeek API is not configured');
+		if (!this.aiClient) {
+			new Notice('AI API is not configured');
 			return null;
 		}
-		const result = await this.deepseekClient.proofreadContent(content);
+		const result = await this.aiClient.proofreadContent(content);
 		if (result) {
 			return result.corrections;
 		}
@@ -405,11 +411,11 @@ export default class WeWritePlugin extends Plugin {
 	}
 
 	async polishContent(content: string): Promise<string | null> {
-		if (!this.deepseekClient) {
-			new Notice('DeepSeek API is not configured');
+		if (!this.aiClient) {
+			new Notice('AI API is not configured');
 			return null;
 		}
-		const result = await this.deepseekClient.polishContent(content);
+		const result = await this.aiClient.polishContent(content);
 		if (result) {
 			return result.polished;
 		}
@@ -417,11 +423,11 @@ export default class WeWritePlugin extends Plugin {
 	}
 
 	async generateCoverImage(content: string): Promise<string | null> {
-		if (!this.deepseekClient) {
-			new Notice('DeepSeek API is not configured');
+		if (!this.aiClient) {
+			new Notice('AI API is not configured');
 			return null;
 		}
-		const result = await this.deepseekClient.generateCoverImage(content);
+		const result = await this.aiClient.generateCoverImage(content);
 		if (result) {
 			return result.coverImage;
 		}

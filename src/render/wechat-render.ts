@@ -27,6 +27,7 @@ import { RemixIconRenderer } from './marked-extensions/remix-icon'
 import { Table } from './marked-extensions/table'
 import { Footnote } from './marked-extensions/footnote'
 import { Links } from './marked-extensions/links'
+import { ListItem } from './marked-extensions/list-item'
 
 
 const markedOptiones = {
@@ -67,7 +68,7 @@ export class WechatRender {
         }
         return this.instance;
     }
-    addExtension(extension:WeWriteMarkedExtension) {
+    addExtension(extension: WeWriteMarkedExtension) {
         this.extensions.push(extension);
         this.marked.use(extension.markedExtension())
     }
@@ -83,6 +84,7 @@ export class WechatRender {
         this.addExtension(new BlockquoteRenderer(this.plugin, this.previewRender, this.marked))
         this.addExtension(new Table(this.plugin, this.previewRender, this.marked))
         this.addExtension(new Links(this.plugin, this.previewRender, this.marked))
+        this.addExtension(new ListItem(this.plugin, this.previewRender, this.marked))
 
     }
     async parse(md:string){

@@ -14,12 +14,12 @@ export type WeChatTheme = {
 export class ThemeManager {
     async downloadThemes() {
         const baseUrl = "https://gitee.com/northern_bank/wewrite/raw/master/themes/";
-        const saveDir = this._plugin.settings.css_styles_folder || "/wewrite-custom-css";
+        const saveDir = this.plugin.settings.css_styles_folder || "/wewrite-custom-css";
 
         try {
             // Create save directory if it doesn't exist
-            if (!this._plugin.app.vault.getAbstractFileByPath(saveDir)) {
-                await this._plugin.app.vault.createFolder(saveDir);
+            if (!this.plugin.app.vault.getAbstractFileByPath(saveDir)) {
+                await this.plugin.app.vault.createFolder(saveDir);
             }
 
             // Download themes.json
@@ -47,7 +47,7 @@ export class ThemeManager {
                     let filePath = `${saveDir}/${theme.file}`;
                     let counter = 1;
 
-                    while (this._plugin.app.vault.getAbstractFileByPath(filePath)) {
+                    while (this.plugin.app.vault.getAbstractFileByPath(filePath)) {
                         const extIndex = theme.file.lastIndexOf('.');
                         const baseName = extIndex > 0 ? theme.file.slice(0, extIndex) : theme.file;
                         const ext = extIndex > 0 ? theme.file.slice(extIndex) : '';
@@ -55,7 +55,7 @@ export class ThemeManager {
                         counter++;
                     }
 
-                    await this._plugin.app.vault.create(filePath, fileContent);
+                    await this.plugin.app.vault.create(filePath, fileContent);
                 } catch (error) {
                     console.error(error);
                     new Notice("Error downloading theme: " + error.message );
@@ -69,13 +69,13 @@ export class ThemeManager {
             new Notice("Error downloading themes.");
         }
     }
-    private _plugin: WeWritePlugin;
+    private plugin: WeWritePlugin;
     defaultCssRoot: postcss.Root;
     themes: WeChatTheme[] = [];
     static template_css: string = combinedCss;
 
     private constructor(plugin: WeWritePlugin) {
-        this._plugin = plugin;
+        this.plugin = plugin;
 
     }
     static getInstance(plugin: WeWritePlugin): ThemeManager {
@@ -85,8 +85,8 @@ export class ThemeManager {
 
     async loadThemes() {
         this.themes = [];
-        const folder_path = this._plugin.settings.css_styles_folder;
-        const folder = this._plugin.app.vault.getAbstractFileByPath(folder_path);
+        const folder_path = this.plugin.settings.css_styles_folder;
+        const folder = this.plugin.app.vault.getAbstractFileByPath(folder_path);
         if (folder instanceof TFolder) {
             this.themes = await this.getAllThemesInFolder(folder);
         }
@@ -114,11 +114,11 @@ export class ThemeManager {
         return cleanedCSS.trim();
     }
     public async getThemeContent(path: string) {
-        const file = this._plugin.app.vault.getFileByPath(path);
+        const file = this.plugin.app.vault.getFileByPath(path);
         if (!file) {
             return ThemeManager.template_css; //DEFAULT_STYLE;
         }
-        const fileContent = await this._plugin.app.vault.cachedRead(file);
+        const fileContent = await this.plugin.app.vault.cachedRead(file);
 
         const reg_css_block = /```[cC][Ss]{2}\s*([\s\S]*?)\s*```/g;
 
@@ -136,10 +136,10 @@ export class ThemeManager {
     }
     public async getCSS() {
         let custom_css = '' //this.defaultCssRoot.toString() //''
-        if (this._plugin.settings.custom_theme === undefined || !this._plugin.settings.custom_theme) {
+        if (this.plugin.settings.custom_theme === undefined || !this.plugin.settings.custom_theme) {
 
         } else {
-            custom_css = await this.getThemeContent(this._plugin.settings.custom_theme)
+            custom_css = await this.getThemeContent(this.plugin.settings.custom_theme)
         }
 
         return custom_css
@@ -169,7 +169,7 @@ export class ThemeManager {
     }
 
     private async getThemeProperties(file: TFile): Promise<WeChatTheme | undefined> {
-        const fileContent = await this._plugin.app.vault.cachedRead(file);
+        const fileContent = await this.plugin.app.vault.cachedRead(file);
         const { data } = matter(fileContent); // 解析前置元数据
         if (data.theme_name === undefined || !data.theme_name.trim()) {
             // it is not a valid theme.
@@ -189,6 +189,7 @@ export class ThemeManager {
 
         this.applyStyle(htmlRoot, mergedRoot)
         this.removeClassName(htmlRoot as HTMLElement);
+        
     }
     private removeVarablesInStyleText(root: HTMLElement) {
         for (let i = 0; i < root.style.length; i++) {

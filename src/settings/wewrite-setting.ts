@@ -3,6 +3,7 @@ manage the wechat account settings
 
 */
 import PouchDB from 'pouchdb';
+import { areObjectsEqual } from 'src/utils/utils';
 
 export type WeWriteAccountInfo = {
     _id?: string;
@@ -13,56 +14,74 @@ export type WeWriteAccountInfo = {
     expires_in?: number;
     lastRefreshTime?: number;
     isTokenValid?: boolean;
-    
+
 }
 export type WeWriteSetting = {
+    previewer_wxname?: string;
     custom_theme?: string;
-	codeLineNumber: boolean;
-	css_styles_folder: string;
-    _id?: string; // = 'wechat-mp-setting';
-    _rev?: string; 
+    codeLineNumber: boolean;
+    css_styles_folder: string;
+    _id?: string; // = 'wewrite-setting';
+    _rev?: string;
     ipAddress?: string;
     selectedAccount?: string;
     mpAccounts: Array<WeWriteAccountInfo>;
     useFontAwesome: boolean;
     rpgDownloadedOnce: boolean;
     accountDataPath: string;
-    deepseekApiUrl?: string;
-    deepseekApiKey?: string;
+    chatLLMBaseUrl?: string;
+    chatLLMApiKey?: string;
+    chatLLMModel?: string;
+    drawLLMBaseUrl?: string;
+    drawLLMTaskUrl?: string;
+    drawLLMApiKey?: string;
+    drawLLMModel?: string;
+
 }
 
 // Create a new database
-const db = new PouchDB('wewrite-wechat-mp-setting');
+const db = new PouchDB('wewrite-settings');
 
-export const getWeChatMPSetting = async (): Promise<WeWriteSetting|undefined> => {
+export const getWeWriteSetting = async (): Promise<WeWriteSetting | undefined> => {
     return new Promise((resolve, reject) => {
-        db.get('wechat-mp-setting')
+        db.get('wewrite-settings')
             .then((doc: any) => {
                 resolve(doc);
             })
             .catch((error: any) => {
-                console.error('Error getting WeChatMPSetting:', error);
+                console.error('Error getting WeWriteSetting:', error);
                 resolve(undefined)
             });
     })
 }
 
-export const saveWeWriteSetting = async (doc:WeWriteSetting): Promise<void> => {
+export const saveWeWriteSetting = async (doc: WeWriteSetting): Promise<void> => {
     return new Promise((resolve, reject) => {
-        doc._id = 'wechat-mp-setting';
+        doc._id = 'wewrite-settings';
         db.get(doc._id).then(existedDoc => {
+            if (areObjectsEqual(doc, existedDoc)) {
+                // the material has not been changed
+                resolve()
+            }
             doc._rev = existedDoc._rev;
             db.put(doc)
                 .then(() => {
                     resolve();
                 })
                 .catch((error: any) => {
-                    console.error('Error setting WeChatMPSetting:', error);
+                    console.error('Error setting WeWriteSetting:', error);
                     resolve()
                 });
         }).catch(error => {
-            console.error('save setting error: ',error);
-            resolve()
+            // console.error('save setting error: ',error);
+            db.put(doc)
+                .then(() => {
+                    resolve();
+                })
+                .catch((error: any) => {
+                    console.error('Error setting WeWriteSetting:', error);
+                    resolve()
+                });
         })
     })
 }

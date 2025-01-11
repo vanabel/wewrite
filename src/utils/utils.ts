@@ -1,7 +1,10 @@
+import { requestUrl } from "obsidian";
+
 export function areObjectsEqual(obj1: any, obj2: any): boolean {
     if (obj1 === obj2) return true;
 
     if (typeof obj1 !== 'object' || obj1 === null || typeof obj2 !== 'object' || obj2 === null) {
+        console.log(`object not same type`);
         return false;
     }
 
@@ -18,3 +21,34 @@ export function areObjectsEqual(obj1: any, obj2: any): boolean {
 
     return true;
 }
+
+export function fetchImageBlob(url: string): Promise<Blob> {
+    return new Promise(async (resolve, reject) => {
+        if (!url) {
+            console.error(`Invalid URL: ${url}`);
+            return;
+        }
+        if (url.startsWith('http://') || url.startsWith('https://')) {
+
+
+            try {
+                const response = await requestUrl(url);
+                if (!response.arrayBuffer) {
+                    console.error(`Failed to fetch image from ${url}`);
+                    return;
+                }
+                const blob = new Blob([response.arrayBuffer]);
+                resolve(blob);
+            } catch (error) {
+                console.error(`Error fetching image from ${url}:`, error);
+                return;
+            }
+        } else {
+            const blob = await fetch(url).then(response => response.blob());
+            resolve(blob);
+
+        }
+
+    });
+}
+

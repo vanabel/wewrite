@@ -9,9 +9,9 @@ import WeWritePlugin from 'src/main';
 
 export class ResourceManager {
     private static instance: ResourceManager;
-    private _plugin: WeWritePlugin;
+    private plugin: WeWritePlugin;
     private constructor(plugin: WeWritePlugin) {
-        this._plugin = plugin;
+        this.plugin = plugin;
         this.init();
     }
     static getInstance(plugin: WeWritePlugin) {
@@ -23,8 +23,8 @@ export class ResourceManager {
     private init() {
     }
     public getCurrentMarkdownView() {
-        const currentFile = this._plugin.app.workspace.getActiveFile();
-        const leaves = this._plugin.app.workspace.getLeavesOfType('markdown');
+        const currentFile = this.plugin.app.workspace.getActiveFile();
+        const leaves = this.plugin.app.workspace.getLeavesOfType('markdown');
         for (let leaf of leaves) {
             const markdownView = leaf.view as MarkdownView;
             if (markdownView.file?.path === currentFile?.path) {
@@ -36,7 +36,7 @@ export class ResourceManager {
     public forceRenderActiveMarkdownView() {
         const view = this.getCurrentMarkdownView();
         if (view) {
-            this._plugin.app.workspace.trigger('render', view)
+            this.plugin.app.workspace.trigger('render', view)
         }
     }
     public queryElements(query: string) {
@@ -70,13 +70,13 @@ export class ResourceManager {
         return root;
     }
     public getFileOfLink(link: string) {
-        const file = this._plugin.app.metadataCache.getFirstLinkpathDest(link, '');
+        const file = this.plugin.app.metadataCache.getFirstLinkpathDest(link, '');
         return file;
     }
     public async getLinkFileContent(link: string) {
         const tf = this.getFileOfLink(link);
         if (tf) {
-            const content = await this._plugin.app.vault.adapter.read(tf.path);
+            const content = await this.plugin.app.vault.adapter.read(tf.path);
             return content
         }
         return null
