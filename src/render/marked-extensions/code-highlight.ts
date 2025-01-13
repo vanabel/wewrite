@@ -18,6 +18,8 @@ export class CodeHighlight extends WeWriteMarkedExtension {
         if (type) return code;
         if (lang && lang.trim().toLocaleLowerCase() == 'mpcard') return code;
         if (lang && lang.trim().toLocaleLowerCase() == 'mermaid') return code;
+        if (lang && lang.trim().toLocaleLowerCase() == 'charts') return code;
+        if (lang && lang.trim().toLocaleLowerCase() == 'dataview') return code;
 
         if (lang && hljs.getLanguage(lang)) {
           try {

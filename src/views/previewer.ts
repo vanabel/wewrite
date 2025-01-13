@@ -134,6 +134,20 @@ export class PreviewPanel extends ItemView implements PreviewRender {
                         })
                 }
             )
+            .addExtraButton(
+                (button) => {
+                    // button.setIcon('wewrite-send')
+                    button.setIcon('clipboard-copy')
+                        .setTooltip('copy draft to clipboard')
+                        .onClick(async () => {
+                            const data = this.getArticleContent()
+                            await navigator.clipboard.write([new ClipboardItem({
+                                'text/html': new Blob([data], {type: 'text/html'})
+                            })])
+                            new Notice('draft copied to clipboard')
+                        })
+                }
+            )
             // .addExtraButton(
             //     (button) => {
             //         button.setIcon('newspaper')

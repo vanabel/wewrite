@@ -37,7 +37,7 @@ export class ImageGenerateModal extends Modal {
         const prompt = contentEl.createEl('textarea', {
             placeholder: 'Please input prompts',
             value: '画面上有条河，小马在水边准备过河，河边有小马的妈妈一匹老马，还有老牛，河边还有一棵树，树上有松鼠，它们仿佛在对话中，小马很疑惑的表情',
-            cls: 'image-generate-dialog-prompt'
+            cls: 'rename-textarea'
         });
         prompt.value = '画面上有条河，小马在水边准备过河，河边有小马的妈妈一匹老马，还有老牛，河边还有一棵树，树上有松鼠，它们仿佛在对话中，小马很疑惑的表情'
 
@@ -45,7 +45,7 @@ export class ImageGenerateModal extends Modal {
         const negativePrompt = contentEl.createEl('textarea', {
             placeholder: 'Please input negative prompts',
             value: '没有人，和其它动物',
-            cls: 'image-generate-dialog-prompt'
+            cls: 'rename-textarea'
         });
         negativePrompt.value = '没有人，和其它动物'
         const toolbar = contentEl.createDiv({ cls: 'image-generate-dialog-tool-bar' })

@@ -432,7 +432,7 @@ material view
   border: none;
   cursor: pointer;
 }
-.image-generate-dialog-prompt{
+.image-generate-dialog-content textarea {
   border: gray 1px solid;
   border-radius: 5px;
   padding: 0.5em;
@@ -443,7 +443,7 @@ material view
   resize:none;
   text-wrap:pretty;
   overflow-y: auto;
-  height: 6em;
+  height: 6rem !important;
 }
 .image-generate-dialog-size-label{
   vertical-align: middle;
@@ -454,4 +454,25 @@ material view
   width: 100%;
   height: 100%;
   border: solid 1px #ccc;
+  visibility: visible;
+}
+
+.wewrite-markdown-render-container{
+  max-width: 720px;
+}
+
+.wewrite-markdown-render-container li {
+  line-height: 3rem;
+
+}
+.wewrite-markdown-render-container ul,ol {
+  margin-top: 1rem;
+  margin-bottom: 2rem;
+
+}
+
+.wewrite-markdown-render-container .callout {
+  font-size: 20px;
+  padding: 1rem;
+
 }

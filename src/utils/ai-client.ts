@@ -40,7 +40,7 @@ export class AiClient {
         },
         {
           role: 'user',
-          content: `用最多100个字总结下面的一段话:\n\n${content}`,
+          content: `总结下面的一段话, 输出的字数最大100个字符:\n\n${content}`,
         },
       ],
       max_tokens: 100, // 限制生成的摘要长度
@@ -199,6 +199,7 @@ export class AiClient {
       if (!headers) {
         throw new Error('Missing API configuration');
       }
+      this.plugin.showSpinner();
 
       const response = await requestUrl({
         ...headers,
@@ -231,12 +232,14 @@ export class AiClient {
         const json = await this.checkImageGenerationStatus(result.output.task_id)
         if (json.output.task_status === 'SUCCEEDED'){
           clearInterval(intervalId);
+          this.plugin.hideSpinner()
           resolve(json.output.results[0].url)
         }
         if (json.output.task_status === 'FAILED' || json.output.task_status === 'UNKNOWN'){
           console.log(`task failed.`, json);
           
           clearInterval(intervalId);
+          this.plugin.hideSpinner()
           resolve('')
         }
 
@@ -256,6 +259,7 @@ export class AiClient {
     return new Promise(async (resolve, reject) => {
       const headers = this.prepareImageTaskCheckingHeader();
       if (!headers) {
+        this.plugin.hideSpinner()
         throw new Error('Missing API configuration');
       }
       if (!headers.url.endsWith('/')) {
@@ -263,7 +267,7 @@ export class AiClient {
       }
       headers.url += taskId;
       const response = await requestUrl({...headers, url: headers.url})
-      console.log(`checkImageGenerationStatus response=>`, response);
+      // console.log(`checkImageGenerationStatus response=>`, response);
       resolve(response.json)
     })
   }

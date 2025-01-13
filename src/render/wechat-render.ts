@@ -27,12 +27,18 @@ import { RemixIconRenderer } from './marked-extensions/remix-icon'
 import { Table } from './marked-extensions/table'
 import { Footnote } from './marked-extensions/footnote'
 import { Links } from './marked-extensions/links'
-import { ListItem } from './marked-extensions/list-item'
-
+// import { ListItem } from './marked-extensions/list-item'
+import hljs from "highlight.js";
 
 const markedOptiones = {
     gfm: true,
     breaks: true,
+    // highlight: function (code: string, lang: string) {
+    //     if (lang && hljs.getLanguage(lang)) {
+    //         return hljs.highlight(code, { language: lang }).value;
+    //     }
+    //     return hljs.highlightAuto(code).value;
+    // }
 };
 
 // const customRenderer = {
@@ -59,7 +65,7 @@ export class WechatRender {
         this.marked.use(markedOptiones)
         // this.marked.use(extendedTables())
         this.useExtensions()
-    
+
         // this.marked.use({renderer: customRenderer});
     }
     static getInstance(plugin: WeWritePlugin, previewRender: PreviewRender) {
@@ -84,26 +90,26 @@ export class WechatRender {
         this.addExtension(new BlockquoteRenderer(this.plugin, this.previewRender, this.marked))
         this.addExtension(new Table(this.plugin, this.previewRender, this.marked))
         this.addExtension(new Links(this.plugin, this.previewRender, this.marked))
-        this.addExtension(new ListItem(this.plugin, this.previewRender, this.marked))
+        // this.addExtension(new ListItem(this.plugin, this.previewRender, this.marked))
 
     }
-    async parse(md:string){
+    async parse(md: string) {
 
         const { data, content } = matter(md)
-        for (const extension of this.extensions){
+        for (const extension of this.extensions) {
             await extension.prepare()
         }
         return await this.marked.parse(content)
     }
     async postprocess(html: string) {
-		let result = html;
-		for (let ext of this.extensions) {
-			result = await ext.postprocess(result);
-		}
-		return result;
-	}
+        let result = html;
+        for (let ext of this.extensions) {
+            result = await ext.postprocess(result);
+        }
+        return result;
+    }
 
-    public async parseNote(path:string, container:HTMLElement, view:Component){
+    public async parseNote(path: string, container: HTMLElement, view: Component) {
         await ObsidianMarkdownRenderer.getInstance(this.plugin.app).render(path, container, view)
         const md = await this.plugin.app.vault.adapter.read(path)
         let html = await this.parse(md)

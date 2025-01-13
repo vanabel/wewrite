@@ -6,7 +6,8 @@
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
 		"build": "node src/assets/css/build-template-css.js && tsc -noEmit && node esbuild.config.mjs production",
-		"version": "node version-bump.mjs && git add manifest.json versions.json"
+		"version": "node version-bump.mjs && git add manifest.json versions.json",
+		"deploy": "cp -r ./main.js ./manifest.json ./styles.css /mnt/c/Users/steve/OneDrive/📖业务工作/培训业务@obsidian/.obsidian/plugins/wewrite/ "
 	},
 	"keywords": [],
 	"author": "",

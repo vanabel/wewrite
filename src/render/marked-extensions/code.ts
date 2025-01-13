@@ -14,7 +14,6 @@ import { Tokens } from "marked";
 import { ObsidianMarkdownRenderer } from "../markdown-render";
 import { WeWriteMarkedExtension } from "./extension";
 import { MathRenderer } from "./math";
-
 export class CodeRenderer extends WeWriteMarkedExtension {
 	showLineNumber: boolean;
 	mermaidIndex: number = 0;
@@ -52,12 +51,10 @@ export class CodeRenderer extends WeWriteMarkedExtension {
 				liItems = liItems + `<li>${count}</li>`;
 				count = count + 1;
 			}
-			codeSection = '<section class="code-section"><ul>'
-				+ liItems
-				+ '</ul>';
+			codeSection = `<section class="code-section"><span class="code-section-banner"></span><ul>${liItems}</ul>`;
 		}
 		else {
-			codeSection = '<section class="code-section">';
+			codeSection = `<section class="code-section"><span class="code-section-banner"></span><ul>`;
 		}
 
 		if (!lang) {
@@ -128,19 +125,22 @@ export class CodeRenderer extends WeWriteMarkedExtension {
 
 		}
 		// Convert HTML to image
-		// try {
-		// 	const imageData = await renderer.domToImage(root);
-		// 	const img = document.createElement('img');
-		// 	img.src = imageData;
-		// 	img.alt = 'admonition content';
-		// 	img.addClass('admonition-image');
-		// 	img.style.maxWidth = '100%';
-		// 	return img.outerHTML;
-		//   } catch (error) {
-		// 	console.error('Failed to convert callout to image:', error);
-		// 	return '<span>Callout转换失败</span>';
-		//   }
-		return root.outerHTML
+		root.setCssProps({'max-width': '720px !important'})
+		try {
+			const imageData = await renderer.domToImage(root, {
+				width: 720,
+			});
+			const img = document.createElement('img');
+			img.src = imageData;
+			img.alt = 'admonition content';
+			img.addClass('admonition-image');
+			img.style.maxWidth = '100%';
+			return img.outerHTML;
+		  } catch (error) {
+			console.error('Failed to convert callout to image:', error);
+			return '<span>Callout转换失败</span>';
+		  }
+		// return root.outerHTML
 	}
 
 	async renderMermaidAsync(token: Tokens.Generic) {
@@ -215,7 +215,7 @@ export class CodeRenderer extends WeWriteMarkedExtension {
 						// let type = token.lang.trim().toLocaleLowerCase().replace('ad-', '');
 						// if (type === '') type = 'note';
 
-						// return this.renderAdmonition(token, type);
+						// return this.renderAdmonition(token, type);admno
 					}
 					return this.codeRenderer(token.text, token.lang);
 				},

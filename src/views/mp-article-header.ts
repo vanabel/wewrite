@@ -1,14 +1,14 @@
 /** 
  *  WeChat MP Article Header settings 
  */
-import { Notice, requestUrl, Setting, TextComponent, TFile, ToggleComponent } from "obsidian";
+import { Notice, Setting, TextComponent, TFile, ToggleComponent } from "obsidian";
 import { LocalDraftItem, LocalDraftManager } from 'src/assets/draft-manager';
 import WeWritePlugin from 'src/main';
 import { UrlUtils } from 'src/utils/urls';
+import { fetchImageBlob } from "src/utils/utils";
 import { WechatClient } from "src/wechat-api/wechat-client";
 import { MaterialMeidaItem } from "src/wechat-api/wechat-types";
 import { ImageGenerateModal } from "./image-generate-modal";
-import { fetchImageBlob } from "src/utils/utils";
 
 interface Point {
     x: number;
@@ -388,10 +388,10 @@ export class MPArticleHeader {
         let _media_id = this.plugin.findImageMediaId(url)
         if (_media_id === undefined && upload) {
             // const blob = await fetch(url).then(res => res.blob());
-           const blob = await fetchImageBlob(url)
-           if (blob === undefined || !blob){
-               return
-           }
+            const blob = await fetchImageBlob(url)
+            if (blob === undefined || !blob) {
+                return
+            }
 
             const res = await WechatClient.getInstance(this.plugin).uploadImage(blob, 'banner-cover.png', 'image')
 
@@ -453,10 +453,7 @@ export class MPArticleHeader {
             const y = 0
             // this.coverframe.setAttr('style', `background-image: url('${this.cover_image}'); background-size:cover; background-repeat: no-repeat; background-position:  ${x}px ${y}px;`);
         }
-        if (this.cover_image) {
-            // this.setCoverImage(this.cover_image)
-            this.setCoverImageXY()
-        }
+        this.setCoverImageXY()
         this.plugin.messageService.sendMessage('draft-title-updated', this._title.getValue())
     }
 }

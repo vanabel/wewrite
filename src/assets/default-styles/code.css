@@ -1,0 +1,180 @@
+/* code section */
+
+.wewrite code-section {
+  background: #1E1E1E;
+}
+
+
+
+
+.wewrite .code-section-banner {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" version="1.1" x="0px" y="0px" width="450px" height="130px"><ellipse cx="65" cy="65" rx="50" ry="52" stroke="rgb(220,60,54)" stroke-width="2" fill="rgb(237,108,96)"></ellipse> <ellipse cx="225" cy="65" rx="50" ry="52" stroke="rgb(218,151,33)" stroke-width="2" fill="rgb(247,193,81)">  </ellipse>  <ellipse cx="385" cy="65" rx="50" ry="52" stroke="rgb(27,161,37)" stroke-width="2" fill="rgb(100,200,86)">  </ellipse> </svg>');
+  background-color: #1E1E1E;
+  background-position: 10px 10px;
+  background-size: 40px auto;
+  background-repeat: no-repeat;
+  display: inline-block;
+  height: 32px;
+  width: 100%;
+  margin-bottom: -24px;
+  border-radius: 5px 5px 0 0;
+}
+
+.wewrite pre {
+  position: relative;
+  padding: 10px;
+  margin: 10px 0;
+  background: #1E1E1E;
+  color: #ffffff;
+  border-radius: 0 0 5px 5px;
+  box-shadow: rgba(0, 0, 0, 0.55) 0px 10px 10px -10px;
+  overflow: hidden;
+}
+
+
+.wewrite code {
+  display: block;
+  padding: 15px 16px 16px;
+  /* background: #2b2b2b; */
+  border-radius: 5px;
+  overflow-x: auto;
+  font-family: Consolas, Monaco, Menlo, monospace;
+  font-size: 12px;
+  color: #d3d3d3;
+  /* 提供更好的对比度 */
+}
+
+/*
+ * Visual Studio 2015 dark style
+ * Author: Nicolas LLOBERA <nllobera@gmail.com>
+ */
+.wewrite .hljs {
+  /* background: #1E1E1E; */
+  color: #DCDCDC
+}
+
+.wewrite .hljs-keyword,
+.wewrite .hljs-literal,
+.wewrite .hljs-symbol,
+.wewrite .hljs-name {
+  color: #569CD6
+}
+
+.wewrite .hljs-link {
+  color: #569CD6;
+  text-decoration: underline
+}
+
+.wewrite .hljs-built_in,
+.wewrite .hljs-type {
+  color: #4EC9B0
+}
+
+.wewrite .hljs-number,
+.wewrite .hljs-class {
+  color: #B8D7A3
+}
+
+.wewrite .hljs-string,
+.wewrite .hljs-meta .hljs-string {
+  color: #D69D85
+}
+
+.wewrite .hljs-regexp,
+.wewrite .hljs-template-tag {
+  color: #9A5334
+}
+
+.wewrite .hljs-subst,
+.wewrite .hljs-function,
+.wewrite .hljs-title,
+.wewrite .hljs-params,
+.wewrite .hljs-formula {
+  color: #DCDCDC
+}
+
+.wewrite .hljs-comment,
+.wewrite .hljs-quote {
+  color: #57A64A;
+  font-style: italic
+}
+
+.wewrite .hljs-doctag {
+  color: #608B4E
+}
+
+.wewrite .hljs-meta,
+.wewrite .hljs-meta .hljs-keyword,
+.wewrite .hljs-tag {
+  color: #9B9B9B
+}
+
+.wewrite .hljs-variable,
+.wewrite .hljs-template-variable {
+  color: #BD63C5
+}
+
+.wewrite .hljs-attr,
+.wewrite .hljs-attribute {
+  color: #9CDCFE
+}
+
+.wewrite .hljs-section {
+  color: gold
+}
+
+.wewrite .hljs-emphasis {
+  font-style: italic
+}
+
+.wewrite .hljs-strong {
+  font-weight: bold
+}
+
+.wewrite .hljs-code {
+  font-family: 'Monospace';
+}
+
+.wewrite .hljs-bullet,
+.wewrite .hljs-selector-tag,
+.wewrite .hljs-selector-id,
+.wewrite .hljs-selector-class,
+.wewrite .hljs-selector-attr,
+.wewrite .hljs-selector-pseudo {
+  color: #D7BA7D
+}
+
+.wewrite .hljs-addition {
+  background-color: #144212;
+  display: inline-block;
+  width: 100%
+}
+
+.wewrite .hljs-deletion {
+  background-color: #600;
+  display: inline-block;
+  width: 100%
+}
+
+/* 隐藏行号 */
+.wewrite section ul {
+  display: none;
+}
+
+/* 如果你想要隐藏整个行号块，包括行号本身 */
+.wewrite section ul li {
+  display: none;
+}
+
+
+
+/* <svg xmlns="http://www.w3.org/2000/svg" version="1.1" x="0px" y="0px" width="450px" height="130px">
+  <ellipse cx="65" cy="65" rx="50" ry="52" stroke="rgb(220,60,54)" stroke-width="2" fill="rgb(237,108,96)">
+  </ellipse>
+  <ellipse cx="225" cy="65" rx="50" ry="52" stroke="rgb(218,151,33)" stroke-width="2" fill="rgb(247,193,81)">
+  </ellipse>
+  <ellipse cx="385" cy="65" rx="50" ry="52" stroke="rgb(27,161,37)" stroke-width="2" fill="rgb(100,200,86)">
+  </ellipse>
+ </svg> */
+
+/* <span style="display: block;background: url(&quot;https://mmbiz.qpic.cn/mmbiz_svg/LwcbhAmMnZCpmku5VZuHQqcZV2jKGZRFCevbpH2P01MmKccaWkeOwzrXjLwicaVKJicfnqMS8wtSdicicgBhecer8dibcn3euxvbM/640?wx_fmt=svg&quot;) 10px 10px / 40px auto no-repeat rgb(40, 44, 52);height: 30px;width: 784px;margin-bottom: -7px;border-radius: 5px;"></span> */

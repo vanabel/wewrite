@@ -48,23 +48,27 @@ export class BlockquoteRenderer extends WeWriteMarkedExtension {
 			}
 
 		}
-    return root.outerHTML;
+    // return root.outerHTML;
 
     // Convert HTML to image
-    // try {
-    //   const imageData = await renderer.domToImage(root);
-    //   // const imageData = await renderer.htmlToImage(root);
+    // root.setCssProps({'max-width': '720px!important'})
+    root.style.maxWidth = '720px!important';
+    try {
+      const imageData = await renderer.domToImage(root, {
+				width: 720,
+			});
+      // const imageData = await renderer.htmlToImage(root);
 
-    //   const img = document.createElement('img');
-    //   img.src = imageData;
-    //   img.alt = 'Callout content';
-    //   img.addClass('callout-image');
-    //   img.style.maxWidth = '100%';
-    //   return img.outerHTML;
-    // } catch (error) {
-    //   console.error('Failed to convert callout to image:', error);
-    //   return '<span>Callout转换失败</span>';
-    // }
+      const img = document.createElement('img');
+      img.src = imageData;
+      img.alt = 'Callout content';
+      img.addClass('callout-image');
+      img.style.maxWidth = '100%';
+      return img.outerHTML;
+    } catch (error) {
+      console.error('Failed to convert callout to image:', error);
+      return '<span>Callout转换失败</span>';
+    }
   }
 
   markedExtension(): MarkedExtension {

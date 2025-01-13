@@ -131,6 +131,8 @@ export class ObsidianMarkdownRenderer {
             return;
         }
         this.container = container
+        // this.container.style.maxWidth = 720 + 'px';
+        this.container.addClass('wewrite-markdown-render-container')
         this.view = view
         this.path = path
 
@@ -207,11 +209,11 @@ export class ObsidianMarkdownRenderer {
             }
         });
     }
-    public async domToImage(element: HTMLElement): Promise<string> {
+    public async domToImage(element: HTMLElement, p:any={}): Promise<string> {
         // const blob = await domtoimage.toBlob(element)
         // const dataUrl = URL.createObjectURL(blob)
         // return dataUrl
-        return await domtoimage.toPng(element)
+        return await domtoimage.toPng(element, p)
     }
 
     private async loadComponents(view: Component) {

@@ -360,207 +360,6 @@ export const combinedCss = `.admonition {
   color: #3eaf7c;
 }
 
-/* code section */
-.wewrite code {
-    font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
-    word-break: break-word;
-    overflow-x: auto;
-  
-    padding: 0.2em 0.5em;
-    margin: 0;
-    color: #3eaf7c;
-    font-size: 1em;
-    background-color: rgba(27, 31, 35, 0.05);
-    border-radius: 3px;
-  }
-  .wewrite pre {
-    font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
-    overflow: auto;
-    position: relative;
-    line-height: 1.8em;
-  }
-  .wewrite pre > code {
-    font-size: 1em;
-    padding: 15px 12px;
-    margin: 0;
-    word-break: normal;
-    display: block;
-    overflow-x: auto;
-    color: #333;
-    background: #f8f8f8;
-  }
-  .wewrite .code-section {
-    display: flex;
-    background: #1E1E1E;
-    color: #DCDCDC;
-    border-radius: 3px;
-  
-    /*border: 2px solid #3eaf7c;*/
-  }
-  .wewrite .code-section pre::-webkit-scrollbar {
-      width: 12px; /* 设置滚动条的宽度 */
-  }
-  
-  /* 自定义滚动轨迹的样式 */
-  .wewrite .code-section pre::-webkit-scrollbar-track {
-      background: #f1f1f1; /* 设置滚动轨迹的背景颜色 */
-  }
-  
-  /* 自定义滚动滑块的样式 */
-  .wewrite .code-section pre::-webkit-scrollbar-thumb {
-      background: #888; /* 设置滚动滑块的背景颜色 */
-  }
-  
-  /* 当鼠标悬停在滚动滑块上时的样式 */
-  .wewrite .code-section pre::-webkit-scrollbar-thumb:hover {
-      background: #555; /* 设置鼠标悬停时滚动滑块的背景颜色 */
-  }
-
-  .wewrite .code-section pre {
-    margin: 0;
-    display: block;
-    padding: 0.4em;
-    overflow-x: auto;
-  }
-  .wewrite .code-section pre code {
-    border: none;
-    background: #f8f8f8;
-    font-size: 1em;
-    line-height: 1.8em;
-    padding: 0 !important;
-    margin: 0 !important;
-    text-wrap: wrap;
-  }
-  .wewrite .code-section ul {
-    flex-shrink: 0;
-    counter-reset: line;
-    margin: 0;
-    padding: 1em 0.3em 1em 1em;
-    border-right: solid 1px gray;
-    white-space: normal;
-    width: fit-content;
-  }
-  .wewrite .code-section ul > li {
-    position: relative;
-    margin: 0;
-    padding: 0;
-    display: list-item;
-    text-align: right;
-    line-height: 1.8em;
-    font-size: 1em;
-    font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
-    padding: 0;
-    list-style-type: none;
-    text-wrap: nowrap;
-  }
-  .wewrite .code-section ul > li::marker {
-    content: none;
-  }
-
-  /* code hljs */
-  pre code.hljs {
-    display: block;
-    
-    overflow-x: auto;
-    padding: 1em
-  }
-  code.hljs {
-    padding: 3px 5px;
-    
-  }
-  /*
- * Visual Studio 2015 dark style
- * Author: Nicolas LLOBERA <nllobera@gmail.com>
- */
-.hljs {
-    background: #1E1E1E;
-    color: #DCDCDC
-    
-  }
-  .hljs-keyword,
-  .hljs-literal,
-  .hljs-symbol,
-  .hljs-name {
-    color: #569CD6
-  }
-  .hljs-link {
-    color: #569CD6;
-    text-decoration: underline
-  }
-  .hljs-built_in,
-  .hljs-type {
-    color: #4EC9B0
-  }
-  .hljs-number,
-  .hljs-class {
-    color: #B8D7A3
-  }
-  .hljs-string,
-  .hljs-meta .hljs-string {
-    color: #D69D85
-  }
-  .hljs-regexp,
-  .hljs-template-tag {
-    color: #9A5334
-  }
-  .hljs-subst,
-  .hljs-function,
-  .hljs-title,
-  .hljs-params,
-  .hljs-formula {
-    color: #DCDCDC
-  }
-  .hljs-comment,
-  .hljs-quote {
-    color: #57A64A;
-    font-style: italic
-  }
-  .hljs-doctag {
-    color: #608B4E
-  }
-  .hljs-meta,
-  .hljs-meta .hljs-keyword,
-  .hljs-tag {
-    color: #9B9B9B
-  }
-  .hljs-variable,
-  .hljs-template-variable {
-    color: #BD63C5
-  }
-  .hljs-attr,
-  .hljs-attribute {
-    color: #9CDCFE
-  }
-  .hljs-section {
-    color: gold
-  }
-  .hljs-emphasis {
-    font-style: italic
-  }
-  .hljs-strong {
-    font-weight: bold
-  }
-  .hljs-code {
-    font-family:'Monospace';
-  }
-  .hljs-bullet,
-  .hljs-selector-tag,
-  .hljs-selector-id,
-  .hljs-selector-class,
-  .hljs-selector-attr,
-  .hljs-selector-pseudo {
-    color: #D7BA7D
-  }
-  .hljs-addition {
-    background-color: #144212;
-    display: inline-block;
-    width: 100%
-  }
-  .hljs-deletion {
-    background-color: #600;
-    display: inline-block;
-    width: 100%
-  }
 
   /* icon */
   
@@ -843,4 +642,184 @@ export const combinedCss = `.admonition {
 }
 
 
+/* code section */
+
+.wewrite code-section {
+  background: #1E1E1E;
+}
+
+
+
+
+.wewrite .code-section-banner {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" version="1.1" x="0px" y="0px" width="450px" height="130px"><ellipse cx="65" cy="65" rx="50" ry="52" stroke="rgb(220,60,54)" stroke-width="2" fill="rgb(237,108,96)"></ellipse> <ellipse cx="225" cy="65" rx="50" ry="52" stroke="rgb(218,151,33)" stroke-width="2" fill="rgb(247,193,81)">  </ellipse>  <ellipse cx="385" cy="65" rx="50" ry="52" stroke="rgb(27,161,37)" stroke-width="2" fill="rgb(100,200,86)">  </ellipse> </svg>');
+  background-color: #1E1E1E;
+  background-position: 10px 10px;
+  background-size: 40px auto;
+  background-repeat: no-repeat;
+  display: inline-block;
+  height: 32px;
+  width: 100%;
+  margin-bottom: -24px;
+  border-radius: 5px 5px 0 0;
+}
+
+.wewrite pre {
+  position: relative;
+  padding: 10px;
+  margin: 10px 0;
+  background: #1E1E1E;
+  color: #ffffff;
+  border-radius: 0 0 5px 5px;
+  box-shadow: rgba(0, 0, 0, 0.55) 0px 2px 10px;
+  overflow: hidden;
+}
+
+
+.wewrite code {
+  display: block;
+  padding: 15px 16px 16px;
+  /* background: #2b2b2b; */
+  border-radius: 5px;
+  overflow-x: auto;
+  font-family: Consolas, Monaco, Menlo, monospace;
+  font-size: 12px;
+  color: #d3d3d3;
+  /* 提供更好的对比度 */
+}
+
+/*
+ * Visual Studio 2015 dark style
+ * Author: Nicolas LLOBERA <nllobera@gmail.com>
+ */
+.wewrite .hljs {
+  /* background: #1E1E1E; */
+  color: #DCDCDC
+}
+
+.wewrite .hljs-keyword,
+.wewrite .hljs-literal,
+.wewrite .hljs-symbol,
+.wewrite .hljs-name {
+  color: #569CD6
+}
+
+.wewrite .hljs-link {
+  color: #569CD6;
+  text-decoration: underline
+}
+
+.wewrite .hljs-built_in,
+.wewrite .hljs-type {
+  color: #4EC9B0
+}
+
+.wewrite .hljs-number,
+.wewrite .hljs-class {
+  color: #B8D7A3
+}
+
+.wewrite .hljs-string,
+.wewrite .hljs-meta .hljs-string {
+  color: #D69D85
+}
+
+.wewrite .hljs-regexp,
+.wewrite .hljs-template-tag {
+  color: #9A5334
+}
+
+.wewrite .hljs-subst,
+.wewrite .hljs-function,
+.wewrite .hljs-title,
+.wewrite .hljs-params,
+.wewrite .hljs-formula {
+  color: #DCDCDC
+}
+
+.wewrite .hljs-comment,
+.wewrite .hljs-quote {
+  color: #57A64A;
+  font-style: italic
+}
+
+.wewrite .hljs-doctag {
+  color: #608B4E
+}
+
+.wewrite .hljs-meta,
+.wewrite .hljs-meta .hljs-keyword,
+.wewrite .hljs-tag {
+  color: #9B9B9B
+}
+
+.wewrite .hljs-variable,
+.wewrite .hljs-template-variable {
+  color: #BD63C5
+}
+
+.wewrite .hljs-attr,
+.wewrite .hljs-attribute {
+  color: #9CDCFE
+}
+
+.wewrite .hljs-section {
+  color: gold
+}
+
+.wewrite .hljs-emphasis {
+  font-style: italic
+}
+
+.wewrite .hljs-strong {
+  font-weight: bold
+}
+
+.wewrite .hljs-code {
+  font-family: 'Monospace';
+}
+
+.wewrite .hljs-bullet,
+.wewrite .hljs-selector-tag,
+.wewrite .hljs-selector-id,
+.wewrite .hljs-selector-class,
+.wewrite .hljs-selector-attr,
+.wewrite .hljs-selector-pseudo {
+  color: #D7BA7D
+}
+
+.wewrite .hljs-addition {
+  background-color: #144212;
+  display: inline-block;
+  width: 100%
+}
+
+.wewrite .hljs-deletion {
+  background-color: #600;
+  display: inline-block;
+  width: 100%
+}
+
+/* 隐藏行号 */
+.wewrite section ul {
+  display: none;
+}
+
+/* 如果你想要隐藏整个行号块，包括行号本身 */
+.wewrite section ul li {
+  display: none;
+}
+
+
+
+/* <svg xmlns="http://www.w3.org/2000/svg" version="1.1" x="0px" y="0px" width="450px" height="130px">
+  <ellipse cx="65" cy="65" rx="50" ry="52" stroke="rgb(220,60,54)" stroke-width="2" fill="rgb(237,108,96)">
+  </ellipse>
+  <ellipse cx="225" cy="65" rx="50" ry="52" stroke="rgb(218,151,33)" stroke-width="2" fill="rgb(247,193,81)">
+  </ellipse>
+  <ellipse cx="385" cy="65" rx="50" ry="52" stroke="rgb(27,161,37)" stroke-width="2" fill="rgb(100,200,86)">
+  </ellipse>
+ </svg> */
+
+/* <span style="display: block;background: url(&quot;https://mmbiz.qpic.cn/mmbiz_svg/LwcbhAmMnZCpmku5VZuHQqcZV2jKGZRFCevbpH2P01MmKccaWkeOwzrXjLwicaVKJicfnqMS8wtSdicicgBhecer8dibcn3euxvbM/640?wx_fmt=svg&quot;) 10px 10px / 40px auto no-repeat rgb(40, 44, 52);height: 30px;width: 784px;margin-bottom: -7px;border-radius: 5px;"></span> */
 `;

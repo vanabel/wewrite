@@ -6,12 +6,30 @@
 
 import { Tokens, MarkedExtension } from "marked";
 import { WeWriteMarkedExtension } from "./extension";
+import { sanitizeHTMLToDom } from "obsidian";
+import { url } from "inspector";
 
 export class ListItem extends WeWriteMarkedExtension {
     async postprocess(html: string) {
         // console.log(`listItem postprocess:`,html);
+        const root = sanitizeHTMLToDom(html)
+        const uls = root.querySelectorAll<HTMLElement>('ul,ol')
+        for (let ul of uls) {
+            if (ul.children.length === 0) {
+                ul.remove()
+            }
+            const p = ul.parentNode
+            if (p){
+                p.removeChild(ul)
+                const frame = p.createDiv({cls:'wewrite-list-frame'})
+                frame.setAttr('frame-type', 'list')
+                frame.appendChild(ul)
+            }
+        }
+        const tempDiv = document.createElement('div');
+        tempDiv.appendChild(root);
+        return tempDiv.innerHTML;
         
-        return html
     }
     renderItem(item: Tokens.ListItem) {
         console.log(`listitem:`, item);
@@ -48,14 +66,14 @@ export class ListItem extends WeWriteMarkedExtension {
                 //     }
                 // },
 
-                {
-                    name: 'list',
-                    level: 'block',
+                // {
+                //     name: 'list',
+                //     level: 'block',
 
-                    renderer: (token: Tokens.List) => {
-                        return this.renderList(token);
-                    }
-                }
+                //     renderer: (token: Tokens.List) => {
+                //         return this.renderList(token);
+                //     }
+                // }
             ]
         }
     }
