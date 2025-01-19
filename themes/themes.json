@@ -5,6 +5,10 @@
             "file": "CSS模板.md"
         },
         {
+            "name": "Default CSS",
+            "file": "wewrite-default-theme.md"
+        },
+        {
             "name": "空风格",
             "file": "empty.md"
         },
