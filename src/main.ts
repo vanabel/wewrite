@@ -34,6 +34,7 @@ const DEFAULT_SETTINGS: WeWriteSetting = {
 	accountDataPath: 'wewrite-accounts',
 	chatLLMBaseUrl: '',
 	chatLLMApiKey: '',
+	useCenterToken: false,
 }
 
 export default class WeWritePlugin extends Plugin {
@@ -323,19 +324,27 @@ export default class WeWritePlugin extends Plugin {
 		return account.access_token
 	}
 	async TestAccessToken(accountName: string) {
-		const account = this.getMPAccountByName(accountName);
-		if (account === undefined) {
-			new Notice('Please select a WeChat MP Account');
-			return false;
-		}
-		const token = await this.wechatClient.getAccessToken(account.appId, account.appSecret)
-		if (token) {
-			this.setAccessToken(accountName, token.access_token, token.expires_in)
-			return token.access_token
+		if (this.settings.useCenterToken){
+			return this.wechatClient.requestToken()
+		}else{
+
+			const account = this.getMPAccountByName(accountName);
+			if (account === undefined) {
+				new Notice('Please select a WeChat MP Account');
+				return false;
+			}
+			const token = await this.wechatClient.getAccessToken(account.appId, account.appSecret)
+			if (token) {
+				this.setAccessToken(accountName, token.access_token, token.expires_in)
+				return token.access_token
+			}
 		}
 		return false
 	}
 	async refreshAccessToken(accountName: string | undefined) {
+		if (this.settings.useCenterToken){
+			return this.wechatClient.requestToken()
+		}
 		if (accountName === undefined) {
 			return false
 		}
@@ -344,7 +353,7 @@ export default class WeWritePlugin extends Plugin {
 			new Notice('Please select a WeChat MP Account');
 			return false;
 		}
-		const { appId, appSecret } = account;
+		const { appId, appSecret} = account;
 		if (appId === undefined || appSecret === undefined || !appId || !appSecret) {
 			new Notice('Please give check your [appid] and [secret]');
 			return false;

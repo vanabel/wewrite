@@ -432,8 +432,17 @@ export class WeWriteSettingTab extends PluginSettingTab {
 				});
 		});
 
+		new Setting(mpFrame)
+		.setName('Use Center Token Refresh?')
+		.setDesc('If you don\'t have a static pubic IP, then use center token refresh.')
+		.addToggle(toggle => {
+			toggle.setValue(this.plugin.settings.useCenterToken)
+			.onChange(async (value) => {
+				this.plugin.settings.useCenterToken = value;
+				await this.plugin.saveSettings();
+			});
+		});
 		mpFrame.createEl('hr')
-		
 		// Account title
 		new Setting(mpFrame)
 			.setName($t('account-info'))

@@ -9,7 +9,6 @@
   
  */
 
-import * as htmlToImage from 'html-to-image';
 import { MarkedExtension, Token, Tokens } from "marked";
 import { TAbstractFile, TFile } from "obsidian";
 import { ObsidianMarkdownRenderer } from "../markdown-render";
@@ -472,8 +471,10 @@ export class Embed extends WeWriteMarkedExtension {
         const href = token.href;
         const index = this.excalidrawIndex;
         this.excalidrawIndex++;
-        const root = ObsidianMarkdownRenderer.getInstance(this.plugin.app).queryElement(index, 'div.excalidraw-svg')
+        const renderer = ObsidianMarkdownRenderer.getInstance(this.plugin.app);
+        const root = renderer.queryElement(index, 'div.excalidraw-svg')
         if (!root) {
+            console.error(`renderExcalidrawAsync error:`, 'root is null');
             return
         }
         root.removeAttribute('style');
@@ -485,8 +486,10 @@ export class Embed extends WeWriteMarkedExtension {
                 image.setAttr('height', '100%')
                 image.setAttr('style', 'width:100%;height:100%')
             }
-            const dataUrl = await htmlToImage.toPng(root)
-            token.html = `<img src="${dataUrl}" class="wewwrite-exclaidraw" >`
+            // const dataUrl1 = await htmlToImage.toPng(root)
+            const dataUrl = await renderer.domToImage(root)
+
+            token.html = `<section class="excalidraw" ><img src="${dataUrl}" class="exclaidraw-image" ></section>`
         }
         catch (e) {
             console.error(`renderExcalidrawAsync error:`, e);

@@ -4,8 +4,8 @@
 */
 
 import { App, Component, MarkdownRenderChild, MarkdownRenderer, MarkdownView } from "obsidian";
-import { DeepSeekResult } from "../types";
-import domtoimage from 'dom-to-image';
+import { DeepSeekResult } from "../types/types";
+import domtoimage from './dom-to-image-more';
 async function delay(milliseconds: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, milliseconds));
 }
@@ -210,9 +210,6 @@ export class ObsidianMarkdownRenderer {
         });
     }
     public async domToImage(element: HTMLElement, p:any={}): Promise<string> {
-        // const blob = await domtoimage.toBlob(element)
-        // const dataUrl = URL.createObjectURL(blob)
-        // return dataUrl
         return await domtoimage.toPng(element, p)
     }
 

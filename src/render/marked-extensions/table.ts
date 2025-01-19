@@ -23,13 +23,12 @@ export class Table extends WeWriteMarkedExtension {
                     name: 'table',
                     level: 'block', // Is this a block-level or inline-level tokenizer?
                     renderer : (token:Tokens.Table)=> {
-                        let html = '<div class="table-container">table 渲染失败</div>'
-                        const root =  ObsidianMarkdownRenderer.getInstance(this.plugin.app).queryElement(this.tableIndex, 'table')
-                        if (root){
-                            html = `<div class="table-container">${root.outerHTML}</div>`
-                            this.tableIndex++
+                        const root = ObsidianMarkdownRenderer.getInstance(this.plugin.app).queryElement(this.tableIndex, 'table');
+                        if (!root) {
+                            return '<section class="table-container"><p>Table content not found</p><section>';
                         }
-                        return html
+                        this.tableIndex++;
+                        return `<section class="table-container">${root.outerHTML}</section>`;
                     }
                 }
             ]

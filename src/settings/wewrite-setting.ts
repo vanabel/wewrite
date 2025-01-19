@@ -14,9 +14,11 @@ export type WeWriteAccountInfo = {
     expires_in?: number;
     lastRefreshTime?: number;
     isTokenValid?: boolean;
+    doc_id?: string;
 
 }
 export type WeWriteSetting = {
+	useCenterToken: boolean;
     previewer_wxname?: string;
     custom_theme?: string;
     codeLineNumber: boolean;

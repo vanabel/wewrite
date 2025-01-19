@@ -14,6 +14,7 @@ import { Tokens } from "marked";
 import { ObsidianMarkdownRenderer } from "../markdown-render";
 import { WeWriteMarkedExtension } from "./extension";
 import { MathRenderer } from "./math";
+import { replaceDivWithSection } from "src/utils/utils";
 export class CodeRenderer extends WeWriteMarkedExtension {
 	showLineNumber: boolean;
 	mermaidIndex: number = 0;
@@ -124,30 +125,14 @@ export class CodeRenderer extends WeWriteMarkedExtension {
 			}
 
 		}
-		// Convert HTML to image
-		root.setCssProps({'max-width': '720px !important'})
-		try {
-			const imageData = await renderer.domToImage(root, {
-				width: 720,
-			});
-			const img = document.createElement('img');
-			img.src = imageData;
-			img.alt = 'admonition content';
-			img.addClass('admonition-image');
-			img.style.maxWidth = '100%';
-			return img.outerHTML;
-		  } catch (error) {
-			console.error('Failed to convert callout to image:', error);
-			return '<span>Callout转换失败</span>';
-		  }
-		// return root.outerHTML
+		return replaceDivWithSection(root)//root.outerHTML
 	}
 
 	async renderMermaidAsync(token: Tokens.Generic) {
         // define default failed
         token.html = '<span>mermaid渲染失败</span>';
 
-        const href = token.href;
+        // const href = token.href;
         const index = this.mermaidIndex;
         this.mermaidIndex++;
 
@@ -167,7 +152,7 @@ export class CodeRenderer extends WeWriteMarkedExtension {
 		if (style) {
 			style.parentNode!.removeChild(style)
 		}
-		token.html = `<div id="wewrite-mermaid-${index}"> <img src="${dataUrl}" class="wewrite wewrite-mermaid"> </div>` 
+		token.html = `<section id="wewrite-mermaid-${index}" class="mermaid"> <img src="${dataUrl}" class="mermaid-image"> </section>` 
 	}
 
 	renderCharts(_token: Tokens.Generic) {
@@ -183,8 +168,8 @@ export class CodeRenderer extends WeWriteMarkedExtension {
 		if (canvas) {
 			const MIME_TYPE = "image/png";
 			const imgURL = canvas.toDataURL(MIME_TYPE);
-			return `<section id="${containerId}" class="wewrite charts" >
-			<img src="${imgURL}" >
+			return `<section id="${containerId}" class="charts" >
+			<img src="${imgURL}" class="charts-image" />
 			</section>`;
 		}
 		return '<span>charts渲染失败</span>';

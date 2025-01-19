@@ -29,7 +29,8 @@
     "test",
     "icons",
     "src/assets/css/build-template-css.js",
-    "*.mjs"
+    "*.mjs",
+    "src/render/dom-to-image-more.js"
     
   ]
 }

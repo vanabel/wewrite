@@ -8,7 +8,6 @@ import { LocalDraftItem } from "src/assets/draft-manager";
 import WeWritePlugin from "src/main";
 
 import { getErrorMessage } from "./error-code";
-import { DraftItem, MaterialItem } from "./wechat-types";
 
 export class WechatClient {
   private static instance: WechatClient;
@@ -17,7 +16,6 @@ export class WechatClient {
 
   private constructor(plugin: WeWritePlugin) {
     this.plugin = plugin
-    
   }
   public static getInstance(plugin: WeWritePlugin): WechatClient {
     if (!WechatClient.instance) {
@@ -25,6 +23,79 @@ export class WechatClient {
     }
     return WechatClient.instance;
   }
+
+
+  public async requestToken(): Promise<string | null> {
+    const url = 'https://wewrite.3thinking.cn/mp_token';
+    const account = this.plugin.getSelectedMPAccount()
+    if (account === undefined) {
+      new Notice('Please select a WeChat MP Account');
+      return null;
+    }
+    const { appId, appSecret, doc_id } = account;
+    let params
+    if (doc_id === undefined || !doc_id) {
+      params = {
+        app_id: appId,
+        secret: appSecret,
+      }
+      }
+    else{
+      params = {
+        doc_id: doc_id,
+      }
+    }
+    console.log(`request token params:`, params);
+    
+    try {
+      const result = await requestUrl({
+        method: 'POST',
+        url: url,
+        headers: { 'Content-Type': 'application/json' },
+        throw: false,
+        body: JSON.stringify(params)
+      });
+      console.log('获取token返回结果:', result);
+      if (result.status !== 200) {
+        new Notice(result.text, 0);
+        return null;
+      }
+      const { code, data, message, server_errcode, server_errmsg } = result.json;
+      if (code !== 0) {
+        if (code == -2){
+          // new Notice(message, 0);
+          console.log('app已过期，请重新获取');
+          account.doc_id = undefined;
+          this.plugin.saveSettings();
+          return await this.requestToken();
+        }
+        if (code == -10){
+          //white list
+          if (server_errcode === 40164){
+            const {ipv4} = extractIPs(server_errmsg)
+            new Notice(`请先将IP地址 [${ipv4[0]}] 加入当前公众号的白名单中`, 0);
+          }
+        }
+        return null;
+      }
+      if (data.last_token === undefined) {
+        new Notice('获取token失败', 0);
+        return null;
+      }
+      account.access_token = data.last_token;
+      account.doc_id = data.doc_id;
+      account.expires_in = data.expiretime;
+      account.lastRefreshTime = new Date().getTime()
+      this.plugin.saveSettings();
+      return data.last_token;
+
+
+    } catch (error) {
+      console.error('获取token失败:', error);
+      return null;
+    }
+  }
+
   private getHeaders() {
     return {
       'Accept-Encoding': 'gzip, deflate, br',
@@ -73,7 +144,7 @@ export class WechatClient {
   }
   public async sendArticleToDraftBox(localDraft: LocalDraftItem, data: string) {
     // console.log(`send draft:`, localDraft, data);
-    
+
     const accessToken = await this.plugin.refreshAccessToken(this.plugin.settings.selectedAccount);
     if (!accessToken) {
       return false;
@@ -391,7 +462,7 @@ export class WechatClient {
       return true
     }
   }
-  public async massSendAll(media_id: string, accountName: string = ""){
+  public async massSendAll(media_id: string, accountName: string = "") {
     if (!accountName) {
       accountName = this.plugin.settings.selectedAccount!;
     }
@@ -420,7 +491,7 @@ export class WechatClient {
     const resp = await requestUrl(req);
 
     console.log(`mass send resp`, resp);
-    
+
     const { errcode, errmsg } = resp.json;
     if (errcode !== undefined && errcode !== 0) {
       new Notice(getErrorMessage(errcode), 0);
@@ -430,11 +501,11 @@ export class WechatClient {
     }
 
   }
-  public async senfForPreview(media_id: string, wxname:string="", accountName: string = ""){
+  public async senfForPreview(media_id: string, wxname: string = "", accountName: string = "") {
     if (!accountName) {
       accountName = this.plugin.settings.selectedAccount!;
     }
-    if (!wxname){
+    if (!wxname) {
       wxname = this.plugin.settings.previewer_wxname!;
     }
     const accessToken = await this.plugin.refreshAccessToken(accountName);
@@ -451,7 +522,7 @@ export class WechatClient {
       },
       msgtype: "mpnews",
     };
-      
+
 
     const req: RequestUrlParam = {
       url: url,
@@ -462,7 +533,7 @@ export class WechatClient {
     const resp = await requestUrl(req);
 
     console.log(`preview resp`, resp);
-    
+
     const { errcode, errmsg } = resp.json;
     if (errcode !== undefined && errcode !== 0) {
       new Notice(getErrorMessage(errcode), 0);
@@ -472,5 +543,26 @@ export class WechatClient {
     }
 
   }
- 
+
+
 }
+
+
+function extractIPs(input:string) {
+    // 正则表达式匹配 IPv4 和 IPv6 地址
+    const ipv4Pattern = /\b(?:\d{1,3}\.){3}\d{1,3}\b/g;
+    const ipv6Pattern = /(?:::ffff:)?([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|::(?:ffff:)?(?:\d{1,3}\.){3}\d{1,3}/g;
+
+    // 提取 IPv4 地址
+    const ipv4Matches = input.match(ipv4Pattern) || [];
+
+    // 提取 IPv6 地址
+    const ipv6Matches = input.match(ipv6Pattern) || [];
+
+    // 返回所有匹配的 IP 地址
+    return {
+        ipv4: ipv4Matches,
+        ipv6: ipv6Matches
+    };
+}
+

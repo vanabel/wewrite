@@ -1,7 +1,7 @@
 export const combinedCss = `.admonition {
     margin-top: 1.5em;
     margin-bottom: 1.5em;
-    box-shadow: 0 .2em .5em rgba(0,0,0, 0.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .admonition.no-title .admonition-content {
@@ -254,41 +254,6 @@ export const combinedCss = `.admonition {
   }
 
 
-/* table */
-.table-container {
-  display: flex;
-  overflow: auto;
-  padding:auto
-}
-.wewrite table {
-    /* display: inline-block !important; */
-    display: table;
-    font-size: 12px;
-    width: fit-content !important;
-    /* border: solid 1px #3eaf7c; */
-    margin: auto;
-  }
-  .wewrite thead {
-    background: #3eaf7c!important;
-    color: #fff;
-    text-align: left;
-  }
-  .wewrite tr:nth-child(2n) {
-    background-color: rgba(62, 175, 124, 0.2);
-  }
-  .wewrite th {
-    background: #3eaf7c!important;
-    color: #fff;
-  }
-  .wewrite th,
-  .wewrite td {
-    padding: 12px 7px;
-    line-height: 24px;
-  }
-  .wewrite td {
-    min-width: 120px;
-  }
-
   /* blockquote */
   .wewrite blockquote {
     color: #666;
@@ -406,7 +371,7 @@ export const combinedCss = `.admonition {
 }
 
 .callout:not(.admonition).drop-shadow {
-    box-shadow: 0 .2em .5em rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .callout:not(.admonition) .no-title {
@@ -435,7 +400,7 @@ export const combinedCss = `.admonition {
 
 .callout {
     background-color: rgba(8, 109, 221, 0.1);
-    box-shadow: 0 .2em .5em rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 
@@ -642,6 +607,21 @@ export const combinedCss = `.admonition {
 }
 
 
+.wewrite .charts,
+.wewrite .mermaid {
+    display: flex;
+    flex-direction: column;
+    padding: 3px;
+    border: solid 1px #ccc;
+    border-radius: 3px;
+}
+
+.wewrite .charts image,
+.wewrite .mermaid image
+ {
+    width: 100%;
+    margin: auto;
+}
 /* code section */
 
 .wewrite code-section {
@@ -671,7 +651,7 @@ export const combinedCss = `.admonition {
   background: #1E1E1E;
   color: #ffffff;
   border-radius: 0 0 5px 5px;
-  box-shadow: rgba(0, 0, 0, 0.55) 0px 2px 10px;
+  box-shadow: rgba(0, 0, 0, 0.55) 0px 10px 10px -10px;
   overflow: hidden;
 }
 
@@ -801,25 +781,72 @@ export const combinedCss = `.admonition {
 }
 
 /* 隐藏行号 */
-.wewrite section ul {
+.wewrite .code-section ul {
   display: none;
 }
 
 /* 如果你想要隐藏整个行号块，包括行号本身 */
-.wewrite section ul li {
+.wewrite .code-section ul li {
   display: none;
 }
 
 
+/* table */
+.wewrite .table-container {
+    display: flex;
+    width: 100%;
+    /* 父容器宽度 */
+    overflow: auto;
+    /* 超出部分显示滚动条 */
+    /* border: 1px solid #ccc; */
+    /* 边框 */
+    /* border-radius: 4px; */
+    /* 圆角 */
+    padding: 1px;
+    /* 内边距 */
+    /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); */
+    /* 阴影 */
+}
 
-/* <svg xmlns="http://www.w3.org/2000/svg" version="1.1" x="0px" y="0px" width="450px" height="130px">
-  <ellipse cx="65" cy="65" rx="50" ry="52" stroke="rgb(220,60,54)" stroke-width="2" fill="rgb(237,108,96)">
-  </ellipse>
-  <ellipse cx="225" cy="65" rx="50" ry="52" stroke="rgb(218,151,33)" stroke-width="2" fill="rgb(247,193,81)">
-  </ellipse>
-  <ellipse cx="385" cy="65" rx="50" ry="52" stroke="rgb(27,161,37)" stroke-width="2" fill="rgb(100,200,86)">
-  </ellipse>
- </svg> */
+.wewrite table {
+    border-collapse: collapse;
+    /* 合并边框 */
+    width: fit-content;
+    /* 表格宽度 */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    /* 添加阴影 */
+    border-radius: 4px;
+    /* 圆角 */
+    margin: auto;
+}
 
-/* <span style="display: block;background: url(&quot;https://mmbiz.qpic.cn/mmbiz_svg/LwcbhAmMnZCpmku5VZuHQqcZV2jKGZRFCevbpH2P01MmKccaWkeOwzrXjLwicaVKJicfnqMS8wtSdicicgBhecer8dibcn3euxvbM/640?wx_fmt=svg&quot;) 10px 10px / 40px auto no-repeat rgb(40, 44, 52);height: 30px;width: 784px;margin-bottom: -7px;border-radius: 5px;"></span> */
+.wewrite thead {
+    background: #3eaf7c !important;
+    color: #fff;
+    text-align: left;
+}
+
+.wewrite tr:nth-child(2n) {
+    background-color: rgba(62, 175, 124, 0.2);
+}
+
+.wewrite th {
+    background: #3eaf7c !important;
+    color: #fff;
+}
+
+.wewrite th,
+.wewrite td {
+    padding: 12px 7px;
+    line-height: 24px;
+}
+
+.wewrite td {
+    min-width: 120px;
+}
+
+.wewrite tr:hover {
+    background-color: #f1f1f1;
+    /* 行悬停效果 */
+}
 `;

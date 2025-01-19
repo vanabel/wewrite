@@ -52,3 +52,8 @@ export function fetchImageBlob(url: string): Promise<Blob> {
     });
 }
 
+export function replaceDivWithSection(root: HTMLElement){
+    let html = root.outerHTML.replaceAll(/<div /g, '<section ').replaceAll(/<\/div>/g, '</section>');
+    return html;
+
+}

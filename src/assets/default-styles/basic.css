@@ -128,41 +128,6 @@
   }
 
 
-/* table */
-.table-container {
-  display: flex;
-  overflow: auto;
-  padding:auto
-}
-.wewrite table {
-    /* display: inline-block !important; */
-    display: table;
-    font-size: 12px;
-    width: fit-content !important;
-    /* border: solid 1px #3eaf7c; */
-    margin: auto;
-  }
-  .wewrite thead {
-    background: #3eaf7c!important;
-    color: #fff;
-    text-align: left;
-  }
-  .wewrite tr:nth-child(2n) {
-    background-color: rgba(62, 175, 124, 0.2);
-  }
-  .wewrite th {
-    background: #3eaf7c!important;
-    color: #fff;
-  }
-  .wewrite th,
-  .wewrite td {
-    padding: 12px 7px;
-    line-height: 24px;
-  }
-  .wewrite td {
-    min-width: 120px;
-  }
-
   /* blockquote */
   .wewrite blockquote {
     color: #666;

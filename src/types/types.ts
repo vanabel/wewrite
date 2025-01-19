@@ -1,4 +1,4 @@
-import WeWritePlugin from "./main";
+import WeWritePlugin from "../main";
 
 export interface DeepSeekResult {
     summary: string;

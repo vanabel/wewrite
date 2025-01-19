@@ -28,7 +28,6 @@ import { Table } from './marked-extensions/table'
 import { Footnote } from './marked-extensions/footnote'
 import { Links } from './marked-extensions/links'
 // import { ListItem } from './marked-extensions/list-item'
-import hljs from "highlight.js";
 
 const markedOptiones = {
     gfm: true,

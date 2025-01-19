@@ -12,7 +12,7 @@
 }
 
 .callout:not(.admonition).drop-shadow {
-    box-shadow: 0 .2em .5em rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .callout:not(.admonition) .no-title {
@@ -41,7 +41,7 @@
 
 .callout {
     background-color: rgba(8, 109, 221, 0.1);
-    box-shadow: 0 .2em .5em rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 

@@ -1,5 +1,5 @@
 import { Notice, requestUrl } from 'obsidian';
-import { DeepSeekResult } from '../types';
+import { DeepSeekResult } from '../types/types';
 import WeWritePlugin from 'src/main';
 import OpenAI from "openai"
 import { WeWriteSetting } from 'src/settings/wewrite-setting';
