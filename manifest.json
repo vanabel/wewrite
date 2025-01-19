@@ -1,10 +1,10 @@
 {
 	"id": "wewrite",
 	"name": "WeWrite",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"minAppVersion": "0.15.0",
 	"description": "Make a workspace for writing and publishing article to WeChat MP.",
 	"author": "Learner Chen",
-	"authorUrl": "https://github.com/learnerchen-forever",
+	"authorUrl": "https://www.3thinking.cn/#/learner-forever",
 	"isDesktopOnly": true
 }

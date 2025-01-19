@@ -1,8 +1,6 @@
 import esbuild from "esbuild";
 import process from "process";
 import builtins from "builtin-modules";
-// import cssModulesPlugin from 'esbuild-css-modules-plugin';
-// import { cssPlugin } from "./src/css-plugin.js";
 
 const banner =
 `/*
@@ -41,7 +39,6 @@ const context = await esbuild.context({
 	treeShaking: true,
 	outfile: "main.js",
 	minify: prod,
-	// plugins: [cssPlugin()],
 });
 
 if (prod) {
