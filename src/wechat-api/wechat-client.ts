@@ -71,8 +71,8 @@ export class WechatClient {
         }
         if (code == -10){
           //white list
-          if (server_errcode === 40164){
-            const {ipv4} = extractIPs(server_errmsg)
+          if (data.errcode === 40164){
+            const {ipv4} = extractIPs(data.errmsg)
             new Notice(`请先将IP地址 [${ipv4[0]}] 加入当前公众号的白名单中`, 0);
           }
         }

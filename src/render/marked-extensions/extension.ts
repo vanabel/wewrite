@@ -21,6 +21,7 @@ import WeWritePlugin from "src/main";
 export interface PreviewRender {
     updateElementByID(id:string, html:string):void;
     addElementByID(id:string, node:HTMLElement | string):void;
+    articleProperties: Map<string, string>;
 
 }
 

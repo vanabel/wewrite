@@ -1,0 +1,46 @@
+.wewrite code {
+  display: inline;
+  color: rgb(153, 153, 153);
+}
+.wewrite .code-section {
+  display: flex;
+  border: solid 1px rgb(62, 67, 72);
+  background-color: rgb(47, 51, 55);
+}
+.wewrite .code-section pre {
+  margin: 0;
+  overflow-x: auto;
+}
+.wewrite .code-section code {
+  display: block;
+  padding: 0.9em;
+  font-size: 0.9em;
+  line-height: 1.6em;
+  text-wrap: nowrap;
+  background-color: rgb(47, 51, 55);
+}
+.wewrite .code-section ul {
+  flex-shrink: 0;
+  counter-reset: line;
+  margin: 0;
+  padding: 0.9em 0 0.9em 0.9em;
+  white-space: normal;
+  width: fit-content;
+}
+.wewrite .code-section ul > li {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  display: list-item;
+  text-align: right;
+  text-wrap: nowrap;
+  line-height: 1.6em;
+  font-size: 0.9em;
+  font-family: Menlo-Regular, Menlo, Monaco, Consolas, "Courier New", monospace;
+  padding: 0;
+  list-style-type: none;
+  color: rgb(166, 166, 166);
+}
+.wewrite .code-section ul > li::marker {
+  content: none;
+}

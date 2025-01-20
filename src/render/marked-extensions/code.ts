@@ -42,8 +42,12 @@ export class CodeRenderer extends WeWriteMarkedExtension {
 		const lang = (infostring || '').match(/^\S*/)?.[0];
 		code = code.replace(/\n$/, '') + '\n';
 
-		let codeSection = '';
-		if (this.plugin.settings.codeLineNumber) {
+		let codeSection = '<section class="code-container"><section class="code-section-banner">  hello  </section><section class="code-section">';
+		
+		const codeLineNumber = this.previewRender.articleProperties.get('show-code-line-number')
+		console.log(`codeLineNumber:${codeLineNumber}`);
+		
+		if (codeLineNumber === 'true' || codeLineNumber === 'yes' || codeLineNumber === '1') {
 			const lines = code.split('\n');
 
 			let liItems = '';
@@ -52,23 +56,19 @@ export class CodeRenderer extends WeWriteMarkedExtension {
 				liItems = liItems + `<li>${count}</li>`;
 				count = count + 1;
 			}
-			codeSection = `<section class="code-section"><span class="code-section-banner"></span><ul>${liItems}</ul>`;
+			codeSection += `<ul>${liItems}</ul>`;
 		}
-		else {
-			codeSection = `<section class="code-section"><span class="code-section-banner"></span><ul>`;
-		}
+		
 
 		if (!lang) {
-			return codeSection + '<pre><code>'
-				+ code
-				+ '</code></pre></section>\n';
+			codeSection += `<pre><code>${code}</code></pre>`;
+		}else{
+
+			codeSection +=`<pre><code class="hljs language-${lang}" >${code}</code></pre>`
 		}
 
-		return codeSection + '<pre><code class="hljs language-'
-			+ lang
-			+ '">'
-			+ code
-			+ '</code></pre></section>\n';
+		return codeSection + '</section></section>';
+		
 	}
 
 	static getMathType(lang: string | null) {
@@ -83,7 +83,7 @@ export class CodeRenderer extends WeWriteMarkedExtension {
 	renderAdmonition(_token: Tokens.Generic, _type: string) {
 		let root = ObsidianMarkdownRenderer.getInstance(this.plugin.app).queryElement(this.admonitionIndex, '.callout.admonition')
 		if (!root) {
-			return '<span>admonition渲染失败</span>';
+			return '<section>admonition渲染失败</section>';
 		}
 		this.admonitionIndex++
 		
@@ -107,7 +107,7 @@ export class CodeRenderer extends WeWriteMarkedExtension {
 		const renderer = ObsidianMarkdownRenderer.getInstance(this.plugin.app);
 		let root = renderer.queryElement(this.admonitionIndex, '.callout.admonition')
 		if (!root) {
-			return '<span>admonition渲染失败</span>';
+			return '<section>admonition渲染失败</section>';
 		}
 		this.admonitionIndex++
 		
@@ -130,7 +130,7 @@ export class CodeRenderer extends WeWriteMarkedExtension {
 
 	async renderMermaidAsync(token: Tokens.Generic) {
         // define default failed
-        token.html = '<span>mermaid渲染失败</span>';
+        token.html = '<section>mermaid渲染失败</section>';
 
         // const href = token.href;
         const index = this.mermaidIndex;
@@ -160,7 +160,7 @@ export class CodeRenderer extends WeWriteMarkedExtension {
 		const root = this.plugin.resourceManager.getMarkdownRenderedElement(this.chartsIndex, '.block-language-chart')
 
 		if (!root ) {
-			return '<span>charts渲染失败</span>';
+			return '<section>charts渲染失败</section>';
 		}
 		const containerId = `charts-img-${this.chartsIndex}`;
 		this.chartsIndex++;
@@ -172,7 +172,7 @@ export class CodeRenderer extends WeWriteMarkedExtension {
 			<img src="${imgURL}" class="charts-image" />
 			</section>`;
 		}
-		return '<span>charts渲染失败</span>';
+		return '<section>charts渲染失败</section>';
 	}
 	markedExtension() {
 		return {

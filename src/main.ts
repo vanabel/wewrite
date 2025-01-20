@@ -19,18 +19,10 @@ import { loadWeWriteIcons } from './assets/icons';
 
 
 const DEFAULT_SETTINGS: WeWriteSetting = {
-	mpAccounts: [
-		{
-			accountName: '',
-			appId: '',
-			appSecret: '',
-		}
-	],
+	mpAccounts: [],
 	ipAddress: '',
 	css_styles_folder: 'wewrite-css-styles',
 	codeLineNumber: true,
-	useFontAwesome: true,
-	rpgDownloadedOnce: false,
 	accountDataPath: 'wewrite-accounts',
 	chatLLMBaseUrl: '',
 	chatLLMApiKey: '',
@@ -261,7 +253,7 @@ export default class WeWritePlugin extends Plugin {
 
 	async loadSettings() {
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, await getWeWriteSetting());
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+		// this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
 	}
 	async updateIpAddress(): Promise<string> {
 		return new Promise(resolve => {
@@ -278,7 +270,7 @@ export default class WeWritePlugin extends Plugin {
 	async saveSettings() {
 		delete this.settings._id
 		delete this.settings._rev
-		await this.saveData(this.settings);
+		// await this.saveData(this.settings);
 		await saveWeWriteSetting(this.settings);
 	}
 	async activateView() {

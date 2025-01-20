@@ -20,13 +20,24 @@ interface FileSystemDirectoryHandle {
 declare global {
 	interface Window {
 		showDirectoryPicker(): Promise<FileSystemDirectoryHandle>;
+		showSaveFilePicker(options?: SaveFilePickerOptions): Promise<FileSystemFileHandle>;
 	}
+}
+
+interface SaveFilePickerOptions {
+	suggestedName?: string;
+	types?: FilePickerAcceptType[];
+}
+
+interface FilePickerAcceptType {
+	description: string;
+	accept: Record<string, string[]>;
 }
 import { getPublicIpAddress } from "src/utils/ip-address";
 import { ThemeManager } from "src/views/theme-manager";
 import { FolderSuggest } from "./folder-suggester";
 import { WECHAT_MP_WEB_PAGE } from "./images";
-import { WeWriteAccountInfo } from "./wewrite-setting";
+import { WeWriteAccountInfo, WeWriteSetting } from "./wewrite-setting";
 import { $t } from "src/lang/i18n";
 
 export class WeWriteSettingTab extends PluginSettingTab {
@@ -54,35 +65,151 @@ export class WeWriteSettingTab extends PluginSettingTab {
 		this.createAiDrawSettings(containerEl)
 
 	} //display	()
-	async exportAccountInfo() {
+	// async exportAccountInfo() {
+	// 	try {
+	// 		if (this.plugin.settings.mpAccounts.length === 0) {
+	// 			new Notice($t('no-accounts-to-export'));
+	// 			return;
+	// 		}
+
+	// 		// Create and download file with all accounts
+	// 		const accountsData = JSON.stringify(this.plugin.settings.mpAccounts, null, 2);
+	// 		const blob = new Blob([accountsData], { type: 'application/json' });
+	// 		const url = URL.createObjectURL(blob);
+
+	// 		const a = document.createElement('a');
+	// 		a.href = url;
+	// 		a.download = `wechat-accounts-${new Date().toISOString().slice(0, 10)}.json`;
+	// 		document.body.appendChild(a);
+	// 		a.click();
+
+	// 		document.body.removeChild(a);
+	// 		URL.revokeObjectURL(url);
+
+	// 		new Notice($t('accounts-exported-successfully') + ` (${this.plugin.settings.mpAccounts.length} accounts)`);
+	// 	} catch (error) {
+	// 		new Notice($t('failed-to-export-account') + error);
+	// 		console.error(error);
+	// 	}
+	// }
+	async exportSettings() {
 		try {
-			if (this.plugin.settings.mpAccounts.length === 0) {
-				new Notice($t('no-accounts-to-export'));
-				return;
-			}
-
-			// Create and download file with all accounts
-			const accountsData = JSON.stringify(this.plugin.settings.mpAccounts, null, 2);
-			const blob = new Blob([accountsData], { type: 'application/json' });
-			const url = URL.createObjectURL(blob);
-
-			const a = document.createElement('a');
-			a.href = url;
-			a.download = `wechat-accounts-${new Date().toISOString().slice(0, 10)}.json`;
-			document.body.appendChild(a);
-			a.click();
-
-			document.body.removeChild(a);
-			URL.revokeObjectURL(url);
-
-			new Notice($t('accounts-exported-successfully') + ` (${this.plugin.settings.mpAccounts.length} accounts)`);
+			const settingData = JSON.stringify(this.plugin.settings, null, 2);
+			const blob = new Blob([settingData], { type: 'application/json' });
+			
+			// Use File System Access API for better control
+			const fileHandle = await window.showSaveFilePicker({
+				suggestedName: `wewrite-settings-${new Date().toISOString().slice(0, 10)}.json`,
+				types: [{
+					description: 'JSON Files',
+					accept: { 'application/json': ['.json'] }
+				}]
+			});
+			
+			// User selected a file location
+			const writable = await fileHandle.createWritable();
+			await writable.write(blob);
+			await writable.close();
+			
+			new Notice('Settings exported successfully!');
+			return true;
 		} catch (error) {
-			new Notice($t('failed-to-export-account') + error);
+			if (error.name === 'AbortError') {
+				// User canceled the save dialog
+				return false;
+			}
+			new Notice('Settings export failed: ' + error);
 			console.error(error);
+			return false;
 		}
 	}
 
-	async importAccountInfo() {
+	// async importAccountInfo() {
+	// 	try {
+	// 		// Create file input
+	// 		const input = document.createElement('input');
+	// 		input.type = 'file';
+	// 		input.accept = '.json';
+
+	// 		input.onchange = async (e) => {
+	// 			const file = (e.target as HTMLInputElement).files?.[0];
+	// 			if (!file) return;
+
+	// 			const reader = new FileReader();
+	// 			reader.onload = async (e) => {
+	// 				try {
+	// 					const content = e.target?.result as string;
+	// 					let importedData: WeWriteAccountInfo | WeWriteAccountInfo[];
+
+	// 					// Validate JSON structure
+	// 					try {
+	// 						importedData = JSON.parse(content);
+	// 					} catch (error) {
+	// 						new Notice($t('invalid-json-file'));
+	// 						return;
+	// 					}
+
+	// 					// Validate account data structure
+	// 					const validateAccount = (account: any): account is WeWriteAccountInfo => {
+	// 						return typeof account === 'object' &&
+	// 							typeof account.accountName === 'string' &&
+	// 							typeof account.appId === 'string' &&
+	// 							typeof account.appSecret === 'string';
+	// 					};
+
+	// 					let accountsToImport: WeWriteAccountInfo[] = [];
+
+	// 					if (Array.isArray(importedData)) {
+	// 						// Multiple accounts
+	// 						if (!importedData.every(validateAccount)) {
+	// 							new Notice($t('invalid-account-data-format'));
+	// 							return;
+	// 						}
+	// 						accountsToImport = importedData;
+	// 					} else if (validateAccount(importedData)) {
+	// 						// Single account
+	// 						accountsToImport = [importedData];
+	// 					} else {
+	// 						new Notice($t('invalid-account-data-format'));
+	// 						return;
+	// 					}
+
+	// 					// Filter out duplicates and invalid accounts
+	// 					const existingAccounts = this.plugin.settings.mpAccounts;
+	// 					const newAccounts = accountsToImport.filter(newAccount =>
+	// 						!existingAccounts.some(existingAccount =>
+	// 							existingAccount.accountName === newAccount.accountName &&
+	// 							existingAccount.appId === newAccount.appId &&
+	// 							existingAccount.appSecret === newAccount.appSecret
+	// 						)
+	// 					);
+
+	// 					if (newAccounts.length === 0) {
+	// 						new Notice($t('no-new-accounts-to-import'));
+	// 						return;
+	// 					}
+
+	// 					// Add new accounts
+	// 					this.plugin.settings.mpAccounts.push(...newAccounts);
+	// 					await this.plugin.saveSettings();
+	// 					this.updateAccountOptions();
+	// 					new Notice($t('accounts-imported-successfully') + ` (${newAccounts.length} accounts)`);
+	// 				} catch (error) {
+	// 					new Notice($t('failed-to-import-accounts') + error);
+	// 					console.error(error);
+	// 				}
+	// 			};
+
+	// 			reader.readAsText(file);
+	// 		};
+
+	// 		input.click();
+	// 	} catch (error) {
+	// 		new Notice($t('failed-to-import-account') + error);
+	// 		console.error(error);
+	// 	}
+	// }
+	async importSettings() {
 		try {
 			// Create file input
 			const input = document.createElement('input');
@@ -97,7 +224,7 @@ export class WeWriteSettingTab extends PluginSettingTab {
 				reader.onload = async (e) => {
 					try {
 						const content = e.target?.result as string;
-						let importedData: WeWriteAccountInfo | WeWriteAccountInfo[];
+						let importedData: WeWriteSetting;
 
 						// Validate JSON structure
 						try {
@@ -107,51 +234,21 @@ export class WeWriteSettingTab extends PluginSettingTab {
 							return;
 						}
 
+
 						// Validate account data structure
-						const validateAccount = (account: any): account is WeWriteAccountInfo => {
-							return typeof account === 'object' &&
-								typeof account.accountName === 'string' &&
-								typeof account.appId === 'string' &&
-								typeof account.appSecret === 'string';
-						};
-
-						let accountsToImport: WeWriteAccountInfo[] = [];
-
-						if (Array.isArray(importedData)) {
-							// Multiple accounts
-							if (!importedData.every(validateAccount)) {
-								new Notice($t('invalid-account-data-format'));
-								return;
-							}
-							accountsToImport = importedData;
-						} else if (validateAccount(importedData)) {
-							// Single account
-							accountsToImport = [importedData];
-						} else {
-							new Notice($t('invalid-account-data-format'));
-							return;
+						const {mpAccounts, css_styles_folder} = importedData;
+						if (mpAccounts === undefined || css_styles_folder === undefined){
+							new Notice('Not valid settings file!')
+							return 
 						}
+						console.log(`settings:`, importedData);
 
-						// Filter out duplicates and invalid accounts
-						const existingAccounts = this.plugin.settings.mpAccounts;
-						const newAccounts = accountsToImport.filter(newAccount =>
-							!existingAccounts.some(existingAccount =>
-								existingAccount.accountName === newAccount.accountName &&
-								existingAccount.appId === newAccount.appId &&
-								existingAccount.appSecret === newAccount.appSecret
-							)
-						);
-
-						if (newAccounts.length === 0) {
-							new Notice($t('no-new-accounts-to-import'));
-							return;
-						}
-
-						// Add new accounts
-						this.plugin.settings.mpAccounts.push(...newAccounts);
+						this.plugin.settings = importedData;
+						// save it
 						await this.plugin.saveSettings();
 						this.updateAccountOptions();
-						new Notice($t('accounts-imported-successfully') + ` (${newAccounts.length} accounts)`);
+						this.display();
+						new Notice('settings imported successfully!');
 					} catch (error) {
 						new Notice($t('failed-to-import-accounts') + error);
 						console.error(error);
@@ -235,6 +332,7 @@ export class WeWriteSettingTab extends PluginSettingTab {
 				.setValue(account.accountName)
 				.onChange(async (value) => {
 					account.accountName = value;
+					this.plugin.settings.selectedAccount = value;
 					await this.plugin.saveSettings();
 					this.updateAccountOptions()
 				}));
@@ -286,11 +384,13 @@ export class WeWriteSettingTab extends PluginSettingTab {
 			.addExtraButton(async button => {
 				button.setTooltip($t('click-to-delete-account')).setIcon('trash-2');
 				button.onClick(async () => {
-					this.plugin.settings.mpAccounts = this.plugin.settings.mpAccounts.filter(account => account.accountName !== accountName)
+					const accountToDelete = this.plugin.settings.selectedAccount
+					this.plugin.settings.mpAccounts = this.plugin.settings.mpAccounts.filter(account => account.accountName !== accountToDelete)
 					const account = this.plugin.settings.mpAccounts[0]
 					if (account !== undefined) {
 						this.plugin.settings.selectedAccount = account.accountName
 						this.updateAccountOptions()
+						this.updateAccountSettings(account.accountName, this.accountEl)
 					} else {
 						this.newAccountInfo()
 					}
@@ -456,6 +556,7 @@ export class WeWriteSettingTab extends PluginSettingTab {
 			.setDesc($t('choose-the-account-you-want-to-edit'))
 			.addDropdown(
 				(dropdown) => {
+					dropdown.selectEl.empty();
 					this.accountDropdown = dropdown
 					if (this.plugin.settings.mpAccounts.length == 0) {
 						this.newAccountInfo()
@@ -499,21 +600,26 @@ export class WeWriteSettingTab extends PluginSettingTab {
 		new Setting(mpFrame)
 			.setName($t('import-export-wewrite-account'))
 			.setDesc($t('import-or-export-your-account-info'))
-			.addButton(
+			.setClass('wewrite-import-export-config')
+			.addExtraButton(
 				(button) => {
-					button.setIcon('download')
+					button.setIcon('upload')
+						
 						.setTooltip($t('import-account-info'))
 						.onClick(async () => {
-							this.importAccountInfo();
+							// this.importAccountInfo();
+							this.importSettings();
 						})
 				}
 			)
-			.addButton(
+			.addExtraButton(
 				(button) => {
-					button.setIcon('upload')
+
+					button.setIcon('download')
 						.setTooltip($t('export-account-info'))
 						.onClick(async () => {
-							this.exportAccountInfo();
+							// this.exportAccountInfo();
+							this.exportSettings();
 
 						})
 				}

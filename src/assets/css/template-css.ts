@@ -624,48 +624,75 @@ export const combinedCss = `.admonition {
 }
 /* code section */
 
-.wewrite code-section {
+.wewrite code {
+  display: inline;
+  color: rgb(153, 153, 153);
+}
+
+.wewrite .code-container {
+  display: flex;
+  flex-direction: column;
+  border-radius: 4px;
   background: #1E1E1E;
+  box-shadow: rgba(0, 0, 0, 0.55) 0px 10px 10px -10px;
 }
 
 
-
-
 .wewrite .code-section-banner {
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" version="1.1" x="0px" y="0px" width="450px" height="130px"><ellipse cx="65" cy="65" rx="50" ry="52" stroke="rgb(220,60,54)" stroke-width="2" fill="rgb(237,108,96)"></ellipse> <ellipse cx="225" cy="65" rx="50" ry="52" stroke="rgb(218,151,33)" stroke-width="2" fill="rgb(247,193,81)">  </ellipse>  <ellipse cx="385" cy="65" rx="50" ry="52" stroke="rgb(27,161,37)" stroke-width="2" fill="rgb(100,200,86)">  </ellipse> </svg>');
-  background-color: #1E1E1E;
+  background-image: url('https://www.3thinking.cn/wewrite/code-banner.svg');
   background-position: 10px 10px;
   background-size: 40px auto;
   background-repeat: no-repeat;
   display: inline-block;
   height: 32px;
   width: 100%;
-  margin-bottom: -24px;
-  border-radius: 5px 5px 0 0;
 }
 
-.wewrite pre {
+.wewrite .code-section {
+  display: flex;
+  flex-grow: 1;
+  font-size: 0.9rem;
+  line-height: 1.6rem;
+}
+
+.wewrite .code-section pre {
   position: relative;
-  padding: 10px;
-  margin: 10px 0;
-  background: #1E1E1E;
-  color: #ffffff;
-  border-radius: 0 0 5px 5px;
-  box-shadow: rgba(0, 0, 0, 0.55) 0px 10px 10px -10px;
-  overflow: hidden;
+  padding:0;
+  margin: 0;
+  overflow: auto;
 }
 
 
-.wewrite code {
+.wewrite .code-section code {
   display: block;
-  padding: 15px 16px 16px;
-  /* background: #2b2b2b; */
-  border-radius: 5px;
-  overflow-x: auto;
+  padding: 10px 5px!important;
   font-family: Consolas, Monaco, Menlo, monospace;
-  font-size: 12px;
-  color: #d3d3d3;
-  /* 提供更好的对比度 */
+  text-wrap: nowrap;
+}
+
+.wewrite .code-section ul {
+  flex-shrink: 0;
+  counter-reset: line;
+  margin: 0;
+  padding: 10px 3px 0 1rem;
+  white-space: normal;
+  width: fit-content;
+  user-select: none;
+  border-right: solid 0.5px rgb(166, 166, 166);
+}
+.wewrite .code-section ul > li {
+  position: relative;
+  margin: 0;
+  display: list-item;
+  text-align: right;
+  text-wrap: nowrap;
+  line-height: 1.6rem;
+  font-family: Menlo-Regular, Menlo, Monaco, Consolas, "Courier New", monospace;
+  list-style-type: none;
+  color: rgb(166, 166, 166);
+}
+.wewrite .code-section ul > li::marker {
+  content: none;
 }
 
 /*
@@ -779,17 +806,6 @@ export const combinedCss = `.admonition {
   display: inline-block;
   width: 100%
 }
-
-/* 隐藏行号 */
-.wewrite .code-section ul {
-  display: none;
-}
-
-/* 如果你想要隐藏整个行号块，包括行号本身 */
-.wewrite .code-section ul li {
-  display: none;
-}
-
 
 /* table */
 .wewrite .table-container {

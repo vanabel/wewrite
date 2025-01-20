@@ -3,7 +3,7 @@
 */
 
 import { EditorView } from "@codemirror/view";
-import { DropdownComponent, Editor, EventRef, ItemView, MarkdownView, Notice, sanitizeHTMLToDom, Setting, TFile, WorkspaceLeaf } from 'obsidian';
+import { DropdownComponent, Editor, EventRef, getFrontMatterInfo, ItemView, MarkdownView, Notice, sanitizeHTMLToDom, Setting, TFile, WorkspaceLeaf } from 'obsidian';
 import WeWritePlugin from 'src/main';
 import { PreviewRender } from 'src/render/marked-extensions/extension';
 import { uploadCanvas, uploadSVGs, uploadURLImage } from 'src/render/post-render';
@@ -33,6 +33,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
     private themeSelector: ThemeSelector;
 
     private draftHeader: MPArticleHeader
+    articleProperties: Map<string, string> = new Map();
     editorView: EditorView | null = null;
     lastLeaf: WorkspaceLeaf | undefined;
     renderDiv: any;
@@ -83,8 +84,10 @@ export class PreviewPanel extends ItemView implements PreviewRender {
         this.themeSelector.startWatchThemes()
         this.startWatchActiveNoteChange()
         this.plugin.messageService.registerListener('custom-theme-changed', async (theme: string) => {
+            this.articleProperties.set('custom_theme', theme)
+            this.setArticleProperties()
         })
-        
+
 
     }
 
@@ -99,6 +102,58 @@ export class PreviewPanel extends ItemView implements PreviewRender {
 
     }
 
+    getArticleProperties() {
+        const activeFile = this.plugin.app.workspace.getActiveFile()
+        if (activeFile?.extension === 'md' || activeFile?.extension === 'markdown') {
+            const cache = this.app.metadataCache.getCache(activeFile.path);
+            const frontmatter = cache?.frontmatter;
+            this.articleProperties.clear()
+            if (frontmatter !== undefined && frontmatter !== null) {
+                Object.keys(frontmatter).forEach(key => {
+                    this.articleProperties.set(key, frontmatter[key])
+                })
+            }
+        }
+        return this.articleProperties
+    }
+    async setArticleProperties() {
+        const path = this.getCurrentMarkdownFile()
+
+        if (path && this.articleProperties.size > 0) {
+            const file = this.app.vault.getAbstractFileByPath(path);
+            if (!(file instanceof TFile)) {
+                throw new Error(`File not found: ${path}`);
+            }
+
+            const content = await this.app.vault.read(file);
+            const frontmatterString = Array.from(this.articleProperties.entries())
+                .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
+                .join('\n');
+            console.log(`frontmatterString: `, frontmatterString);
+
+            let updatedContent
+            if (content.startsWith('---')) {
+                updatedContent = content.replace(/^---\n[\s\S]*?\n---/, `---\n${frontmatterString}\n---`);
+            } else {
+                updatedContent = `---\n${frontmatterString}\n---\n${content}`
+            }
+
+            await this.app.vault.modify(file, updatedContent);
+        }
+    }
+
+
+    public getCurrentMarkdownFile() {
+        const currentFile = this.plugin.app.workspace.getActiveFile();
+        const leaves = this.plugin.app.workspace.getLeavesOfType('markdown');
+        for (let leaf of leaves) {
+            const markdownView = leaf.view as MarkdownView;
+            if (markdownView.file?.path === currentFile?.path) {
+                return markdownView.file?.path;
+            }
+        }
+        return null
+    }
     async buildUI() {
         const container = this.containerEl.children[1];
         container.empty();
@@ -112,8 +167,20 @@ export class PreviewPanel extends ItemView implements PreviewRender {
             })
             .addExtraButton(
                 (button) => {
+                    button.setIcon('anchor')
+                        .setTooltip('testing .')
+                        .onClick(async () => {
+
+                            this.getArticleProperties()
+
+
+                        })
+                }
+            )
+            .addExtraButton(
+                (button) => {
                     button.setIcon('refresh-cw')
-                    // button.setIcon('wewrite-translate')
+                        // button.setIcon('wewrite-translate')
                         .setTooltip('Rerender the article content.')
                         .onClick(async () => {
                             this.renderDraft()
@@ -126,9 +193,9 @@ export class PreviewPanel extends ItemView implements PreviewRender {
                     button.setIcon('send-horizontal')
                         .setTooltip('send to draft box.')
                         .onClick(async () => {
-                            if (await this.checkCoverImage()){
+                            if (await this.checkCoverImage()) {
                                 this.sendArticleToDraftBox()
-                            }else{
+                            } else {
                                 new Notice('Cover image is required.')
                             }
                         })
@@ -142,33 +209,33 @@ export class PreviewPanel extends ItemView implements PreviewRender {
                         .onClick(async () => {
                             const data = this.getArticleContent()
                             await navigator.clipboard.write([new ClipboardItem({
-                                'text/html': new Blob([data], {type: 'text/html'})
+                                'text/html': new Blob([data], { type: 'text/html' })
                             })])
                             new Notice('draft copied to clipboard')
                         })
                 }
             )
-            // .addExtraButton(
-            //     (button) => {
-            //         button.setIcon('newspaper')
-            //             .setTooltip('for testing')
-            //         button.onClick(async () => {
-            //             // this.draftHeader.publishDraft()
-            //             // this.openMPPlatform()
-            //             console.log(`for testing.....`);
-                        
-            //         })
-            //     }
-            // )
-            // .addExtraButton(
-            //     (button) => {
-            //         button.setIcon('panel-left')
-            //             .setTooltip('show materials and drafts')
-            //         button.onClick(async () => {
-            //             this.plugin.showLeftView()
-            //         })
-            //     }
-            // )
+        // .addExtraButton(
+        //     (button) => {
+        //         button.setIcon('newspaper')
+        //             .setTooltip('for testing')
+        //         button.onClick(async () => {
+        //             // this.draftHeader.publishDraft()
+        //             // this.openMPPlatform()
+        //             console.log(`for testing.....`);
+
+        //         })
+        //     }
+        // )
+        // .addExtraButton(
+        //     (button) => {
+        //         button.setIcon('panel-left')
+        //             .setTooltip('show materials and drafts')
+        //         button.onClick(async () => {
+        //             this.plugin.showLeftView()
+        //         })
+        //     }
+        // )
 
         this.draftHeader = new MPArticleHeader(this.plugin, mainDiv)
 
@@ -196,17 +263,17 @@ export class PreviewPanel extends ItemView implements PreviewRender {
         await uploadURLImage(this.articleDiv, this.plugin.wechatClient)
 
         const media_id = await this.wechatClient.sendArticleToDraftBox(this.draftHeader.getActiveLocalDraft()!, this.getArticleContent())
-        
+
         if (media_id) {
             this.draftHeader.updateDraftDraftId(media_id)
             const news_item = await this.wechatClient.getDraftById(this.plugin.settings.selectedAccount!, media_id)
             if (news_item) {
-                
+
                 open(news_item[0].url)
                 const item = {
                     media_id: media_id,
                     content: {
-                        news_item:news_item
+                        news_item: news_item
                     },
                     update_time: Date.now()
                 }
@@ -230,6 +297,8 @@ export class PreviewPanel extends ItemView implements PreviewRender {
 
 
     async parseActiveMarkdown() {
+        // get properties
+        const prop = this.getArticleProperties()
         const mview = ResourceManager.getInstance(this.plugin).getCurrentMarkdownView()
         if (!mview) {
             return 'not a markdown view';
@@ -248,7 +317,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
 
         // return;
         html = `<div class="wewrite-article-content wewrite" id="article-section">${html}</div>`;
-        
+
         this.articleDiv.innerHTML = html
 
         this.elementMap.forEach(async (node: HTMLElement | string, id: string) => {
@@ -310,7 +379,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
         item.empty();
         if (doc.childElementCount > 0) {
             for (const child of doc.children) {
-                item.appendChild(child.cloneNode(true)); 
+                item.appendChild(child.cloneNode(true));
             }
         }
         else {
@@ -325,5 +394,5 @@ export class PreviewPanel extends ItemView implements PreviewRender {
 
         }
     }
-    
+
 }

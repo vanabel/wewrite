@@ -28,8 +28,8 @@ export type WeWriteSetting = {
     ipAddress?: string;
     selectedAccount?: string;
     mpAccounts: Array<WeWriteAccountInfo>;
-    useFontAwesome: boolean;
-    rpgDownloadedOnce: boolean;
+    // useFontAwesome: boolean;
+    // rpgDownloadedOnce: boolean;
     accountDataPath: string;
     chatLLMBaseUrl?: string;
     chatLLMApiKey?: string;
