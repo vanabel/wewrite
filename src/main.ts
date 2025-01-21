@@ -16,6 +16,7 @@ import { PreviewPanel, VIEW_TYPE_NP_PREVIEW } from './views/previewer';
 import { WechatClient } from './wechat-api/wechat-client';
 import { getMetadata, isMarkdownFile } from './utils/urls';
 import { loadWeWriteIcons } from './assets/icons';
+import { showProofSuggestions } from './views/proof-suggestion';
 
 
 const DEFAULT_SETTINGS: WeWriteSetting = {
@@ -37,32 +38,32 @@ export default class WeWritePlugin extends Plugin {
 
 	}
 
-	addIcons(){
+	addIcons() {
 		this
 	}
 	// Add context menu for polish operation
-	async addContextMenu() {
-		this.registerEvent(
-			this.app.workspace.on('file-menu', (menu, file: TFile) => {
-				if (file instanceof TFile && isMarkdownFile(file)) {
-					menu.addItem((item) => {
-						item
-							.setTitle('Polish with DeepSeek')
-							.setIcon('sparkles')
-							.onClick(async () => {
-								const content = await this.app.vault.read(file);
-								const polished = await this.polishContent(content);
+	// async addContextMenu() {
+	// 	this.registerEvent(
+	// 		this.app.workspace.on('file-menu', (menu, file: TFile) => {
+	// 			if (file instanceof TFile && isMarkdownFile(file)) {
+	// 				menu.addItem((item) => {
+	// 					item
+	// 						.setTitle('Polish with DeepSeek')
+	// 						.setIcon('sparkles')
+	// 						.onClick(async () => {
+	// 							const content = await this.app.vault.read(file);
+	// 							const polished = await this.polishContent(content);
 
-								if (polished) {
-									await this.app.vault.modify(file, polished);
-									new Notice('Content polished successfully!');
-								}
-							});
-					});
-				}
-			})
-		);
-	}
+	// 							if (polished) {
+	// 								await this.app.vault.modify(file, polished);
+	// 								new Notice('Content polished successfully!');
+	// 							}
+	// 						});
+	// 				});
+	// 			}
+	// 		})
+	// 	);
+	// }
 	async addEditorMenu() {
 		this.registerEvent(
 			this.app.workspace.on('editor-menu', (menu, editor) => {
@@ -86,7 +87,7 @@ export default class WeWritePlugin extends Plugin {
 						subMenu.addItem((subItem: MenuItem) => {
 							subItem
 								.setTitle("Polish Selected Text")
-								.setIcon('text-select')
+								.setIcon('sun')
 								.onClick(async () => {
 									const content = editor.getSelection();
 									const polished = await this.polishContent(content);
@@ -105,49 +106,131 @@ export default class WeWritePlugin extends Plugin {
 								.onClick(async () => {
 									console.log(`proof selected ...`);
 									const content = editor.getSelection();
-									const proofed = await this.proofreadContent(content);
+									const proofed = await this.proofContent(content);
 									console.log(`proofed:`, proofed);
 
 									if (proofed) {
 										// editor.replaceSelection(proofed, content)
+										showProofSuggestions(this.app, proofed, editor)
 										new Notice('Selected content proofed successfully!');
 									}
 								});
 						});
+						subMenu.addItem((subItem: MenuItem) => {
+							subItem
+								.setTitle("Synonyms for Selected Text")
+								.setIcon('book-a')
+								.onClick(async () => {
+									console.log(`synonyms selected ...`);
+									const content = editor.getSelection();
+									const proofed = await this.getSynonyms(content);
+									console.log(`synonyms:`, proofed);
+
+									if (proofed) {
+										// editor.replaceSelection(proofed, content)
+										new Notice('Selected content synonyms successfully!');
+									}
+								});
+						});
+						subMenu.addItem((subItem: MenuItem) => {
+							subItem
+								.setTitle("to English")
+								.setIcon('languages')
+								.onClick(async () => {
+									console.log(`to English ...`);
+									const content = editor.getSelection();
+									const translated = await this.translateToEnglish(content);
+									console.log(`translated:`, translated);
+
+									if (translated) {
+										editor.replaceSelection(translated, content)
+										new Notice('Selected content translated successfully!');
+									}
+								});
+						});
+						subMenu.addItem((subItem: MenuItem) => {
+							subItem
+								.setTitle("to Chinese")
+								.setIcon('languages')
+								.onClick(async () => {
+									console.log(`to Chinese ...`);
+									const content = editor.getSelection();
+									const translated = await this.translateToChinese(content);
+									console.log(`translated:`, translated);
+
+									if (translated) {
+										editor.replaceSelection(translated, content)
+										new Notice('Selected content translated successfully!');
+									}
+								});
+						});
+						subMenu.addItem((subItem: MenuItem) => {
+							subItem
+								.setTitle("to Mermaid")
+								.setIcon('git-compare-arrows')
+								.onClick(async () => {
+									console.log(`to mermaid ...`);
+									const content = editor.getSelection();
+									const proofed = await this.generateMermaid(content);
+									console.log(`mermaid:`, proofed);
+
+									if (proofed) {
+										// editor.replaceSelection(proofed, content)
+										new Notice('Selected content mermaid successfully!');
+									}
+								});
+						});
+						subMenu.addItem((subItem: MenuItem) => {
+							subItem
+								.setTitle("to LaTeX")
+								.setIcon('square-radical')
+								.onClick(async () => {
+									console.log(`to LaTeX ...`);
+									const content = editor.getSelection();
+									const proofed = await this.generateLaTex(content);
+									console.log(`LaTeX:`, proofed);
+
+									if (proofed) {
+										// editor.replaceSelection(proofed, content)
+										new Notice('Selected content LaTeX successfully!');
+									}
+								});
+						});
+					} else {
+						subMenu.addItem(subItem => {
+							subItem
+								.setTitle("Polish Whole Note")
+								.setIcon('user-pen')
+								.onClick(async () => {
+									console.log(`polish whole note`);
+									const content = await this.app.vault.read(file);
+									const polished = await this.polishContent(content);
+									console.log(`polished:`, polished);
+
+									if (polished) {
+										await this.app.vault.modify(file, polished);
+										new Notice('Content polished successfully!');
+									}
+								});
+						});
+						subMenu.addItem(subItem => {
+							subItem
+								.setTitle("Proof Whole Note")
+								.setIcon('user-round-pen')
+								.onClick(async () => {
+									console.log(`Proof whole note`);
+									const content = await this.app.vault.read(file);
+									const proofed = await this.proofContent(content);
+									console.log(`proofed:`, proofed);
+
+									if (proofed) {
+										// await this.app.vault.modify(file, polished);
+										showProofSuggestions(this.app, proofed, editor)
+										new Notice('Content Proof successfully!');
+									}
+								});
+						});
 					}
-
-					subMenu.addItem(subItem => {
-						subItem
-							.setTitle("Polish Whole Note")
-							.setIcon('user-pen')
-							.onClick(async () => {
-								console.log(`polish whole note`);
-								const content = await this.app.vault.read(file);
-								const polished = await this.polishContent(content);
-								console.log(`polished:`, polished);
-
-								if (polished) {
-									await this.app.vault.modify(file, polished);
-									new Notice('Content polished successfully!');
-								}
-							});
-					});
-					subMenu.addItem(subItem => {
-						subItem
-							.setTitle("Proof Whole Note")
-							.setIcon('user-round-pen')
-							.onClick(async () => {
-								console.log(`Proof whole note`);
-								const content = await this.app.vault.read(file);
-								const proofed = await this.proofreadContent(content);
-								console.log(`proofed:`, proofed);
-
-								if (proofed) {
-									// await this.app.vault.modify(file, polished);
-									new Notice('Content Proof successfully!');
-								}
-							});
-					});
 				});
 
 
@@ -188,17 +271,20 @@ export default class WeWritePlugin extends Plugin {
 
 	createSpinner() {
 		this.spinnerEl = this.addStatusBarItem();
-		this.spinnerEl.addClass('wewrite-spinner');
-		this.spinnerEl.addClass('wewrite-spinner-hidden');
+		this.spinnerEl.addClass('wewrite-spin-container');
+		this.spinnerEl.createDiv({
+			cls: 'wewrite-spinner',
+		});
 		this.spinnerText = this.spinnerEl.createDiv({
-			text: 'Please wait...',
 			cls: 'wewrite-spinner-text',
 		});
+
+		// this.spinnerEl.style.display = 'none';
 	}
 	async onload() {
 		this.messageService = new MessageService();
 		loadWeWriteIcons()
-		
+
 		await this.loadSettings();
 		this.wechatClient = WechatClient.getInstance(this);
 		this.assetsManager = await AssetsManager.getInstance(this.app, this);
@@ -207,7 +293,7 @@ export default class WeWritePlugin extends Plugin {
 		// }
 		// Initialize DeepSeek client if configured
 		// if (this.settings.chatLLMBaseUrl && this.settings.chatLLMApiKey) {
-			this.aiClient = AiClient.getInstance(this);
+		this.aiClient = AiClient.getInstance(this);
 		// }
 
 		this.registerView(
@@ -224,7 +310,7 @@ export default class WeWritePlugin extends Plugin {
 		const ribbonIconEl = this.addRibbonIcon('pen-tool', 'WeWrite', (evt: MouseEvent) => {
 			this.activateView();
 		});
-		// ribbonIconEl.addClass('wewrite-ribbon-icon');
+		ribbonIconEl.addClass('wewrite-ribbon-icon');
 
 		// This adds a settings tab so the user can configure various aspects of the plugin
 		this.addSettingTab(new WeWriteSettingTab(this.app, this));
@@ -233,22 +319,26 @@ export default class WeWritePlugin extends Plugin {
 		// this.addContextMenu();
 		this.addEditorMenu();
 		this.createSpinner()
-		
-	}
-	showSpinner(text: string="") {
-        this.spinnerEl.style.display = 'block';
-		this.spinnerText.setText(text);
-    }
 
-    hideSpinner() {
-        this.spinnerEl.style.display = 'none';
-    }
+	}
+	showSpinner(text: string = "") {
+		this.spinnerEl.style.display = 'flex';
+		this.spinnerText.setText(text);
+		// this.spinnerText.setText(text);
+	}
+	isSpinning(){
+		return this.spinnerEl.style.display !== 'none';
+	}
+
+	hideSpinner() {
+		this.spinnerEl.style.display = 'none';
+	}
 	onunload() {
 		if (this.editorChangeListener) {
 			this.app.workspace.offref(this.editorChangeListener);
 		}
 		// 移除 spinner 元素
-        this.spinnerEl.remove();
+		this.spinnerEl.remove();
 	}
 
 	async loadSettings() {
@@ -316,9 +406,9 @@ export default class WeWritePlugin extends Plugin {
 		return account.access_token
 	}
 	async TestAccessToken(accountName: string) {
-		if (this.settings.useCenterToken){
+		if (this.settings.useCenterToken) {
 			return this.wechatClient.requestToken()
-		}else{
+		} else {
 
 			const account = this.getMPAccountByName(accountName);
 			if (account === undefined) {
@@ -334,7 +424,7 @@ export default class WeWritePlugin extends Plugin {
 		return false
 	}
 	async refreshAccessToken(accountName: string | undefined) {
-		if (this.settings.useCenterToken){
+		if (this.settings.useCenterToken) {
 			return this.wechatClient.requestToken()
 		}
 		if (accountName === undefined) {
@@ -345,7 +435,7 @@ export default class WeWritePlugin extends Plugin {
 			new Notice('Please select a WeChat MP Account');
 			return false;
 		}
-		const { appId, appSecret} = account;
+		const { appId, appSecret } = account;
 		if (appId === undefined || appSecret === undefined || !appId || !appSecret) {
 			new Notice('Please give check your [appid] and [secret]');
 			return false;
@@ -395,18 +485,118 @@ export default class WeWritePlugin extends Plugin {
 			new Notice('AI API is not configured');
 			return null;
 		}
-		const result = await this.aiClient.generateSummary(content);
-		return result;
+		try {
+			this.showSpinner('Generating summary...');
+			const result = await this.aiClient.generateSummary(content);
+			this.hideSpinner();
+			return result;
+		} catch (error) {
+			console.error('Error showing spinner:', error);
+		} finally {
+			this.hideSpinner();
+		}
+		return null;
 	}
-
-	async proofreadContent(content: string): Promise<{ original: string, corrected: string }[] | null> {
+	async translateToEnglish(content: string): Promise<string | null> {
 		if (!this.aiClient) {
 			new Notice('AI API is not configured');
 			return null;
 		}
-		const result = await this.aiClient.proofreadContent(content);
-		if (result) {
-			return result.corrections;
+		try {
+			this.showSpinner('tranlating to English...');
+			const result = await this.aiClient.translateText(content, 'Chinese', 'English');
+			this.hideSpinner();
+			return result;
+		} catch (error) {
+			console.error('Error showing spinner:', error);
+		} finally {
+			this.hideSpinner();
+		}
+		return null;
+	}
+	async translateToChinese(content: string): Promise<string | null> {
+		if (!this.aiClient) {
+			new Notice('AI API is not configured');
+			return null;
+		}
+		try {
+			this.showSpinner('tranlating to Chinese...');
+			const result = await this.aiClient.translateText(content);
+			this.hideSpinner();
+			return result;
+		} catch (error) {
+			console.error('Error showing spinner:', error);
+		} finally {
+			this.hideSpinner();
+		}
+		return null;
+	}
+	async getSynonyms(content: string): Promise<string[] | null> {
+		if (!this.aiClient) {
+			new Notice('AI API is not configured');
+			return null;
+		}
+		try {
+			this.showSpinner('get synonyms ...');
+			const result = await this.aiClient.synonym(content);
+			this.hideSpinner();
+			return result;
+		} catch (error) {
+			console.error('Error showing spinner:', error);
+		} finally {
+			this.hideSpinner();
+		}
+		return null;
+	}
+	async generateMermaid(content: string): Promise<string | null> {
+		if (!this.aiClient) {
+			new Notice('AI API is not configured');
+			return null;
+		}
+		try {
+			this.showSpinner('get mermaid ...');
+			const result = await this.aiClient.generateMermaid(content);
+			this.hideSpinner();
+			return result;
+		} catch (error) {
+			console.error('Error showing spinner:', error);
+		} finally {
+			this.hideSpinner();
+		}
+		return null;
+	}
+	async generateLaTex(content: string): Promise<string | null> {
+		if (!this.aiClient) {
+			new Notice('AI API is not configured');
+			return null;
+		}
+		try {
+			this.showSpinner('get LaTex ...');
+			const result = await this.aiClient.generateLaTeX(content);
+			return result;
+		} catch (error) {
+			console.error('Error showing spinner:', error);
+		} finally {
+			this.hideSpinner();
+		}
+		return null;
+	}
+
+	async proofContent(content: string): Promise<any[] | null> {
+		if (!this.aiClient) {
+			new Notice('AI API is not configured');
+			return null;
+		}
+		try {
+			this.showSpinner('proofing content...');
+			const result = await this.aiClient.proofContent(content);
+			if (result) {
+				return result.corrections;
+			}
+		} catch (error) {
+			console.error('Error showing spinner:', error);
+		} finally {
+			this.hideSpinner();
 		}
 		return null;
 	}

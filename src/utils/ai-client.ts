@@ -50,36 +50,75 @@ export class AiClient {
     return completion.choices[0].message.content
   }
 
-  public async proofreadContent(content: string): Promise<DeepSeekResult | null> {
-    const openai = this.getChatAI()
+  public async proofContent(content: string): Promise<DeepSeekResult | null> {
+    const openai = this.getChatAI();
     if (!openai) {
-      return null
+      return null;
     }
-    const completion = await openai.chat.completions.create({
-      model: this.plugin.settings.chatLLMModel || 'qwen-plus', //"deepseek-chat",
-      messages: [
-        {
-          role: 'system',
-          content: `#角色 你是一个资深的文字工作者
-              ##技能1: 擅长于发现文本中的中文的错别字、英文的拼写错误
-              ##技能2: 擅长于发现文本存在的语法错误。
-              ##技能3：擅长于发现文本存在的修辞错误。
-              ##技能4：双发现的各种问题，以及修改建议整理成为数组对象，以json格式返回。`,
-        },
-        {
-          role: 'user',
-          content: `请校对一下的文字:\n\n${content}`,
-        },
-      ],
-      max_tokens: 8192,
-      temperature: 0.7,
-    });
-    return {
-      summary: '',
-      corrections: [],
-      polished: completion.choices[0].message.content || '',
-      coverImage: ''
-    };
+
+    try {
+      const completion = await openai.chat.completions.create({
+        model: this.plugin.settings.chatLLMModel || 'qwen-plus',
+        messages: [
+          {
+            role: 'system',
+            content: `你是一个专业的文本校对助手。请分析以下文本，找出所有拼写错误、语法错误和修辞问题。对于每个问题，请提供：
+1. 错误类型（拼写/语法/修辞）
+2. 错误位置（开始字符索引，结束字符索引）
+3. 错误描述
+4. 修改建议
+
+请以以下JSON格式返回结果：
+{
+  "corrections": [
+    {
+      "type": "拼写|语法|修辞",
+      "start": 0,
+      "end": 5,
+      "description": "错误描述",
+      "suggestion": "修改建议"
+    }
+  ],
+  "polished": "修改后的完整文本"
+}`,
+          },
+          {
+            role: 'user',
+            content: `请校对以下文本：\n\n${content}`,
+          },
+        ],
+        response_format: { type: "json_object" },
+        max_tokens: 8192,
+        temperature: 0.7,
+      });
+
+      const responseContent = completion.choices[0].message.content;
+      if (!responseContent) {
+        return {
+          summary: '',
+          corrections: [],
+          polished: content,
+          coverImage: ''
+        };
+      }
+
+      const result = JSON.parse(responseContent);
+      
+      return {
+        summary: '',
+        corrections: result.corrections || [],
+        polished: result.polished || content,
+        coverImage: ''
+      };
+    } catch (error) {
+      console.error('Error in proofContent:', error);
+      return {
+        summary: '',
+        corrections: [],
+        polished: content,
+        coverImage: ''
+      };
+    }
   }
 
   public async polishContent(content: string): Promise<DeepSeekResult | null> {
@@ -88,15 +127,23 @@ export class AiClient {
       return null
     }
     const completion = await openai.chat.completions.create({
-      model: this.plugin.settings.chatLLMModel || 'qwen-plus', //"deepseek-chat",
+      model: this.plugin.settings.chatLLMModel || 'qwen-plus',
       messages: [
         {
           role: 'system',
-          content: 'You are a helpful assistant that polishes text.',
+          content: `你是一个专业的文本润色助手。请遵循以下原则优化文本：
+1. 保持原文核心意思不变
+2. 改进句子结构和语法
+3. 提升表达清晰度和流畅度
+4. 优化用词，使其更准确和专业
+5. 保持适当的语气和风格
+6. 确保逻辑连贯性
+7. 消除冗余表达
+8. 优化段落结构`,
         },
         {
           role: 'user',
-          content: `Please polish the following text:\n\n${content}`,
+          content: `请优化以下文本，保持原意但提升表达质量：\n\n${content}`,
         },
       ],
       max_tokens: 8192,
@@ -217,7 +264,7 @@ export class AiClient {
         })
       });
 
-      console.log(`generateCoverImageFromText response=>`, response);
+      // console.log(`generateCoverImageFromText response=>`, response);
 
       if (response.status !== 200) {
         throw new Error(`API request failed with status ${response.status}`);
@@ -270,5 +317,109 @@ export class AiClient {
       // console.log(`checkImageGenerationStatus response=>`, response);
       resolve(response.json)
     })
+  }
+
+  public async generateMermaid(content: string): Promise<string> {
+    const openai = this.getChatAI();
+    if (!openai) {
+      return '';
+    }
+
+    const completion = await openai.chat.completions.create({
+      model: this.plugin.settings.chatLLMModel || 'qwen-plus',
+      messages: [
+        {
+          role: 'system',
+          content: `你是一个专业的图表生成助手。请根据提供的文本内容生成相应的Mermaid图表代码。生成的代码应该可以直接插入Markdown文档中使用。`,
+        },
+        {
+          role: 'user',
+          content: `请为以下内容生成Mermaid图表代码：\n\n${content}`,
+        },
+      ],
+      max_tokens: 1000,
+      temperature: 0.7,
+    });
+    return completion.choices[0].message.content || '';
+  }
+
+  public async generateLaTeX(content: string): Promise<string> {
+    const openai = this.getChatAI();
+    if (!openai) {
+      return '';
+    }
+
+    const completion = await openai.chat.completions.create({
+      model: this.plugin.settings.chatLLMModel || 'qwen-plus',
+      messages: [
+        {
+          role: 'system',
+          content: `你是一个专业的LaTeX生成助手。请根据提供的文本内容生成相应的LaTeX代码。生成的代码应该可以直接插入Markdown文档中使用。`,
+        },
+        {
+          role: 'user',
+          content: `请为以下内容生成LaTeX代码：\n\n${content}`,
+        },
+      ],
+      max_tokens: 1000,
+      temperature: 0.7,
+    });
+    return completion.choices[0].message.content || '';
+  }
+
+  public async synonym(content: string): Promise<string[]> {
+    const openai = this.getChatAI();
+    if (!openai) {
+      return [];
+    }
+
+    const completion = await openai.chat.completions.create({
+      model: this.plugin.settings.chatLLMModel || 'qwen-plus',
+      messages: [
+        {
+          role: 'system',
+          content: `你是一个专业的同义词生成助手。请为提供的词语或短语生成最多10个不同的同义表达。每个表达应该简洁明了。`,
+        },
+        {
+          role: 'user',
+          content: `请为以下内容生成同义表达：\n\n${content}`,
+        },
+      ],
+      max_tokens: 200,
+      temperature: 0.7,
+    });
+
+    const synonyms = completion.choices[0].message.content?.split('\n') || [];
+    return synonyms.slice(0, 10);
+  }
+
+  public async translateText(content: string, sourceLang: string = 'English', targetLang: string='Chinese'): Promise<string> {
+    const openai = this.getChatAI();
+    if (!openai) {
+      return '';
+    }
+
+    const completion = await openai.chat.completions.create({
+      model: this.plugin.settings.chatLLMModel || 'qwen-plus',
+      messages: [
+        {
+          role: 'system',
+          content: `你是一个专业的翻译助手。请遵循以下原则进行翻译：
+1. 保持原文意思准确
+2. 使用自然流畅的目标语言表达
+3. 保持专业术语的准确性
+4. 保持上下文一致性
+5. 保留原文格式和特殊符号`,
+        },
+        {
+          role: 'user',
+          content: `请将以下内容从${sourceLang}翻译成${targetLang}：\n\n${content}`,
+        },
+      ],
+      max_tokens: 4096,
+      temperature: 0.7,
+    });
+
+    return completion.choices[0].message.content || '';
   }
 }

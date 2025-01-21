@@ -171,7 +171,16 @@ export class PreviewPanel extends ItemView implements PreviewRender {
                         .setTooltip('testing .')
                         .onClick(async () => {
 
-                            this.getArticleProperties()
+                            // this.getArticleProperties()
+                            if (this.plugin.isSpinning()){
+                                console.log(`spinning`);
+                                
+                                this.plugin.hideSpinner()
+                                return
+                            }
+                            console.log(`to show spinner`);
+                            
+                            this.plugin.showSpinner('testing for view the later.')
 
 
                         })

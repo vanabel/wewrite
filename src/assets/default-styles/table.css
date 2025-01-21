@@ -2,28 +2,15 @@
 .wewrite .table-container {
     display: flex;
     width: 100%;
-    /* 父容器宽度 */
     overflow: auto;
-    /* 超出部分显示滚动条 */
-    /* border: 1px solid #ccc; */
-    /* 边框 */
-    /* border-radius: 4px; */
-    /* 圆角 */
     padding: 1px;
-    /* 内边距 */
-    /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); */
-    /* 阴影 */
 }
 
 .wewrite table {
     border-collapse: collapse;
-    /* 合并边框 */
     width: fit-content;
-    /* 表格宽度 */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    /* 添加阴影 */
     border-radius: 4px;
-    /* 圆角 */
     margin: auto;
 }
 

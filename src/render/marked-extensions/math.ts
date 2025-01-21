@@ -21,10 +21,10 @@ export class MathRenderer extends WeWriteMarkedExtension {
         }
         const svg = parseMath(token.text) 
         if (inline){
-            return `<span  class="inline-math-svg">${svg}</span>`;  
+            return `<span  class="inline-math">${svg}</span>`;  
         }else{
 
-            return `<div  class="block-math-svg">${svg}</div>`;
+            return `<section  class="block-math">${svg}</section>`;
         }
     }
 

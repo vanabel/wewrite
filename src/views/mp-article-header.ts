@@ -9,6 +9,7 @@ import { fetchImageBlob } from "src/utils/utils";
 import { WechatClient } from "src/wechat-api/wechat-client";
 import { MaterialMeidaItem } from "src/wechat-api/wechat-types";
 import { ImageGenerateModal } from "./image-generate-modal";
+import { ResourceManager } from "src/assets/resource-manager";
 
 interface Point {
     x: number;
@@ -71,6 +72,8 @@ export class MPArticleHeader {
         })
         this.updateLocalDraft()
         this.imageGenerateModal = new ImageGenerateModal(this.plugin, (url: string) => {
+            //save it to local folder.
+            ResourceManager.getInstance(this.plugin).saveImageFromUrl(url);
             this.cover_image = url;
             this.setCoverImage(url)
             if (this.activeLocalDraft) {
@@ -347,22 +350,6 @@ export class MPArticleHeader {
     async updateCoverImage() {
 
         this.imageGenerateModal?.open()
-        // //TODO
-        // //clear media_id
-        // // use the canvas to URLdata and update url 
-        // const url = await this.plugin.aiClient?.generateCoverImageFromText()
-        // console.log(`updateCoverImage:`, url);
-
-        // if (url) {
-        //     // this.setCoverImage(url)
-        //     this.cover_image = url;
-        //     if (this.activeLocalDraft !== undefined) {
-        //         this.activeLocalDraft.cover_image_url = this.cover_image!
-        //     }
-        //     this.setCoverImage(url)
-        //     console.log(`replaced:`, url);
-
-        // }
     }
     resetImage() {
         this.current_x = 0;

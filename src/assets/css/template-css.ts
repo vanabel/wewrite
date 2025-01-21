@@ -639,7 +639,8 @@ export const combinedCss = `.admonition {
 
 
 .wewrite .code-section-banner {
-  background-image: url('https://www.3thinking.cn/wewrite/code-banner.svg');
+  /* background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" version="1.1" x="0px" y="0px" width="450px" height="130px"><ellipse cx="65" cy="65" rx="50" ry="52" stroke="rgb(220,60,54)" stroke-width="2" fill="rgb(237,108,96)"></ellipse> <ellipse cx="225" cy="65" rx="50" ry="52" stroke="rgb(218,151,33)" stroke-width="2" fill="rgb(247,193,81)">  </ellipse>  <ellipse cx="385" cy="65" rx="50" ry="52" stroke="rgb(27,161,37)" stroke-width="2" fill="rgb(100,200,86)">  </ellipse> </svg>'); */
+  background-image: url('https://mmbiz.qpic.cn/mmbiz_svg/QAm7hEbaujTQuIH8VVl7W7PicH14grAZxd7oUx579CB2wpytwlLSpiaq2DXBpNUz8R6ckkAuO8tBLr52XjAsvR67mh3oibs2dYK/640?wx_fmt=svg&from=appmsg&tp=webp&wxfrom=15&wx_lazy=1');
   background-position: 10px 10px;
   background-size: 40px auto;
   background-repeat: no-repeat;
@@ -647,6 +648,7 @@ export const combinedCss = `.admonition {
   height: 32px;
   width: 100%;
 }
+/* https://mmbiz.qpic.cn/mmbiz_svg/QAm7hEbaujTQuIH8VVl7W7PicH14grAZxd7oUx579CB2wpytwlLSpiaq2DXBpNUz8R6ckkAuO8tBLr52XjAsvR67mh3oibs2dYK/640?wx_fmt=svg&from=appmsg&tp=webp&wxfrom=15&wx_lazy=1 */
 
 .wewrite .code-section {
   display: flex;
@@ -807,32 +809,35 @@ export const combinedCss = `.admonition {
   width: 100%
 }
 
+.wewrite .inline-math{
+    display: inline-block;
+    padding: 0 0.5rem;
+}
+
+.wewrite .block-math {
+    display: flex;
+    width: 100%;
+    overflow: auto;
+    padding: 0.5rem;
+}
+
+.wewrite .block-math svg {
+    width: fit-content;
+    margin: auto;
+}
 /* table */
 .wewrite .table-container {
     display: flex;
     width: 100%;
-    /* 父容器宽度 */
     overflow: auto;
-    /* 超出部分显示滚动条 */
-    /* border: 1px solid #ccc; */
-    /* 边框 */
-    /* border-radius: 4px; */
-    /* 圆角 */
     padding: 1px;
-    /* 内边距 */
-    /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); */
-    /* 阴影 */
 }
 
 .wewrite table {
     border-collapse: collapse;
-    /* 合并边框 */
     width: fit-content;
-    /* 表格宽度 */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    /* 添加阴影 */
     border-radius: 4px;
-    /* 圆角 */
     margin: auto;
 }
 

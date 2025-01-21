@@ -4,7 +4,7 @@
   
  */
 
-import { MarkdownView } from 'obsidian';
+import { MarkdownView, requestUrl } from 'obsidian';
 import WeWritePlugin from 'src/main';
 
 export class ResourceManager {
@@ -84,5 +84,44 @@ export class ResourceManager {
 
     public async renderMarkdown(path: string) {
 
+    }
+    public async saveImageFromUrl(url: string): Promise<string | null> {
+        const currentFile = this.plugin.app.workspace.getActiveFile();
+        if (!currentFile) return null;
+
+        // Get note basename and folder
+        const noteBasename = currentFile.basename;
+        const folderPath = currentFile.parent?.path || '';
+
+        // Extract filename and extension from URL
+        const urlParts = url.split('/');
+        const filenameWithExt = urlParts[urlParts.length - 1].split('?')[0];
+        const [filename, ext] = filenameWithExt.split('.');
+
+        // Generate timestamp
+        const timestamp = new Date().toISOString()
+            .replace(/[:.]/g, '-')
+            .replace('T', '_');
+
+        // Create new filename
+        const newFilename = `${noteBasename}_cover_${timestamp}.${ext || 'jpg'}`;
+        const fullPath = `${folderPath}/${newFilename}`;
+
+        try {
+            // Fetch image using Obsidian's requestUrl
+            const response = await requestUrl({url});
+            if (response.status !== 200) throw new Error('Failed to fetch image');
+            
+            // Get ArrayBuffer from response
+            const arrayBuffer = response.arrayBuffer;
+            
+            // Save to vault
+            await this.plugin.app.vault.adapter.writeBinary(fullPath, arrayBuffer);
+            
+            return fullPath;
+        } catch (error) {
+            console.error('Error saving image:', error);
+            return null;
+        }
     }
 }

@@ -42,7 +42,7 @@ export class CodeRenderer extends WeWriteMarkedExtension {
 		const lang = (infostring || '').match(/^\S*/)?.[0];
 		code = code.replace(/\n$/, '') + '\n';
 
-		let codeSection = '<section class="code-container"><section class="code-section-banner">  hello  </section><section class="code-section">';
+		let codeSection = '<section class="code-container"><section class="code-section-banner"></section><section class="code-section">';
 		
 		const codeLineNumber = this.previewRender.articleProperties.get('show-code-line-number')
 		console.log(`codeLineNumber:${codeLineNumber}`);
