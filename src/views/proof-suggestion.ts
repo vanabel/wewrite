@@ -1,3 +1,4 @@
+import { MessageService } from './../utils/message-service';
 import { Modal, Editor } from 'obsidian';
 
 interface ProofItem {
@@ -43,8 +44,8 @@ export class ProofSuggestionModal extends Modal {
         
         // Select the text to be replaced
         const startPos = this.editor.offsetToPos(adjustedStart);
-        const endPos = this.editor.offsetToPos(adjustedEnd);
-        this.editor.setSelection(startPos, endPos);
+        // const endPos = this.editor.offsetToPos(adjustedEnd);
+        // this.editor.setSelection(startPos, endPos);
 
         // Position modal near the text
         const coords = (this.editor as any).cm.coordsAtPos?.(startPos);
@@ -83,9 +84,14 @@ export class ProofSuggestionModal extends Modal {
             this.showNext();
         };
         
-        const selectBtn = buttonContainer.createEl('button', { text: `select :(${adjustedStart}-${adjustedEnd}),(${startPos}, ${endPos}) ` });
+        const selectBtn = buttonContainer.createEl('button', { text: `select${adjustedStart}-${adjustedEnd}` });
         selectBtn.onclick = () => {
-            this.editor.setSelection(startPos, endPos);
+            console.log(`select${adjustedStart}-${adjustedEnd}`, this.editor);
+            
+            this.editor.setSelection(
+                this.editor.offsetToPos(adjustedStart),
+                this.editor.offsetToPos(adjustedEnd)
+            );
         };
 
     }
@@ -99,11 +105,13 @@ export class ProofSuggestionModal extends Modal {
     }
 
     private showNext() {
+        this.close()
         this.currentIndex++;
         if (this.currentIndex < this.proofItems.length) {
-            this.onOpen();
+            // this.onOpen();
+            this.show()
         } else {
-            this.close();
+            // this.close();
         }
     }
 
@@ -111,11 +119,28 @@ export class ProofSuggestionModal extends Modal {
         const { contentEl } = this;
         contentEl.empty();
     }
+    public show(){
+        const item = this.proofItems[this.currentIndex];
+        if (item === undefined || !item){
+            this.close()
+        }
+        // Adjust start and end positions based on selection offset
+        const adjustedStart = item.start + this.selectionOffset;
+        const adjustedEnd = item.end + this.selectionOffset;
+        
+        // Select the text to be replaced
+        const startPos = this.editor.offsetToPos(adjustedStart);
+        const endPos = this.editor.offsetToPos(adjustedEnd);
+        this.editor.setSelection(startPos, endPos);
+        this.open()
+        
+    }
 }
+
 
 export function showProofSuggestions(app: any, proofItems: ProofItem[], editor: Editor) {
     console.log(`showProofSuggestions:`, proofItems);
     
     const modal = new ProofSuggestionModal(app, proofItems, editor);
-    modal.open();
+    modal.show();
 }

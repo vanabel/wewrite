@@ -15,6 +15,7 @@ import { MPArticleHeader } from './mp-article-header';
 import { ThemeManager } from './theme-manager';
 import { ThemeSelector } from './theme-selector';
 import { WebViewModal } from './webview';
+import { showProofSuggestions } from "./proof-suggestion";
 
 export const VIEW_TYPE_NP_PREVIEW = 'wechat-np-article-preview';
 export interface ElectronWindow extends Window {
@@ -170,17 +171,9 @@ export class PreviewPanel extends ItemView implements PreviewRender {
                     button.setIcon('anchor')
                         .setTooltip('testing .')
                         .onClick(async () => {
-
-                            // this.getArticleProperties()
-                            if (this.plugin.isSpinning()){
-                                console.log(`spinning`);
-                                
-                                this.plugin.hideSpinner()
-                                return
-                            }
-                            console.log(`to show spinner`);
-                            
-                            this.plugin.showSpinner('testing for view the later.')
+                            const markdownView = this.plugin.app.workspace.getActiveViewOfType(MarkdownView);
+                            const editor = markdownView?.editor;
+                            if (editor!== undefined ) showProofSuggestions(null, [], editor)
 
 
                         })

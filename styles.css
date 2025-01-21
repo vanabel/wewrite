@@ -528,3 +528,20 @@ ol {
   padding: 1rem;
 
 }
+
+/* styles.css */
+.proof-suggestion-modal {
+  position: fixed;
+  z-index: 9999;
+  background-color: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  padding: 1em;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  resize: both;
+  overflow: auto;
+  min-width: 300px;
+  min-height: 200px;
+  max-width: 80vw;
+  max-height: 80vh;
+}
