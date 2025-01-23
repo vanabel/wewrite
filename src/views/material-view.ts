@@ -16,11 +16,11 @@ export const MediaTypeIcon = new Map([
 ]);
 
 export const MediaTypeNames = new Map([
-  ['image', "image"],
-  ['voice', "voice"],
-  ['video', "video"],
-  ['news', "news"],
-  ['draft', "draft"]
+  ['image', $t('views.material-view.image')],
+  ['voice', $t('views.material-view.voice')],
+  ['video', $t('views.material-view.video')],
+  ['news', $t('views.material-view.news')],
+  ['draft', $t('views.material-view.draft')]
 ]);
 
 export class MaterialView extends ItemView {

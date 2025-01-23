@@ -187,14 +187,18 @@ export class MPArticleHeader {
             return
         }
         if (this.activeLocalDraft === undefined) {
+			console.log(`no activelocal draft`);
+			
             new Notice($t('views.article-header.no-active-note'))
             return
         }
         if (this.activeLocalDraft.notePath === undefined) {
+			console.log(`no note path`);
+			
             new Notice($t('views.article-header.no-active-note'))
             return
         }
-        this.plugin.showSpinner()
+        this.plugin.showSpinner($t('views.article-header.generating-digest'))
         const md = await this.plugin.app.vault.adapter.read(this.activeLocalDraft.notePath)
         const summary = await this.plugin.aiClient?.generateSummary(md)
         if (summary) {
@@ -392,11 +396,16 @@ export class MPArticleHeader {
     }
     async updateLocalDraft() {
 
+		console.log(`updateLocalDraft=>`, this.activeLocalDraft);
+		
+		this.activeLocalDraft = await this.localDraftmanager.getDrafOfActiveNote()
+		console.log(`activeLocalDraft:`, this.activeLocalDraft);
+		
         if (this.localDraftmanager.isActiveNoteDraft(this.activeLocalDraft)) {
+			console.log(`not a active draft.`);
+			
             return;
         }
-
-        this.activeLocalDraft = await this.localDraftmanager.getDrafOfActiveNote()
         this.updateHeaderProporties()
         return true;
     }

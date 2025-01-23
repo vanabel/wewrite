@@ -95,7 +95,7 @@ export default class WeWritePlugin extends Plugin {
 						});
 						subMenu.addItem((subItem: MenuItem) => {
 							subItem
-								.setTitle('proof')
+								.setTitle($t('main.proof'))
 								.setIcon('user-pen')
 								.onClick(async () => {
 									const content = editor.getSelection();

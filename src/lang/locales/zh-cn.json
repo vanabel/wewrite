@@ -1,3 +1,206 @@
 {
- 
+	"modals": {
+		"confirm": "确认",
+		"cancel": "取消",
+		"ok": "确定",
+		"enter": "回车",
+		"space": "空格",
+		"escape": "Esc键",
+		"be-careful": "注意！",
+		"caution": "注意！",
+		"delete": {
+			"title": "确认删除",
+			"message": "确定要删除此项吗？",
+			"warning": "此操作不可撤销。",
+			"action": "点击下方按钮继续删除。"
+		},
+		"publish": {
+			"title": "确认发布",
+			"message": "确定要发布这篇文章吗？",
+			"warning": "在微信公众号平台外发布可能效率较低，部分功能可能无法正常使用（如标签、推送到公众号等）。",
+			"success": "发布成功",
+			"failed": "发布失败"
+		},
+		"image-generation": {
+			"title": "图片生成",
+			"size": "尺寸",
+			"prompt": "提示词：",
+			"negative-prompt": "反向提示词：",
+			"generate": "生成"
+		},
+		"proof": {
+			"suggestion": "建议：",
+			"accept": "接受",
+			"skip": "跳过"
+		}
+	},
+	"render": {
+		"callout-failed": "<span>Callout渲染失败</span>",
+		"admonition-failed": "<section>Admonition渲染失败</section>",
+		"mermaid-failed": "<section>Mermaid渲染失败</section>",
+		"charts-failed": "<section>图表渲染失败</section>",
+		"file-not-found": "文件未找到：{0}",
+		"rendering": "渲染中...",
+		"render-failed": "渲染失败。",
+		"excalidraw-failed": "Excalidraw渲染失败",
+		"pdf-crop-failed": "<span>PDF裁剪失败</span>",
+		"faild-canvas-context": "获取canvas上下文失败。",
+		"failed-to-convert-canvas-to-blob": "将canvas转换为Blob失败。"
+	},
+	"settings": {
+		"select-wechat-mp-account": "选择微信公众号账号",
+		"refresh-all-material-from-remote": "从远程刷新所有素材。",
+		"settings-exported": "设置导出成功。",
+		"settings-exporting-failed": "设置导出失败。",
+		"invalid-json-file": "无效的JSON文件。",
+		"invalid-wewerite-settings-file": "无效的WeWrite设置文件。",
+		"settings-imported-successfully": "设置导入成功。",
+		"settings-imported-failed": "设置导入失败。",
+		"settings-imported-error": "设置导入出错。",
+		"custom-themes": "自定义主题",
+		"custom-themes-folder": "自定义主题文件夹",
+		"the-folder-where-your-custom-themes": "存储自定义主题的文件夹。",
+		"themes-folder-path": "主题文件夹路径",
+		"download-predefined-custom-themes-from": "从服务器下载预定义的自定义主题。",
+		"new-account": "新建账号",
+		"account-name": "账号名称",
+		"account-name-for-your-wechat-official": "微信公众号账号名称",
+		"appid-for-your-wechat-official-account": "微信公众号App ID",
+		"app-secret": "App Secret",
+		"app-secret-for-your-wechat-official": "微信公众号App Secret",
+		"check-if-your-account-setting-is-correct": "检查账号设置是否正确。",
+		"test-connection": "测试连接",
+		"click-to-connect-wechat-server": "点击连接微信服务器",
+		"successfully-connected-to-wechat-officia": "成功连接到微信公众号平台。",
+		"be-carefull-delete-account": "注意！这将删除该账号的所有设置和数据。",
+		"delete-account": "删除账号",
+		"no-ip-address": "无IP地址",
+		"copy-ip-address-to-clipboard": "复制IP地址到剪贴板",
+		"ip-copied-to-clipboard": "IP地址已复制到剪贴板。",
+		"text-llm-settings": "文本LLM设置",
+		"llm-access-base-url": "LLM访问基础URL",
+		"llm-access-api-key": "LLM访问API密钥",
+		"llm-model-to-be-used": "使用的LLM模型",
+		"image-llm-settings": "图像LLM设置",
+		"image-llm-checking-task-progress-url": "图像LLM任务进度URL",
+		"wechat-account-settings": "微信账号设置",
+		"public-ip-address": "公网IP地址",
+		"you-should-add-this-ip-to-ip-whitelist-o": "请将此IP添加到微信公众号平台的IP白名单中。点击图片访问。",
+		"copy-ip-to-clipboard": "复制IP到剪贴板",
+		"use-center-token-server": "使用中心令牌服务器",
+		"if-your-device-cannot-get-static-pubic-i": "如果您的设备无法获取静态公网IP，请使用我们的中心令牌服务器获取令牌。我们不会滥用您的App ID或密钥。",
+		"account-info": "账号信息",
+		"select-account": "选择账号",
+		"choose-the-account-to-modify": "选择要修改的账号。",
+		"create-new-account": "创建新账号",
+		"draft-previewer-wechat-id": "草稿预览者微信ID",
+		"draft-only-visible-for-the-wechat-user-o": "草稿仅对微信用户可见。仅对认证的公众号有效。",
+		"import-export-wewrite-account": "导入/导出WeWrite账号",
+		"import-or-export-your-account-info-for-b": "导入或导出您的账号信息以进行备份和恢复。",
+		"import-account-info": "导入账号信息",
+		"export-account-info": "导出账号信息"
+	},
+	"utils": {
+		"no-ai-server-url-given": "未提供AI服务器URL。",
+		"no-ai-server-key-given": "未提供AI服务器密钥。",
+		"missing-api-configuration": "缺少API配置。"
+	},
+	"views": {
+		"free-publish": "免费发布",
+		"delete-image": "删除图片",
+		"delete-draft": "删除草稿",
+		"preview-draft": "预览草稿",
+		"send-mass-message": "群发消息",
+		"no-title-article": "无标题文章。",
+		"other-type-has-not-been-implemented": "其他类型尚未实现。",
+		"materials": {
+			"wechat-materials": "微信素材",
+			"account-prefix": "微信公众号账号",
+			"open-mp-page": "打开微信公众号管理页面"
+		},
+		"article-header": {
+			"title": "草稿参数",
+			"article-title": "文章标题",
+			"article-title-placeholder": "输入文章标题",
+			"author": "作者",
+			"author-name": "作者名称",
+			"digest": "摘要",
+			"generate-digest-by-ai": "AI生成摘要",
+			"digest-text": "输入摘要文本",
+			"open-comments": "开启评论",
+			"comments-description": "评论默认关闭。",
+			"fans-comment-description": "默认仅粉丝可评论。",
+			"only-fans-can-comment": "仅粉丝可评论",
+			"no-active-note": "无活动笔记",
+			"cover-image": "封面图片",
+			"cover-image-description": "文章必须包含封面图片。可从素材库选择或从vault拖放图片。",
+			"generate-cover-image-by-ai": "AI生成封面图片",
+			"upload-cover-image-error": "上传封面图片失败。",
+			"generating-digest": "正在生成摘要..."
+		},
+		"previewer": {
+			"wewrite-previewer": "WeWrite预览器",
+			"to-verify-the-images-in-article": "验证文章中的图片",
+			"article-title": "文章标题",
+			"testing-button": "测试按钮",
+			"render-article": "渲染文章",
+			"send-article-to-draft-box": "发送文章到草稿箱",
+			"please-set-cover-image": "请设置封面图片。",
+			"copy-article-to-clipboard": "复制文章到剪贴板",
+			"file-not-found-path": "文件未找到：{0}",
+			"article-copied-to-clipboard": "文章已复制到剪贴板。",
+			"not-a-markdown-view": "不是Markdown视图",
+			"article-render-failed": "文章渲染失败。"
+		},
+		"theme-manager": {
+			"failed-to-fetch-themes-json-themesrespon": "获取themes.json失败：{0}",
+			"error-downloading-theme": "下载主题出错",
+			"total-themes-length-themes-downloaded": "共下载{0}个主题。",
+			"error-downloading-themes": "下载主题出错。",
+			"default-theme": "默认主题"
+		},
+		"material-view": {
+			"image": "图片",
+			"voice": "语音",
+			"video": "视频",
+			"news": "图文消息",
+			"draft": "草稿"
+		}
+	},
+	"assets": {
+		"image": "图片",
+		"voice": "语音",
+		"video": "视频",
+		"news": "图文消息",
+		"draft": "草稿",
+		"invalid-draft": "无效草稿：缺少账号名称或笔记路径。"
+	},
+	"ai": {
+		"no-api-setting": "请先在插件设置中配置DeepSeek API密钥。",
+		"generating-image": "正在生成图片..."
+	},
+	"wechat-api": {
+		"select-an-wechat-mp-account-first": "请先选择一个微信公众号账号。",
+		"add-ip-address-ipv4-0-to-wechat-mp-ip-wh": "将IP地址[{0}]添加到微信公众号IP白名单。",
+		"failed-to-get-wechat-access-token": "获取微信access token失败。",
+		"send-article-to-draft-box-successfully": "文章成功发送到草稿箱。"
+	},
+	"main": {
+		"wewrite-ai": "WeWrite AI",
+		"polish": "润色",
+		"to-english": "翻译为英文",
+		"to-chinese": "翻译为中文",
+		"generate-mermaid": "生成Mermaid",
+		"generate-latex": "生成LaTeX",
+		"proof": "校对",
+		"no-wechat-mp-account-selected": "未选择微信公众号账号。",
+		"please-check-you-appid-and-appsecret": "请检查您的App ID和App Secret。",
+		"chat-llm-has-not-been-configured": "聊天LLM尚未配置。",
+		"translating-to-english": "正在翻译为英文...",
+		"chinese": "中文",
+		"translating-to-chinese": "正在翻译为中文...",
+		"get-synonyms": "获取同义词...",
+		"generating-mermaid": "正在生成Mermaid...",
+		"generating-latex": "正在生成LaTeX..."
+	}
 }

@@ -263,7 +263,7 @@ export class WeWriteSettingTab extends PluginSettingTab {
 		// delete this account
 		new Setting(cEl)
 			.setName($t('settings.delete-account'))
-			.setDesc($t('settings.t-settings-be-carefull-this-will-delete-'))
+			.setDesc($t('settings.be-carefull-delete-account'))
 			.setClass('danger-extra-button')
 			.addExtraButton(async button => {
 				button.setTooltip($t('settings.delete-account')).setIcon('trash-2');

@@ -3,7 +3,6 @@
 */
 
 import { EditorView } from "@codemirror/view";
-// import i18next from 'i18next';
 import { debounce, DropdownComponent, Editor, EventRef, ItemView, MarkdownView, Notice, sanitizeHTMLToDom, Setting, TFile, WorkspaceLeaf } from 'obsidian';
 import WeWritePlugin from 'src/main';
 import { PreviewRender } from 'src/render/marked-extensions/extension';
@@ -52,7 +51,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
         return VIEW_TYPE_NP_PREVIEW;
     }
     getDisplayText(): string {
-        return $t('views.preivewer.wewrite-previewer');
+        return $t('views.previewer.wewrite-previewer');
     }
     getIcon() {
         return 'pen-tool';
@@ -73,7 +72,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
         this.plugin.messageService.registerListener(
             'src-thumb-list-updated', (data: SrcThumbList) => {
                 this.articleDiv.empty();
-                this.articleDiv.createDiv().setText($t('views.preivewer.to-verify-the-images-in-article'))
+                this.articleDiv.createDiv().setText($t('views.previewer.to-verify-the-images-in-article'))
                 const ol = this.articleDiv.createEl('ol');
                 data.list.forEach((articles, url) => {
                     const li = ol.createEl('li');
@@ -132,7 +131,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
         if (path && this.articleProperties.size > 0) {
             const file = this.app.vault.getAbstractFileByPath(path);
             if (!(file instanceof TFile)) {
-                throw new Error($t('views.preivewer.file-not-found-path', [path]));
+                throw new Error($t('views.previewer.file-not-found-path', [path]));
             }
 
             const content = await this.app.vault.read(file);
@@ -170,26 +169,26 @@ export class PreviewPanel extends ItemView implements PreviewRender {
 
         const mainDiv = container.createDiv({ cls: 'wewrite-previewer-container' });
         this.articleTitle = new Setting(mainDiv)
-            .setName($t('views.preivewer.article-title'))
+            .setName($t('views.previewer.article-title'))
             .setHeading()
             .addDropdown((dropdown: DropdownComponent) => {
                 this.themeSelector.dropdown(dropdown);
             })
-            .addExtraButton(
-                (button) => {
-                    button.setIcon('anchor')
-                        .setTooltip($t('views.preivewer.testing-button'))
-                        .onClick(async () => {
-                            console.log(`testing...`);
+            // .addExtraButton(
+            //     (button) => {
+            //         button.setIcon('anchor')
+            //             .setTooltip($t('views.previewer.testing-button'))
+            //             .onClick(async () => {
+            //                 console.log(`testing...`);
 
 
-                        })
-                }
-            )
+            //             })
+            //     }
+            // )
             .addExtraButton(
                 (button) => {
                     button.setIcon('refresh-cw')
-                        .setTooltip($t('views.preivewer.render-article'))
+                        .setTooltip($t('views.previewer.render-article'))
                         .onClick(async () => {
                             this.renderDraft()
                         })
@@ -198,12 +197,12 @@ export class PreviewPanel extends ItemView implements PreviewRender {
             .addExtraButton(
                 (button) => {
                     button.setIcon('send-horizontal')
-                        .setTooltip($t('views.preivewer.send-article-to-draft-box'))
+                        .setTooltip($t('views.previewer.send-article-to-draft-box'))
                         .onClick(async () => {
                             if (await this.checkCoverImage()) {
                                 this.sendArticleToDraftBox()
                             } else {
-                                new Notice($t('views.preivewer.please-set-cover-image'))
+                                new Notice($t('views.previewer.please-set-cover-image'))
                             }
                         })
                 }
@@ -211,13 +210,13 @@ export class PreviewPanel extends ItemView implements PreviewRender {
             .addExtraButton(
                 (button) => {
                     button.setIcon('clipboard-copy')
-                        .setTooltip($t('views.preivewer.copy-article-to-clipboard'))
+                        .setTooltip($t('views.previewer.copy-article-to-clipboard'))
                         .onClick(async () => {
                             const data = this.getArticleContent()
                             await navigator.clipboard.write([new ClipboardItem({
                                 'text/html': new Blob([data], { type: 'text/html' })
                             })])
-                            new Notice($t('views.preivewer.article-copied-to-clipboard'))
+                            new Notice($t('views.previewer.article-copied-to-clipboard'))
                         })
                 }
             )
@@ -283,7 +282,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
         const prop = this.getArticleProperties()
         const mview = ResourceManager.getInstance(this.plugin).getCurrentMarkdownView()
         if (!mview) {
-            return $t('views.preivewer.not-a-markdown-view');
+            return $t('views.previewer.not-a-markdown-view');
         }
         this.articleDiv.empty();
         this.elementMap = new Map<string, HTMLElement | string>()
@@ -365,7 +364,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
             }
         }
         else {
-            item.innerText = $t('views.preivewer.article-render-failed');
+            item.innerText = $t('views.previewer.article-render-failed');
         }
     }
     addElementByID(id: string, node: HTMLElement | string): void {

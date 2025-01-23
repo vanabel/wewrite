@@ -247,7 +247,7 @@ export class AiClient {
       if (!headers) {
         throw new Error($t('utils.missing-api-configuration'));
       }
-      this.plugin.showSpinner();
+      this.plugin.showSpinner($t('ai.generating-image'));
 
       const response = await requestUrl({
         ...headers,

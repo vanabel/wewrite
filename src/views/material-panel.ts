@@ -39,6 +39,7 @@ export class MaterialPanel {
 
     this.content = parent.createDiv({ cls: 'wewrite-material-panel-content' });
     setIcon(this.refreshButton, 'folder-sync')
+	
 
 
     this.titleSpan.textContent = title;
