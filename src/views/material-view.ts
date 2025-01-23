@@ -16,11 +16,11 @@ export const MediaTypeIcon = new Map([
 ]);
 
 export const MediaTypeNames = new Map([
-  ['image', $t('material_view.media_types.image')],
-  ['voice', $t('material_view.media_types.voice')],
-  ['video', $t('material_view.media_types.video')],
-  ['news', $t('material_view.media_types.news')],
-  ['draft', $t('material_view.media_types.draft')]
+  ['image', "image"],
+  ['voice', "voice"],
+  ['video', "video"],
+  ['news', "news"],
+  ['draft', "draft"]
 ]);
 
 export class MaterialView extends ItemView {
@@ -35,7 +35,7 @@ export class MaterialView extends ItemView {
   }
 
   getDisplayText() {
-    return $t('material_view.title');
+    return $t('views.materials.wechat-materials')
   }
 
   getIcon() {
@@ -54,7 +54,7 @@ export class MaterialView extends ItemView {
   public readonly redraw = (): void => {
     const rootEl = createDiv({ cls: 'nav-folder mod-root' });
     const accountEl = new WeChatMPAccountSwitcher(this.plugin, rootEl)
-    accountEl.setName($t('material_view.account_prefix'))
+    accountEl.setName($t('views.materials.account-prefix'))
 
     // Create tab container
     const tabContainer = rootEl.createDiv({ cls: 'wewrite-material-view-tabs' });
@@ -95,7 +95,7 @@ export class MaterialView extends ItemView {
 
     new ButtonComponent(tabHeader)
       .setIcon('school')
-      .setTooltip($t('material_view.buttons.wechat_mp'))
+      .setTooltip($t('views.materials.open-mp-page'))
       .setClass("wewrite-material-view-tab")
       .onClick(() => {
         window.open('https://mp.weixin.qq.com/', '_blank');

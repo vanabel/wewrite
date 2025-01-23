@@ -30,7 +30,7 @@ export class WechatClient {
     const url = 'https://wewrite.3thinking.cn/mp_token';
     const account = this.plugin.getSelectedMPAccount()
     if (account === undefined) {
-      new Notice($t('notice.select_mp_account'));
+      new Notice($t('wechat-api.select-an-wechat-mp-account-first'));
       return null;
     }
     const { appId, appSecret, doc_id } = account;
@@ -75,14 +75,14 @@ export class WechatClient {
           if (data.errcode === 40164){
             const {ipv4} = extractIPs(data.errmsg)
 			if (ipv4[0]!== undefined && ipv4[0]){
-				new Notice($t('wechatClient.addIpAddressTowhitelist', [ipv4[0]]), 0);
+				new Notice($t('wechat-api.add-ip-address-ipv4-0-to-wechat-mp-ip-wh', [ipv4[0]]));
 			}
           }
         }
         return null;
       }
       if (data.last_token === undefined) {
-        new Notice($t('wechatClient.tokenFailed'), 0);
+        new Notice($t('wechat-api.failed-to-get-wechat-access-token'), 0);
         return null;
       }
       account.access_token = data.last_token;
@@ -94,7 +94,7 @@ export class WechatClient {
 
 
     } catch (error) {
-      console.error($t('wechatClient.tokenFailed'), error);
+      console.error('Get wechat access token error:', error);
       return null;
     }
   }
@@ -180,7 +180,7 @@ export class WechatClient {
       new Notice(getErrorMessage(errcode), 0)
       return false;
     } else {
-      new Notice($t('wechatClient.draftSent', [media_id]));
+      new Notice($t('wechat-api.send-article-to-draft-box-successfully'));
     }
 
     return media_id;

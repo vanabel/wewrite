@@ -2,9 +2,9 @@
  * Procesing the image data for a valid WeChat MP article for upload.
  * 
  */
-import { requestUrl } from 'obsidian';
-import { WechatClient } from './../wechat-api/wechat-client';
+import { $t } from 'src/lang/i18n';
 import { fetchImageBlob } from 'src/utils/utils';
+import { WechatClient } from './../wechat-api/wechat-client';
 function imageFileName(mime:string){
     const type = mime.split('/')[1]
     return `image-${new Date().getTime()}.${type}`
@@ -19,7 +19,7 @@ export function svgToPng(svgData: string): Promise<Blob> {
             canvas.height = img.height * dpr;
             const ctx = canvas.getContext('2d');
             if (!ctx) {
-                reject(new Error('Failed to get canvas context'));
+                reject(new Error($t('render.faild-canvas-context')));
                 return;
             }
             ctx.drawImage(img, 0, 0);
@@ -27,7 +27,7 @@ export function svgToPng(svgData: string): Promise<Blob> {
                 if (blob) {
                     resolve(blob);
                 } else {
-                    reject(new Error('Failed to convert canvas to Blob'));
+                    reject(new Error($t('render.failed-to-convert-canvas-to-blob')));
                 }
             }, 'image/png');
         };

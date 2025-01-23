@@ -2,21 +2,23 @@
  * wewrite plugin for Obsidian
  * author: Learner Chen.
  */
-import { EventRef, Notice, Plugin, TFile, WorkspaceLeaf, Menu, MenuItem, Modal, App, getIcon, debounce } from 'obsidian';
+import { App, debounce, EventRef, MenuItem, Modal, Notice, Plugin, TFile, WorkspaceLeaf } from 'obsidian';
 import { getPublicIpAddress } from "src/utils/ip-address";
 import { AssetsManager } from './assets/assets-manager';
 import { ResourceManager } from './assets/resource-manager';
 import { WeWriteSettingTab } from './settings/setting-tab';
 import { getWeWriteSetting, saveWeWriteSetting, WeWriteSetting } from './settings/wewrite-setting';
 import { MessageService } from './utils/message-service';
-// import { ImageEditorModal } from './views/draft-modal';
+// import { loadWeWriteIcons } from './assets/icons';
 import { AiClient } from './utils/ai-client';
+import { getMetadata } from './utils/urls';
 import { MaterialView, VIEW_TYPE_MP_MATERIAL } from './views/material-view';
 import { PreviewPanel, VIEW_TYPE_NP_PREVIEW } from './views/previewer';
+import { ProofService, showProofSuggestions } from './modals/proof-suggestion';
 import { WechatClient } from './wechat-api/wechat-client';
-import { getMetadata, isMarkdownFile } from './utils/urls';
-import { loadWeWriteIcons } from './assets/icons';
-import { ProofService, showProofSuggestions } from './views/proof-suggestion';
+import { ConfirmModal } from './modals/confirm-modal';
+import { PromptModal } from './modals/prompt-modal';
+import { SynonymsModal } from './modals/synonyms-modal';
 import { $t } from './lang/i18n';
 
 
@@ -59,28 +61,19 @@ export default class WeWritePlugin extends Plugin {
 	
 	proofService: ProofService;
 
-	updateArticleTitle(value: string) {
-
-	}
-
-	addIcons() {
-		this
-	}
-	
 	async addEditorMenu() {
 		this.registerEvent(
 			this.app.workspace.on('editor-menu', (menu, editor) => {
 				const file: TFile
 					// @ts-ignore: Obsidian ts defined incomplete.
 					= editor.editorComponent.file as (TFile | undefined) ?? this.app.workspace.getActiveFile()!;
-				const frontmatter = getMetadata(file, this.app);
 				if (!file) {
 					return;
 				}
 
 				menu.addItem((item) => {
 					item
-						.setTitle($t('menu.ai.title'))
+						.setTitle($t('main.wewrite-ai'))
 						.setIcon('sparkles')
 
 					const subMenu = item.setSubmenu()
@@ -89,150 +82,121 @@ export default class WeWritePlugin extends Plugin {
 					if (editor.somethingSelected()) {
 						subMenu.addItem((subItem: MenuItem) => {
 							subItem
-								.setTitle($t('menu.ai.polish_selected'))
+								.setTitle($t('main.poolish'))
 								.setIcon('sun')
 								.onClick(async () => {
 									const content = editor.getSelection();
 									const polished = await this.polishContent(content);
-									console.log(`polished:`, polished);
 
 									if (polished) {
 										editor.replaceSelection(polished, content)
-										new Notice($t('notice.polish_success'));
 									}
 								});
 						});
 						subMenu.addItem((subItem: MenuItem) => {
 							subItem
-								.setTitle($t('menu.ai.proof_selected'))
+								.setTitle('proof')
 								.setIcon('user-pen')
 								.onClick(async () => {
-									console.log(`proof selected ...`);
 									const content = editor.getSelection();
 									const proofed = await this.proofContent(content);
-									console.log(`proofed:`, proofed);
 
 									if (proofed) {
-										// editor.replaceSelection(proofed, content)
 										this.proofService = showProofSuggestions(editor, proofed)
-										new Notice($t('notice.proof_success'));
 									}
 								});
 						});
 						subMenu.addItem((subItem: MenuItem) => {
 							subItem
-								.setTitle($t('menu.ai.synonyms'))
+								.setTitle('synonyms')
 								.setIcon('book-a')
 								.onClick(async () => {
-									console.log(`synonyms selected ...`);
 									const content = editor.getSelection();
 									const synonym = await this.getSynonyms(content);
 									this.hideSpinner();
-									console.log(`synonyms:`, synonym);
 
 									if (synonym) {
 										editor.replaceSelection(synonym, content)
-										// new Notice('Selected content synonyms successfully!');
 									}
 								});
 						});
 						subMenu.addItem((subItem: MenuItem) => {
 							subItem
-								.setTitle($t('menu.ai.to_english'))
+								.setTitle($t('main.to-english'))
 								.setIcon('languages')
 								.onClick(async () => {
-									console.log(`to English ...`);
 									const content = editor.getSelection();
 									const translated = await this.translateToEnglish(content);
-									console.log(`translated:`, translated);
 
 									if (translated) {
 										editor.replaceSelection(translated, content)
-										// new Notice('Selected content translated successfully!');
 									}
 								});
 						});
 						subMenu.addItem((subItem: MenuItem) => {
 							subItem
-								.setTitle($t('menu.ai.to_chinese'))
+								.setTitle($t('main.to-chinese'))
 								.setIcon('languages')
 								.onClick(async () => {
-									console.log(`to Chinese ...`);
 									const content = editor.getSelection();
 									const translated = await this.translateToChinese(content);
-									console.log(`translated:`, translated);
 
 									if (translated) {
 										editor.replaceSelection(translated, content)
-										// new Notice('Selected content translated successfully!');
 									}
 								});
 						});
 						subMenu.addItem((subItem: MenuItem) => {
 							subItem
-								.setTitle($t('menu.ai.to_mermaid'))
+								.setTitle($t('main.generate-mermaid'))
 								.setIcon('git-compare-arrows')
 								.onClick(async () => {
-									console.log(`to mermaid ...`);
 									const content = editor.getSelection();
 									const mermaid = await this.generateMermaid(content);
-									console.log(`mermaid:`, mermaid);
 
 									if (mermaid) {
 										editor.replaceSelection(mermaid, content)
-										// new Notice('Selected content mermaid successfully!');
 									}
 								});
 						});
 						subMenu.addItem((subItem: MenuItem) => {
 							subItem
-								.setTitle($t('menu.ai.to_latex'))
+								.setTitle($t('main.generate-latex'))
 								.setIcon('square-radical')
 								.onClick(async () => {
-									console.log(`to LaTeX ...`);
 									const content = editor.getSelection();
 									let latex = await this.generateLaTex(content);
-									console.log(`LaTeX:`, latex);
 
 									if (latex) {
 										latex = latex.replace(/\\begin{document}/g, '').replace(/\\end{document}/g, '');
 										latex = latex.replace(/\\\\/g, '\\');
 										editor.replaceSelection(latex, content)
-										// new Notice('Selected content LaTeX successfully!');
 									}
 								});
 						});
 					} else {
 						subMenu.addItem(subItem => {
 							subItem
-								.setTitle($t('menu.ai.polish_note'))
+								.setTitle($t('main.polish'))
 								.setIcon('user-pen')
 								.onClick(async () => {
-									console.log(`polish whole note`);
 									const content = await this.app.vault.read(file);
 									const polished = await this.polishContent(content);
-									console.log(`polished:`, polished);
-
 									if (polished) {
 										await this.app.vault.modify(file, polished);
-										// new Notice('Content polished successfully!');
 									}
 								});
 						});
 						subMenu.addItem(subItem => {
 							subItem
-								.setTitle($t('menu.ai.proof_note'))
+								.setTitle($t('main.proof'))
 								.setIcon('user-round-pen')
 								.onClick(async () => {
-									console.log(`Proof whole note`);
 									const content = await this.app.vault.read(file);
 									const proofed = await this.proofContent(content);
-									console.log(`proofed:`, proofed);
 
 									if (proofed) {
-										// await this.app.vault.modify(file, polished);
 										this.proofService = showProofSuggestions(editor, proofed)
-										// new Notice('Content Proof successfully!');
 									}
 								});
 						});
@@ -248,19 +212,17 @@ export default class WeWritePlugin extends Plugin {
 	}
 	pullAllWeChatMPMaterial() {
 		if (this.settings.selectedAccount === undefined) {
-			new Notice($t('notice.select_account'));
+			new Notice($t('main.no-wechat-mp-account-selected'));
 			return;
 		}
 		this.assetsManager.pullAllMaterial(this.settings.selectedAccount)
 	}
 	assetsUpdated() {
-		//TODO
 		this.messageService.sendMessage('material-updated', null)
 
 	}
 	onWeChantMPAccountChange(value: string) {
 		if (value === undefined || !value) {
-			// do nothing
 			return;
 		}
 		this.settings.selectedAccount = value;
@@ -275,7 +237,6 @@ export default class WeWritePlugin extends Plugin {
 	messageService: MessageService;
 	resourceManager = ResourceManager.getInstance(this);
 
-
 	createSpinner() {
 		this.spinnerEl = this.addStatusBarItem();
 		this.spinnerEl.addClass('wewrite-spin-container');
@@ -285,23 +246,15 @@ export default class WeWritePlugin extends Plugin {
 		this.spinnerText = this.spinnerEl.createDiv({
 			cls: 'wewrite-spinner-text',
 		});
-
-		// this.spinnerEl.style.display = 'none';
 	}
 	async onload() {
 		this.messageService = new MessageService();
-		loadWeWriteIcons()
+		// loadWeWriteIcons()
 
 		await this.loadSettings();
 		this.wechatClient = WechatClient.getInstance(this);
 		this.assetsManager = await AssetsManager.getInstance(this.app, this);
-		// if (this.settings.selectedAccount !== undefined) {
-		// 	await this.assetsManager.loadMaterial(this.settings.selectedAccount)
-		// }
-		// Initialize DeepSeek client if configured
-		// if (this.settings.chatLLMBaseUrl && this.settings.chatLLMApiKey) {
 		this.aiClient = AiClient.getInstance(this);
-		// }
 
 		this.registerView(
 			VIEW_TYPE_NP_PREVIEW,
@@ -313,17 +266,12 @@ export default class WeWritePlugin extends Plugin {
 			(leaf) => (this.matierialView = new MaterialView(leaf, this)),
 		);
 
-		// This creates an icon in the left ribbon.
-		const ribbonIconEl = this.addRibbonIcon('pen-tool', $t('plugin.name'), (evt: MouseEvent) => {
+		this.addRibbonIcon('pen-tool', 'WeWrite', () => {
 			this.activateView();
 		});
-		ribbonIconEl.addClass('wewrite-ribbon-icon');
 
-		// This adds a settings tab so the user can configure various aspects of the plugin
 		this.addSettingTab(new WeWriteSettingTab(this.app, this));
 
-		// Register context menu for DeepSeek polish operation
-		// this.addContextMenu();
 		this.addEditorMenu();
 		this.createSpinner()
 
@@ -331,7 +279,6 @@ export default class WeWritePlugin extends Plugin {
 	showSpinner(text: string = "") {
 		this.spinnerEl.style.display = 'flex';
 		this.spinnerText.setText(text);
-		// this.spinnerText.setText(text);
 	}
 	isSpinning(){
 		return this.spinnerEl.style.display !== 'none';
@@ -344,7 +291,6 @@ export default class WeWritePlugin extends Plugin {
 		if (this.editorChangeListener) {
 			this.app.workspace.offref(this.editorChangeListener);
 		}
-		// 移除 spinner 元素
 		this.spinnerEl.remove();
 		if (this.proofService) {
 			this.proofService.destroy();
@@ -354,8 +300,6 @@ export default class WeWritePlugin extends Plugin {
 	async loadSettings() {
 		this.settings = await Object.assign({}, DEFAULT_SETTINGS, await getWeWriteSetting());
 		await this.loadThemeFolder()
-
-		// this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
 	}
 	async updateIpAddress(): Promise<string> {
 		return new Promise(resolve => {
@@ -407,7 +351,7 @@ export default class WeWritePlugin extends Plugin {
 	async getAccessToken(accountName: string) {
 		const account = this.getMPAccountByName(accountName);
 		if (account === undefined) {
-			new Notice($t('notice.select_mp_account'));
+			new Notice($t('main.no-wechat-mp-account-selected'));
 			return false;
 		}
 		return account.access_token
@@ -419,7 +363,7 @@ export default class WeWritePlugin extends Plugin {
 
 			const account = this.getMPAccountByName(accountName);
 			if (account === undefined) {
-				new Notice($t('notice.select_mp_account'));
+				new Notice($t('main.no-wechat-mp-account-selected'));
 				return false;
 			}
 			const token = await this.wechatClient.getAccessToken(account.appId, account.appSecret)
@@ -439,16 +383,15 @@ export default class WeWritePlugin extends Plugin {
 		}
 		const account = this.getMPAccountByName(accountName);
 		if (account === undefined) {
-			new Notice($t('notice.select_mp_account'));
+			new Notice($t('main.no-wechat-mp-account-selected'));
 			return false;
 		}
 		const { appId, appSecret } = account;
 		if (appId === undefined || appSecret === undefined || !appId || !appSecret) {
-			new Notice($t('notice.check_credentials'));
+			new Notice($t('main.please-check-you-appid-and-appsecret'));
 			return false;
 		}
 		const { access_token: accessToken, expires_in: expiresIn, lastRefreshTime } = account
-		// token not exist.
 		if (accessToken === undefined || accessToken === '') {
 			const token = await this.wechatClient.getAccessToken(appId, appSecret)
 			if (token) {
@@ -456,7 +399,6 @@ export default class WeWritePlugin extends Plugin {
 				return token.access_token
 			}
 		} else if ((lastRefreshTime! + expiresIn! * 1000) < new Date().getTime()) {
-			// token exipred.
 			const token = await this.wechatClient.getAccessToken(appId, appSecret)
 			if (token) {
 				this.setAccessToken(accountName, token.access_token, token.expires_in)
@@ -465,7 +407,7 @@ export default class WeWritePlugin extends Plugin {
 		} else {
 			return accessToken
 		}
-		return false // should not be here, something error. 
+		return false 
 	}
 	getMPAccountByName(accountName: string | undefined) {
 		return this.settings.mpAccounts.find(account => account.accountName === accountName);
@@ -489,11 +431,11 @@ export default class WeWritePlugin extends Plugin {
 
 	async generateSummary(content: string): Promise<string | null> {
 		if (!this.aiClient) {
-			new Notice($t('notice.ai_not_configured'));
+			new Notice($t('main.chat-llm-has-not-been-configured'));
 			return null;
 		}
 		try {
-			this.showSpinner($t('spinner.generating_summary'));
+			this.showSpinner('summarizing...');
 			const result = await this.aiClient.generateSummary(content);
 			this.hideSpinner();
 			return result;
@@ -506,11 +448,11 @@ export default class WeWritePlugin extends Plugin {
 	}
 	async translateToEnglish(content: string): Promise<string | null> {
 		if (!this.aiClient) {
-			new Notice($t('notice.ai_not_configured'));
+			new Notice($t('main.chat-llm-has-not-been-configured'));
 			return null;
 		}
 		try {
-			this.showSpinner($t('spinner.translating_english'));
+			this.showSpinner($t('main.translating-to-english'));
 			const result = await this.aiClient.translateText(content, 'Chinese', 'English');
 			this.hideSpinner();
 			return result;
@@ -523,11 +465,11 @@ export default class WeWritePlugin extends Plugin {
 	}
 	async translateToChinese(content: string): Promise<string | null> {
 		if (!this.aiClient) {
-			new Notice($t('notice.ai_not_configured'));
+			new Notice($t('main.chat-llm-has-not-been-configured'));
 			return null;
 		}
 		try {
-			this.showSpinner($t('spinner.translating_chinese'));
+			this.showSpinner($t('main.translating-to-chinese'));
 			const result = await this.aiClient.translateText(content);
 			this.hideSpinner();
 			return result;
@@ -540,15 +482,14 @@ export default class WeWritePlugin extends Plugin {
 	}
 	async getSynonyms(content: string): Promise<string | null> {
 		if (!this.aiClient) {
-			new Notice($t('notice.ai_not_configured'));
+			new Notice($t('main.chat-llm-has-not-been-configured'));
 			return null;
 		}
 		try {
-			this.showSpinner($t('spinner.getting_synonyms'));
+			this.showSpinner($t('main.get-synonyms'));
 			const result = await this.aiClient.synonym(content);
 			if (result) {
-				// 显示同义词选择窗口
-				const synonyms = result.map(s => s.replace(/^\d+\.\s*/, '')); // 移除数字编号
+				const synonyms = result.map(s => s.replace(/^\d+\.\s*/, '')); 
 				const selectedWord = await new Promise<string | null>((resolve) => {
 					new SynonymsModal(this.app, synonyms, resolve).open();
 				});
@@ -564,19 +505,17 @@ export default class WeWritePlugin extends Plugin {
 	}
 	async generateMermaid(content: string): Promise<string | null> {
 		if (!this.aiClient) {
-			new Notice($t('notice.ai_not_configured'));
+			new Notice($t('main.chat-llm-has-not-been-configured'));
 			return null;
 		}
 		try {
-			this.showSpinner($t('spinner.getting_mermaid'));
+			this.showSpinner($t('main.generating-mermaid'));
 			const result = await this.aiClient.generateMermaid(content);
 			if (result) {
-				// 提取 mermaid 代码块
 				const mermaidMatch = result.match(/```mermaid\n([\s\S]*?)\n```/);
 				if (mermaidMatch && mermaidMatch[1]) {
 					return `\n\`\`\`mermaid\n${mermaidMatch[1].trim()}\n\`\`\`\n`;
 				}
-				// 如果没有找到 mermaid 代码块，返回原始结果
 				return result;
 			}
 			return null;
@@ -589,31 +528,26 @@ export default class WeWritePlugin extends Plugin {
 	}
 	async generateLaTex(content: string): Promise<string | null> {
 		if (!this.aiClient) {
-			new Notice($t('notice.ai_not_configured'));
+			new Notice($t('main.chat-llm-has-not-been-configured'));
 			return null;
 		}
 		try {
-			this.showSpinner($t('spinner.getting_latex'));
+			this.showSpinner($t('main.generating-latex'));
 			const result = await this.aiClient.generateLaTeX(content);
 			console.log(`LaTex:`, result);
 			if (result) {
-				// 提取 LaTeX 公式块
 				const latexMatch = result.match(/\$\$([\s\S]*?)\$\$/);
 				if (latexMatch && latexMatch[0]) {
 					return latexMatch[0].trim();
 				}
-				// 如果没有找到 $$ 格式，尝试从 latex 代码块中提取
 				const codeBlockMatch = result.match(/```latex\n([\s\S]*?)\n```/);
 				if (codeBlockMatch && codeBlockMatch[1]) {
-					// 从代码块中提取 $$ 部分
 					const innerLatexMatch = codeBlockMatch[1].match(/\$\$([\s\S]*?)\$\$/);
 					if (innerLatexMatch && innerLatexMatch[0]) {
 						return innerLatexMatch[0].trim();
 					}
-					// 如果代码块中没有 $$，则添加 $$
 					return `$$${codeBlockMatch[1].trim()}$$`;
 				}
-				// 如果都没找到，返回原始结果
 				return result;
 			}
 			return null;
@@ -627,11 +561,11 @@ export default class WeWritePlugin extends Plugin {
 
 	async proofContent(content: string): Promise<any[] | null> {
 		if (!this.aiClient) {
-			new Notice($t('notice.ai_not_configured'));
+			new Notice($t('main.chat-llm-has-not-been-configured'));
 			return null;
 		}
 		try {
-			this.showSpinner($t('spinner.proofing'));
+			this.showSpinner('Proofing...');
 			const result = await this.aiClient.proofContent(content);
 			if (result) {
 				return result.corrections;
@@ -646,7 +580,7 @@ export default class WeWritePlugin extends Plugin {
 
 	async polishContent(content: string): Promise<string | null> {
 		if (!this.aiClient) {
-			new Notice($t('notice.ai_not_configured'));
+			new Notice($t('main.chat-llm-has-not-been-configured'));
 			return null;
 		}
 		const result = await this.aiClient.polishContent(content);
@@ -655,10 +589,9 @@ export default class WeWritePlugin extends Plugin {
 		}
 		return null;
 	}
-
 	async generateCoverImage(content: string): Promise<string | null> {
 		if (!this.aiClient) {
-			new Notice($t('notice.ai_not_configured'));
+			new Notice($t('main.chat-llm-has-not-been-configured'));
 			return null;
 		}
 		const result = await this.aiClient.generateCoverImage(content);
@@ -671,7 +604,6 @@ export default class WeWritePlugin extends Plugin {
 	async prompt(message: string, defaultValue?: string): Promise<string | null> {
 		return new Promise((resolve) => {
 			const modal = new PromptModal(this.app, message, defaultValue, resolve);
-			// this.app.workspace.openModal(modal);
 			modal.open()
 		});
 	}
@@ -679,177 +611,13 @@ export default class WeWritePlugin extends Plugin {
 	async confirm(message: string): Promise<boolean> {
 		return new Promise((resolve) => {
 			const modal = new ConfirmModal(this.app, message, resolve);
-			// this.app.workspace.openModal(modal);
 			modal.open()
 		});
 	}
 }
 
-class PromptModal extends Modal {
-	private resolve: (value: string | null) => void;
-	private inputEl: HTMLInputElement;
 
-	constructor(
-		app: App,
-		private message: string,
-		private defaultValue: string = '',
-		resolve: (value: string | null) => void
-	) {
-		super(app);
-		this.resolve = resolve;
-	}
 
-	onOpen() {
-		const { contentEl } = this;
-		contentEl.createEl('p', { text: this.message });
 
-		this.inputEl = contentEl.createEl('input', {
-			type: 'text',
-			value: this.defaultValue
-		});
 
-		const buttonContainer = contentEl.createDiv('modal-button-container');
-		buttonContainer.createEl('button', { text: $t('modal.ok') })
-			.addEventListener('click', () => {
-				this.resolve(this.inputEl.value);
-				this.close();
-			});
 
-		buttonContainer.createEl('button', { text: $t('modal.cancel') })
-			.addEventListener('click', () => {
-				this.resolve(null);
-				this.close();
-			});
-	}
-
-	onClose() {
-		const { contentEl } = this;
-		contentEl.empty();
-	}
-}
-
-class ConfirmModal extends Modal {
-	private resolve: (value: boolean) => void;
-
-	constructor(
-		app: App,
-		private message: string,
-		resolve: (value: boolean) => void
-	) {
-		super(app);
-		this.resolve = resolve;
-	}
-
-	onOpen() {
-		const { contentEl } = this;
-		contentEl.createEl('p', { text: this.message });
-
-		const buttonContainer = contentEl.createDiv('modal-button-container');
-		buttonContainer.createEl('button', { text: $t('modal.confirm') })
-			.addEventListener('click', () => {
-				this.resolve(true);
-				this.close();
-			});
-
-		buttonContainer.createEl('button', { text: $t('modal.cancel') })
-			.addEventListener('click', () => {
-				this.resolve(false);
-				this.close();
-			});
-	}
-
-	onClose() {
-		const { contentEl } = this;
-		contentEl.empty();
-	}
-}
-
-class SynonymsModal extends Modal {
-	private resolve: (value: string | null) => void;
-	private selectedIndex = 0;
-
-	constructor(
-		app: App,
-		private synonyms: string[],
-		resolve: (value: string | null) => void
-	) {
-		super(app);
-		this.resolve = resolve;
-	}
-
-	onOpen() {
-		const { contentEl } = this;
-		contentEl.empty();
-		
-		const container = contentEl.createDiv('synonyms-container');
-		container.addClass('synonyms-modal');
-		
-		const list = container.createEl('ul');
-		list.addClass('synonyms-list');
-		
-		this.synonyms.forEach((synonym, index) => {
-			const item = list.createEl('li');
-			item.setText(synonym);
-			item.addClass('synonym-item');
-			
-			if (index === this.selectedIndex) {
-				item.addClass('selected');
-			}
-			
-			item.onClickEvent(() => {
-				this.resolve(synonym);
-				this.close();
-			});
-			
-			item.onmouseenter = () => {
-				this.updateSelection(index);
-			};
-		});
-
-		// 添加键盘事件监听
-		this.scope.register([], 'ArrowUp', (evt) => {
-			evt.preventDefault();
-			this.updateSelection(Math.max(0, this.selectedIndex - 1));
-		});
-		
-		this.scope.register([], 'ArrowDown', (evt) => {
-			evt.preventDefault();
-			this.updateSelection(Math.min(this.synonyms.length - 1, this.selectedIndex + 1));
-		});
-		
-		this.scope.register([], 'Enter', (evt) => {
-			evt.preventDefault();
-			this.resolve(this.synonyms[this.selectedIndex]);
-			this.close();
-		});
-		
-		this.scope.register([], 'Space', (evt) => {
-			evt.preventDefault();
-			this.resolve(this.synonyms[this.selectedIndex]);
-			this.close();
-		});
-		
-		this.scope.register([], 'Escape', () => {
-			this.resolve(null);
-			this.close();
-		});
-	}
-
-	private updateSelection(index: number) {
-		const items = this.contentEl.querySelectorAll('.synonym-item');
-		items[this.selectedIndex]?.removeClass('selected');
-		this.selectedIndex = index;
-		items[this.selectedIndex]?.addClass('selected');
-		
-		// 确保选中项在视图中可见
-		const selectedItem = items[this.selectedIndex] as HTMLElement;
-		if (selectedItem) {
-			selectedItem.scrollIntoView({ block: 'nearest' });
-		}
-	}
-
-	onClose() {
-		const { contentEl } = this;
-		contentEl.empty();
-	}
-}

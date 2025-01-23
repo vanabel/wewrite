@@ -13,6 +13,7 @@ import { MarkedExtension, Token, Tokens } from "marked";
 import { TAbstractFile, TFile } from "obsidian";
 import { ObsidianMarkdownRenderer } from "../markdown-render";
 import { WeWriteMarkedExtension } from "./extension";
+import { $t } from "src/lang/i18n";
 
 declare module 'obsidian' {
     interface Vault {
@@ -381,7 +382,7 @@ export class Embed extends WeWriteMarkedExtension {
         const file = this.searchFile(filename);
 
         if (file == null) {
-            const msg = 'File not found：' + file;
+            const msg = $t('render.file-not-found') + file;
             console.error(msg)
             this.previewRender.updateElementByID(id, msg);
             return;
@@ -431,9 +432,9 @@ export class Embed extends WeWriteMarkedExtension {
                     } else if (embedType == 'svg') {
                         const info = this.parseSVGLink(token.href);
                         const id = this.generateId();
-                        let svg = '渲染中';
+                        let svg = $t('render.rendering');
                         if (Embed.fileCache.has(info.filename)) {
-                            svg = Embed.fileCache.get(info.filename) || '渲染失败';
+                            svg = Embed.fileCache.get(info.filename) || $t('render.render-failed');
                         }
                         else {
                             this.renderSVGFile(info.filename, id);
@@ -466,7 +467,7 @@ export class Embed extends WeWriteMarkedExtension {
 
     async renderExcalidrawAsync(token: Tokens.Generic) {
         // define default failed
-        token.html = "excalidraw渲染失败"
+        token.html = $t('render.excalidraw-failed')
 
         const href = token.href;
         const index = this.excalidrawIndex;
@@ -486,7 +487,6 @@ export class Embed extends WeWriteMarkedExtension {
                 image.setAttr('height', '100%')
                 image.setAttr('style', 'width:100%;height:100%')
             }
-            // const dataUrl1 = await htmlToImage.toPng(root)
             const dataUrl = await renderer.domToImage(root)
 
             token.html = `<section class="excalidraw" ><img src="${dataUrl}" class="exclaidraw-image" ></section>`
@@ -505,7 +505,7 @@ export class Embed extends WeWriteMarkedExtension {
     renderPdfCrop(href: string): string | false | undefined {
         const root = ObsidianMarkdownRenderer.getInstance(this.plugin.app).queryElement(this.pdfCropIndex, '.pdf-cropped-embed')
         if (!root) {
-            return '<span>Pdf-crop渲染失败</span>';
+            return $t('render.pdf-crop-failed');
         }
         this.pdfCropIndex++
         return root.outerHTML

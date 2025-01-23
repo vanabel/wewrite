@@ -15,6 +15,7 @@ import { ObsidianMarkdownRenderer } from "../markdown-render";
 import { WeWriteMarkedExtension } from "./extension";
 import { MathRenderer } from "./math";
 import { replaceDivWithSection } from "src/utils/utils";
+import { $t } from "src/lang/i18n";
 export class CodeRenderer extends WeWriteMarkedExtension {
 	showLineNumber: boolean;
 	mermaidIndex: number = 0;
@@ -83,7 +84,7 @@ export class CodeRenderer extends WeWriteMarkedExtension {
 	renderAdmonition(_token: Tokens.Generic, _type: string) {
 		let root = ObsidianMarkdownRenderer.getInstance(this.plugin.app).queryElement(this.admonitionIndex, '.callout.admonition')
 		if (!root) {
-			return '<section>admonition渲染失败</section>';
+			return $t('render.admonition-failed');
 		}
 		this.admonitionIndex++
 		
@@ -107,7 +108,7 @@ export class CodeRenderer extends WeWriteMarkedExtension {
 		const renderer = ObsidianMarkdownRenderer.getInstance(this.plugin.app);
 		let root = renderer.queryElement(this.admonitionIndex, '.callout.admonition')
 		if (!root) {
-			return '<section>admonition渲染失败</section>';
+			return $t('render.admonition-failed');
 		}
 		this.admonitionIndex++
 		
@@ -130,7 +131,7 @@ export class CodeRenderer extends WeWriteMarkedExtension {
 
 	async renderMermaidAsync(token: Tokens.Generic) {
         // define default failed
-        token.html = '<section>mermaid渲染失败</section>';
+        token.html = $t('render.mermaid-failed');
 
         // const href = token.href;
         const index = this.mermaidIndex;
@@ -160,7 +161,7 @@ export class CodeRenderer extends WeWriteMarkedExtension {
 		const root = this.plugin.resourceManager.getMarkdownRenderedElement(this.chartsIndex, '.block-language-chart')
 
 		if (!root ) {
-			return '<section>charts渲染失败</section>';
+			return $t('render.charts-failed');
 		}
 		const containerId = `charts-img-${this.chartsIndex}`;
 		this.chartsIndex++;
@@ -172,7 +173,7 @@ export class CodeRenderer extends WeWriteMarkedExtension {
 			<img src="${imgURL}" class="charts-image" />
 			</section>`;
 		}
-		return '<section>charts渲染失败</section>';
+		return $t('render.charts-failed');
 	}
 	markedExtension() {
 		return {

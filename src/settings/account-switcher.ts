@@ -11,13 +11,13 @@ export class WeChatMPAccountSwitcher extends Setting {
     constructor(plugin: WeWritePlugin, containerEl: HTMLElement) {
         super(containerEl);
         this.plugin = plugin;
-        this.setName($t('select-wewrite-account'))
+        this.setName($t('settings.select-wechat-mp-account'))
         .addDropdown((dropdown) => {
             this.accountDropdown = dropdown
             this.plugin.settings.mpAccounts.forEach(account => {
                 dropdown.addOption(account.accountName, account.accountName)
             })
-            dropdown.setValue(this.plugin.settings.selectedAccount ?? $t('select-wewrite-account'))
+            dropdown.setValue(this.plugin.settings.selectedAccount ?? $t('settings.select-wechat-mp-account'))
 						.onChange(async (value) => {
 							// this.plugin.onWeChantMPAccountChange(value)
                             this.plugin.messageService.sendMessage('wechat-account-changed', value)
@@ -25,7 +25,7 @@ export class WeChatMPAccountSwitcher extends Setting {
 						});
         }).addExtraButton((button) => {
             button.setIcon('cloud-download')
-            .setTooltip($t('force-to-refresh-all-material-from-remot'))
+            .setTooltip($t('settings.refresh-all-material-from-remote'))
             .onClick(async () => {
                 this.plugin.pullAllWeChatMPMaterial();
             })

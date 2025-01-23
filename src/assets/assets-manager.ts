@@ -24,15 +24,16 @@ import PouchDBFind from 'pouchdb-find';
 import WeWritePlugin from "src/main";
 import { areObjectsEqual } from "src/utils/utils";
 import { getErrorMessage } from "src/wechat-api/error-code";
-import { ConfirmDeleteModal } from "src/views/confirm-delete-modal";
-import { ConfirmPublishModal } from "src/views/confirm-publish-modal";
+import { ConfirmDeleteModal } from "src/modals/confirm-delete-modal";
+import { ConfirmPublishModal } from "src/modals/confirm-publish-modal";
 import { DraftItem, MaterialItem, MaterialMeidaItem, MaterialNewsItem, MediaType, NewsItem } from "src/wechat-api/wechat-types";
+import { $t } from "src/lang/i18n";
 export const MediaTypeLable = new Map([
-    ['image', '图片'],
-    ['voice', '语音'],
-    ['video', '视频'],
-    ['news', '图文消息'],
-    ['draft', '草稿']
+    ['image', $t('assets.image')],
+    ['voice', $t('assets.voice')],
+    ['video', $t('assets.video')],
+    ['news', $t('assets.news')],
+    ['draft', $t('assets.draft')]
 ]);
 
 // 扩展 MaterialItem 类型以包含 _deleted 属性

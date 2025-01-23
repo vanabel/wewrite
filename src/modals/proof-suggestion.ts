@@ -130,10 +130,10 @@ export class ProofService {
         const content = `
             <div class="proof-type">${item.type}</div>
             <div class="proof-description">${item.description}</div>
-            <div class="proof-suggestion">${$t('proofSuggestion.suggestionPrefix')} ${item.suggestion}</div>
+            <div class="proof-suggestion">${$t('modals.proof.suggestion')} ${item.suggestion}</div>
             <div class="proof-actions">
-                <button class="proof-accept">${$t('proofSuggestion.acceptButton')}</button>
-                <button class="proof-reject">${$t('proofSuggestion.rejectButton')}</button>
+                <button class="proof-accept">${$t('modals.proof.accept')} </button>
+                <button class="proof-reject">${$t('modals.proof.skip')} </button>
             </div>
         `;
         this.tooltip.innerHTML = content;

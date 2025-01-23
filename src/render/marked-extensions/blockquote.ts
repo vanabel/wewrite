@@ -8,6 +8,7 @@ import { MarkedExtension, Tokens } from "marked";
 import { WeWriteMarkedExtension } from "./extension";
 import { ObsidianMarkdownRenderer } from "../markdown-render";
 import { replaceDivWithSection } from "src/utils/utils";
+import { $t } from "src/lang/i18n";
 
 
 export class BlockquoteRenderer extends WeWriteMarkedExtension {
@@ -29,7 +30,7 @@ export class BlockquoteRenderer extends WeWriteMarkedExtension {
     const renderer = ObsidianMarkdownRenderer.getInstance(this.plugin.app);
     const root = renderer.queryElement(this.calloutIndex, '.callout:not(.admonition)');
     if (!root) {
-      return '<span>Callout渲染失败</span>';
+      return $t('render.callout-failed');
     }
     this.calloutIndex++;
     
@@ -48,27 +49,7 @@ export class BlockquoteRenderer extends WeWriteMarkedExtension {
 			}
 
 		}
-    return replaceDivWithSection(root)//root.outerHTML;
-
-    // Convert HTML to image
-    // root.setCssProps({'max-width': '720px!important'})
-    // root.style.maxWidth = '720px!important';
-    // try {
-    //   const imageData = await renderer.domToImage(root, {
-		// 		width: 720,
-		// 	});
-    //   // const imageData = await renderer.htmlToImage(root);
-
-    //   const img = document.createElement('img');
-    //   img.src = imageData;
-    //   img.alt = 'Callout content';
-    //   img.addClass('callout-image');
-    //   img.style.maxWidth = '100%';
-    //   return img.outerHTML;
-    // } catch (error) {
-    //   console.error('Failed to convert callout to image:', error);
-    //   return '<span>Callout转换失败</span>';
-    // }
+    return replaceDivWithSection(root)
   }
 
   markedExtension(): MarkedExtension {

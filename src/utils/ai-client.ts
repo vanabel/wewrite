@@ -3,6 +3,7 @@ import { DeepSeekResult } from '../types/types';
 import WeWritePlugin from 'src/main';
 import OpenAI from "openai"
 import { WeWriteSetting } from 'src/settings/wewrite-setting';
+import { $t } from 'src/lang/i18n';
 
 export class AiClient {
   private static instance: AiClient;
@@ -186,11 +187,11 @@ export class AiClient {
   }
   private prepareImageGenerateRequestHeader() {
     if (this.plugin.settings.drawLLMBaseUrl === undefined || !this.plugin.settings.drawLLMBaseUrl) {
-      new Notice('No AI Server URL given')
+      new Notice($t('utils.no-ai-server-url-given'))
       return null
     }
     if (this.plugin.settings.drawLLMApiKey === undefined || !this.plugin.settings.drawLLMApiKey) {
-      new Notice('No AI Server Key given')
+      new Notice($t('utils.no-ai-server-key-given'))
       return null
     }
     const header =
@@ -207,11 +208,11 @@ export class AiClient {
   }
   private prepareImageTaskCheckingHeader() {
     if (this.plugin.settings.drawLLMTaskUrl === undefined || !this.plugin.settings.drawLLMTaskUrl) {
-      new Notice('No AI Server URL given')
+      new Notice($t('utils.no-ai-server-url-given'))
       return null
     }
     if (this.plugin.settings.drawLLMApiKey === undefined || !this.plugin.settings.drawLLMApiKey) {
-      new Notice('No AI Server Key given')
+      new Notice($t('utils.no-ai-server-key-given'))
       return null
     }
     const header =
@@ -226,11 +227,11 @@ export class AiClient {
   }
   private getChatAI(): OpenAI | null {
     if (this.plugin.settings.chatLLMBaseUrl === undefined || !this.plugin.settings.chatLLMBaseUrl) {
-      new Notice('No AI Server URL given')
+      new Notice($t('utils.no-ai-server-url-given'))
       return null
     }
     if (this.plugin.settings.chatLLMApiKey === undefined || !this.plugin.settings.chatLLMApiKey) {
-      new Notice('No AI Server Key given')
+      new Notice($t('utils.no-ai-server-key-given'))
       return null
     }
     const openai = new OpenAI({
@@ -244,7 +245,7 @@ export class AiClient {
     return new Promise(async (resolve, reject) => {
       const headers = this.prepareImageGenerateRequestHeader();
       if (!headers) {
-        throw new Error('Missing API configuration');
+        throw new Error($t('utils.missing-api-configuration'));
       }
       this.plugin.showSpinner();
 
@@ -307,7 +308,7 @@ export class AiClient {
       const headers = this.prepareImageTaskCheckingHeader();
       if (!headers) {
         this.plugin.hideSpinner()
-        throw new Error('Missing API configuration');
+        throw new Error($t('utils.missing-api-configuration'));
       }
       if (!headers.url.endsWith('/')) {
         headers.url += '/'

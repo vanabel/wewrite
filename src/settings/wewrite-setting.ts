@@ -28,8 +28,6 @@ export type WeWriteSetting = {
     ipAddress?: string;
     selectedAccount?: string;
     mpAccounts: Array<WeWriteAccountInfo>;
-    // useFontAwesome: boolean;
-    // rpgDownloadedOnce: boolean;
     accountDataPath: string;
     chatLLMBaseUrl?: string;
     chatLLMApiKey?: string;
@@ -62,7 +60,6 @@ export const saveWeWriteSetting = async (doc: WeWriteSetting): Promise<void> => 
         doc._id = 'wewrite-settings';
         db.get(doc._id).then(existedDoc => {
             if (areObjectsEqual(doc, existedDoc)) {
-                // the material has not been changed
                 resolve()
             }
             doc._rev = existedDoc._rev;
@@ -75,7 +72,6 @@ export const saveWeWriteSetting = async (doc: WeWriteSetting): Promise<void> => 
                     resolve()
                 });
         }).catch(error => {
-            // console.error('save setting error: ',error);
             db.put(doc)
                 .then(() => {
                     resolve();

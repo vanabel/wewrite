@@ -33,11 +33,11 @@ export class ConfirmPublishModal extends Modal {
         const content = contentEl.createDiv({ cls: 'description' })
         content.createEl('p', { text: $t('modals.publish.message') });
         content.createEl('p', { text: $t('modals.publish.warning') });
-        content.createEl('p', { text: $t('modals.publish.caution') });
+        content.createEl('p', { text: $t('modals.caution') });
         
         const toolbar = contentEl.createDiv({ cls: 'confirm-pulbish-dialog-tool-bar' })
-        const confirmButton = toolbar.createEl('button', { text: $t('modals.publish.confirm'), cls: "danger-button" });
-        const cancelButton = toolbar.createEl('button', { text: $t('modals.publish.cancel') });
+        const confirmButton = toolbar.createEl('button', { text: $t('modals.confirm'), cls: "danger-button" });
+        const cancelButton = toolbar.createEl('button', { text: $t('modals.cancel') });
 
         confirmButton.addEventListener('click', () => {
             console.log(`confirm publish:`, this.draftItem);
@@ -61,10 +61,10 @@ export class ConfirmPublishModal extends Modal {
         if (id !== undefined && id) {
             this.plugin.wechatClient.publishDraft(id)
                 .then(() => {
-                    new Notice($t('modals.notice.publish_success'));
+                    new Notice($t('modals.publish.success'));
                 })
                 .catch((error: any) => {
-                    new Notice($t('modals.notice.publish_failed'));
+                    new Notice($t('modals.publish.failed'));
                 })
         }
     }

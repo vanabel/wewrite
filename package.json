@@ -22,6 +22,7 @@
 		"esbuild": "0.17.3",
 		"esbuild-css-modules-plugin": "^3.1.2",
 		"eslint": "^9.15.0",
+		"i18next-scanner": "^4.6.0",
 		"mathjax-full": "^3.2.2",
 		"obsidian": "latest",
 		"tslib": "2.4.0",

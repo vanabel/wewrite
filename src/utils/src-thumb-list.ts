@@ -2,7 +2,6 @@
  * manage wechat thumbnail media 
  */
 export class SrcThumbList {
-    // private static instance: SrcThumbList;
     list: Map<string, string[]>;
 
     constructor() {

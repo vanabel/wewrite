@@ -52,7 +52,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
         return VIEW_TYPE_NP_PREVIEW;
     }
     getDisplayText(): string {
-        return $t('previewer.viewTitle');
+        return $t('views.preivewer.wewrite-previewer');
     }
     getIcon() {
         return 'pen-tool';
@@ -73,7 +73,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
         this.plugin.messageService.registerListener(
             'src-thumb-list-updated', (data: SrcThumbList) => {
                 this.articleDiv.empty();
-                this.articleDiv.createDiv().setText('To Verify the Images in article')
+                this.articleDiv.createDiv().setText($t('views.preivewer.to-verify-the-images-in-article'))
                 const ol = this.articleDiv.createEl('ol');
                 data.list.forEach((articles, url) => {
                     const li = ol.createEl('li');
@@ -132,7 +132,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
         if (path && this.articleProperties.size > 0) {
             const file = this.app.vault.getAbstractFileByPath(path);
             if (!(file instanceof TFile)) {
-                throw new Error(`File not found: ${path}`);
+                throw new Error($t('views.preivewer.file-not-found-path', [path]));
             }
 
             const content = await this.app.vault.read(file);
@@ -170,7 +170,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
 
         const mainDiv = container.createDiv({ cls: 'wewrite-previewer-container' });
         this.articleTitle = new Setting(mainDiv)
-            .setName($t('previewer.articleTitle'))
+            .setName($t('views.preivewer.article-title'))
             .setHeading()
             .addDropdown((dropdown: DropdownComponent) => {
                 this.themeSelector.dropdown(dropdown);
@@ -178,7 +178,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
             .addExtraButton(
                 (button) => {
                     button.setIcon('anchor')
-                        .setTooltip($t('previewer.testButtonTooltip'))
+                        .setTooltip($t('views.preivewer.testing-button'))
                         .onClick(async () => {
                             console.log(`testing...`);
 
@@ -189,8 +189,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
             .addExtraButton(
                 (button) => {
                     button.setIcon('refresh-cw')
-                        // button.setIcon('wewrite-translate')
-                        .setTooltip($t('previewer.rerenderButtonTooltip'))
+                        .setTooltip($t('views.preivewer.render-article'))
                         .onClick(async () => {
                             this.renderDraft()
                         })
@@ -198,61 +197,35 @@ export class PreviewPanel extends ItemView implements PreviewRender {
             )
             .addExtraButton(
                 (button) => {
-                    // button.setIcon('wewrite-send')
                     button.setIcon('send-horizontal')
-                        .setTooltip($t('previewer.sendToDraftTooltip'))
+                        .setTooltip($t('views.preivewer.send-article-to-draft-box'))
                         .onClick(async () => {
                             if (await this.checkCoverImage()) {
                                 this.sendArticleToDraftBox()
                             } else {
-                                new Notice($t('previewer.coverImageRequired'))
+                                new Notice($t('views.preivewer.please-set-cover-image'))
                             }
                         })
                 }
             )
             .addExtraButton(
                 (button) => {
-                    // button.setIcon('wewrite-send')
                     button.setIcon('clipboard-copy')
-                        .setTooltip($t('previewer.copyDraftTooltip'))
+                        .setTooltip($t('views.preivewer.copy-article-to-clipboard'))
                         .onClick(async () => {
                             const data = this.getArticleContent()
                             await navigator.clipboard.write([new ClipboardItem({
                                 'text/html': new Blob([data], { type: 'text/html' })
                             })])
-                            new Notice($t('previewer.draftCopied'))
+                            new Notice($t('views.preivewer.article-copied-to-clipboard'))
                         })
                 }
             )
-        // .addExtraButton(
-        //     (button) => {
-        //         button.setIcon('newspaper')
-        //             .setTooltip('for testing')
-        //         button.onClick(async () => {
-        //             // this.draftHeader.publishDraft()
-        //             // this.openMPPlatform()
-        //             console.log(`for testing.....`);
-
-        //         })
-        //     }
-        // )
-        // .addExtraButton(
-        //     (button) => {
-        //         button.setIcon('panel-left')
-        //             .setTooltip('show materials and drafts')
-        //         button.onClick(async () => {
-        //             this.plugin.showLeftView()
-        //         })
-        //     }
-        // )
 
         this.draftHeader = new MPArticleHeader(this.plugin, mainDiv)
 
         this.renderDiv = mainDiv.createDiv({ cls: 'render-container' });
         this.renderDiv.id = 'render-div';
-        // this.renderDiv.setAttribute('style', '-webkit-user-select: text; user-select: text;');
-
-        //TODO: keep the shadow dom for future use, here for computed style from obsidian and all other plugins
         let shadowDom = this.renderDiv.shawdowRoot;
         if (shadowDom === undefined || shadowDom === null) {
 
@@ -310,7 +283,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
         const prop = this.getArticleProperties()
         const mview = ResourceManager.getInstance(this.plugin).getCurrentMarkdownView()
         if (!mview) {
-            return 'not a markdown view';
+            return $t('views.preivewer.not-a-markdown-view');
         }
         this.articleDiv.empty();
         this.elementMap = new Map<string, HTMLElement | string>()
@@ -392,7 +365,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
             }
         }
         else {
-            item.innerText = $t('previewer.renderFailed');
+            item.innerText = $t('views.preivewer.article-render-failed');
         }
     }
     addElementByID(id: string, node: HTMLElement | string): void {

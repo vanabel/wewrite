@@ -1,7 +1,7 @@
 import { App } from 'obsidian';
 
 export function getFrontmatter(app: App, content: string): Record<string, any> | null {
-    const cache = app.metadataCache.getCache(''); // Get current file cache
+    const cache = app.metadataCache.getCache(''); 
     return cache?.frontmatter || null;
 }
 
@@ -10,7 +10,6 @@ export function setFrontmatter(app: App, content: string, properties: Record<str
     const existingFrontmatter = cache?.frontmatter || {};
     const updatedFrontmatter = { ...existingFrontmatter, ...properties };
     
-    // Convert frontmatter to YAML string
     const frontmatterString = Object.entries(updatedFrontmatter)
         .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
         .join('\n');

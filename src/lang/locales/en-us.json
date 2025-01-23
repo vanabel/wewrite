@@ -1,201 +1,199 @@
 {
-  "plugin": {
-    "name": "WeWrite",
-    "description": "WeWrite plugin for Obsidian",
-    "settings": {
-      "title": "WeWrite Settings",
-      "ip": {
-        "public_address": "Public IP Address:    ",
-        "whitelist_tip": "You should add this IP to \"IP Whitelist\" on your WeChat Official Account Platform development configuration.",
-        "copy": "Copy IP to clipboard",
-        "copied": "IP copied to clipboard",
-        "no_address": "No IP Address"
-      },
-      "account": {
-        "info": "Account Info",
-        "select": "Select WeChat MP Account",
-        "choose": "Choose the account you want to edit.",
-        "add_new": "Add new account",
-        "import_export": "Import/Export WeChat MP Account",
-        "import": "Import account info",
-        "export": "Export account info",
-        "css": {
-          "folder_location": "CSS Styles folder location",
-          "folder_desc": "Files in this folder will be available as CSS Styles for rendering in WeChat posts.",
-          "example": "Example: folder1/folder2",
-          "download_themes": "Download CSS style themes from Server"
-        },
-        "new": {
-          "title": "New Account",
-          "name": "account name",
-          "name_desc": "Account name for your wechat official account",
-          "appid": "AppId for your wechat official account",
-          "secret": "App Secret for your wechat official account"
-        },
-        "test_connection": "Test Connection",
-        "test_desc": "To check whether the [App Id] and [App Secret] and [IP Address Whitelist] setting on are correct.",
-        "test_button": "click to test connection",
-        "connected": "Successfully connected to WeChat official account platform.",
-        "delete": {
-          "title": "Delete Account",
-          "warning": "Be carefull! This will delete all your settings and data of the account.",
-          "button": "click to delete account"
-        }
-      }
-    }
-  },
-  "views": {
-    "mp_article_header": {
-      "title": "Article Header Settings",
-      "title_label": "Title",
-      "title_placeholder": "Enter article title...",
-      "author_label": "Author",
-      "author_placeholder": "Enter author name...",
-      "digest_label": "Digest",
-      "digest_placeholder": "Enter article digest...",
-      "generate_digest": "Generate digest using AI",
-      "cover": {
-        "label": "Cover Image",
-        "desc": "It's mandatory to publish this article to WeChat Official Account. You may drag and drop an image from vault, or from image pool in your WeChat Official Account.",
-        "generate": "Generate Cover Image by AI"
-      },
-      "comments": {
-        "open_label": "Need Open Comments",
-        "open_desc": "Whether to open comments, closed (default)",
-        "fans_only_label": "Only Fans Can Comment",
-        "fans_only_desc": "Whether only fans can comment, everyone can comment (default)"
-      }
+  "modals": {
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "ok": "OK",
+    "enter": "Enter",
+    "space": "Space",
+    "escape": "Escape",
+    "be-careful": "Be careful!",
+    "caution": "Be careful!",
+    "delete": {
+      "title": "Confirm Delete",
+      "message": "Are you sure to delete this item?",
+      "warning": "Delete is permanent. This action cannot be undone.",
+      "action": "If you want to delete this item, please click the button below.\\nIf you want to cancel, please click the button below."
     },
-    "previewer": {
-      "title": "WeChat Article Preview",
-      "article_title": "Article Title",
-      "test_button": "testing .",
-      "rerender_button": "Rerender the article content.",
-      "send_to_draft": "send to draft box.",
-      "cover_required": "Cover image is required.",
-      "copy_draft": "copy draft to clipboard",
-      "draft_copied": "draft copied to clipboard",
-      "render_failed": "Render failed"
+    "publish": {
+      "title": "Confirm Publish",
+      "message": "Are you sure to publish this article?",
+      "warning": "Publishing draft outside of WeChat MP platform is not as efficient as publishing inside WeChat MP platform. Some features may not work as expected, for example the tag, pushing to public account, etc.",
+      "success": "Publish Successfully",
+      "failed": "Publish Failed"
     },
-    "material_panel": {
-      "delete_image": "Delete image",
-      "set_as_cover": "Set as cover of current draft",
-      "delete": "Delete",
-      "delete_draft": "Delete draft",
-      "free_publish": "Silent publish",
-      "preview_draft": "Preview draft",
-      "send_mass_message": "Send mass message",
-      "no_title_article": "No title article",
-      "content": "Content",
-      "zero": "0"
-    },
-    "modals": {
-      "delete": {
-        "title": "Confirm Delete",
-        "message": "Are you sure to delete this item?",
-        "warning": "Delete is permanent. This action cannot be undone.",
-        "instruction": "If you want to delete this item, please click the button below.\nIf you want to cancel, please click the button below.",
-        "caution": "Be careful!",
-        "confirm": "Confirm",
-        "cancel": "Cancel"
-      },
-      "publish": {
-        "title": "Confirm Publish",
-        "message": "Are you sure to publish this article?",
-        "warning": "Publishing draft outside of WeChat MP platform is not as efficient as publishing inside WeChat MP platform. Some features may not work as expected, for example the tag, pushing to public account, etc.",
-        "caution": "Be careful!",
-        "confirm": "Confirm",
-        "cancel": "Cancel"
-      },
-      "notice": {
-        "publish_success": "Publish Successfully",
-        "publish_failed": "Publish Failed"
-      }
-    },
-    "image_generate": {
+    "image-generation": {
       "title": "Image Generation",
-      "size_label": "Size:",
-      "size_placeholder": "Please input image size",
-      "prompt_label": "Prompt:",
-      "prompt_placeholder": "Please input prompts",
-      "negative_prompt_label": "Negative Prompt",
-      "negative_prompt_placeholder": "Please input negative prompts",
-      "generate_button": "Generate",
-      "cancel_button": "Cancel"
+      "size": "Size",
+      "prompt": "Prompt:",
+      "negative-prompt": "Negative Prompt:",
+      "generate": "Generate"
+    },
+    "proof": {
+      "suggestion": "suggestion:",
+      "accept": "Accept",
+      "skip": "Skip"
     }
   },
-  "wechat": {
-    "client": {
-      "select_account": "Please select a WeChat MP Account",
-      "token_failed": "Failed to get token",
-      "draft_sent": "Draft sent successfully",
-      "token_expired": "Token expired, please refresh",
-      "add_ip_to_whitelist": "Please add IP address [{0}] to the whitelist of current MP account"
-    },
-    "material": {
-      "title": "WeChat MP Material",
-      "account_prefix": "MP Account: ",
-      "types": {
-        "image": "Images",
-        "voice": "Audio",
-        "video": "Video",
-        "news": "Articles",
-        "draft": "Drafts"
-      },
-      "buttons": {
-        "web": "WeChat MP Web",
-        "refresh": "Refresh Materials"
-      }
-    }
+  "render": {
+    "callout-failed": "<span>Callout render failed</span>",
+    "admonition-failed": "<section>Admonition render failed</section>",
+    "mermaid-failed": "<section>Mermaid render failed</section>",
+    "charts-failed": "<section>Charts render failed</section>",
+    "file-not-found": "File not found：",
+    "rendering": "Rendering",
+    "render-failed": "Render failed",
+    "excalidraw-failed": "Excalidraw render failed",
+    "pdf-crop-failed": "<span>Pdf-crop render failed</span>",
+    "faild-canvas-context": "Failed to get canvas context",
+    "failed-to-convert-canvas-to-blob": "Failed to convert canvas to Blob"
   },
-  "ai": {
-    "menu": {
-      "title": "WeWrite AI",
-      "polish_selected": "Polish Selected Text",
-      "proof_selected": "Proof Selected Text",
-      "synonyms": "Synonyms for Selected Text",
-      "translate": {
-        "to_english": "to English",
-        "to_chinese": "to Chinese"
-      },
-      "convert": {
-        "to_mermaid": "to Mermaid",
-        "to_latex": "to LaTeX"
-      },
-      "polish_note": "Polish Whole Note",
-      "proof_note": "Proof Whole Note"
-    },
-    "spinner": {
-      "generating_summary": "Generating summary...",
-      "translating": {
-        "english": "tranlating to English...",
-        "chinese": "tranlating to Chinese..."
-      },
-      "getting_synonyms": "get synonyms ...",
-      "converting": {
-        "mermaid": "get mermaid ...",
-        "latex": "get LaTex ..."
-      },
-      "proofing": "proofing content...",
-      "polishing": "polishing content..."
-    },
-    "proof_suggestion": {
-      "prefix": "Suggestion: ",
-      "accept": "✓ Accept",
-      "reject": "✗ Reject"
-    }
-  },
-  "theme": {
-    "default": "Default Style",
-    "total_downloaded": "Successfully downloaded {0} themes."
+  "settings": {
+    "select-wechat-mp-account": "Select WeChat MP Account",
+    "refresh-all-material-from-remote": "Refresh all material from remote.",
+    "settings-exported": "Settings Exported.",
+    "settings-exporting-failed": "Settings Exporting failed.",
+    "invalid-json-file": "Invalid json file.",
+    "invalid-wewerite-settings-file": "Invalid WeWerite Settings file.",
+    "settings-imported-successfully": "Settings imported successfully.",
+    "settings-imported-failed": "Settings imported failed:",
+    "settings-imported-error": "Settings imported error:",
+    "custom-themes": "Custom Themes",
+    "custom-themes-folder": "Custom themes folder",
+    "the-folder-where-your-custom-themes": "The folder where your custom themes are stored.",
+    "themes-folder-path": "themes folder path",
+    "download-predefined-custom-themes-from": "Download predefined custom themes from Server.",
+    "new-account": "New Account",
+    "account-name": "Account Name",
+    "account-name-for-your-wechat-official": "Account name for your wechat official account",
+    "appid-for-your-wechat-official-account": "AppId for your wechat official account",
+    "app-secret": "App Secret",
+    "app-secret-for-your-wechat-official": "App Secret for your wechat official account",
+    "check-if-your-account-setting-is-correct": "Check if your account setting is correct.",
+    "test-connection": "Test connection",
+    "click-to-connect-wechat-server": "Click to connect wechat server",
+    "successfully-connected-to-wechat-officia": "Successfully connected to WeChat official account platform.",
+    "be-carefull-this-will-delete-all-your-se": "Be careful! This will delete all your settings and data of the account.",
+    "delete-account": "Delete account",
+    "no-ip-address": "No IP Address",
+    "copy-ip-address-to-clipboard": "Copy IP address to clipboard",
+    "ip-copied-to-clipboard": "IP copied to clipboard.",
+    "text-llm-settings": "Text LLM settings",
+    "llm-access-base-url": "LLM access base url",
+    "llm-access-api-key": "LLM access api key",
+    "llm-model-to-be-used": "LLM model to be used.",
+    "t-settings-be-carefull-this-will-delete-": "$t('settings.be-carefull-this-will-delete-all-your-se')",
+    "image-llm-settings": "Image LLM settings",
+    "image-llm-checking-task-progress-url": "Image LLM checking task progress url.",
+    "wechat-account-settings": "WeChat Account settings",
+    "public-ip-address": "Public IP Address",
+    "you-should-add-this-ip-to-ip-whitelist-o": "You should add this IP to IP whitelist of WeChat MP platform. click follow image to visit it.",
+    "copy-ip-to-clipboard": "Copy IP to clipboard",
+    "use-center-token-server": "Use Center Token Server",
+    "if-your-device-cannot-get-static-pubic-i": "If your device cannot get static pubic IP, you may use our center token server to get token. We will not use your appID and secre for any other purpose, but it up to you to decide whether to use it.",
+    "account-info": "Account Info",
+    "select-account": "Select Account",
+    "choose-the-account-to-modify": "Choose the account to modify.",
+    "create-new-account": "Create New Account",
+    "draft-previewer-wechat-id": "Draft Previewer wechat id",
+    "draft-only-visible-for-the-wechat-user-o": "draft only visible for the wechat user. Only valid for MP account officially certified.",
+    "import-export-wewrite-account": "Import/Export WeWrite Account",
+    "import-or-export-your-account-info-for-b": "Import or export your account info for backup and restore.",
+    "import-account-info": "Import account info",
+    "export-account-info": "Export account info"
   },
   "utils": {
-    "message": {
-      "settings_exported": "Settings exported successfully!",
-      "settings_export_failed": "Settings export failed:",
-      "force_refresh_material": "Force to refresh all material from remote.",
-      "set_cover": "set as cover of current draft",
-      "set_cover_image": "set cover image: {0}"
+    "no-ai-server-url-given": "No AI Server URL given",
+    "no-ai-server-key-given": "No AI Server Key given",
+    "missing-api-configuration": "Missing API configuration"
+  },
+  "views": {
+    "free-publish": "Free publish",
+    "delete-image": "Delete image",
+    "delete-draft": "Delete Draft",
+    "preview-draft": "Preview Draft",
+    "send-mass-message": "Send Mass Message",
+    "no-title-article": "No title article.",
+    "other-type-has-not-been-implemented": "other type has not been implemented.",
+    "materials": {
+      "wechat-materials": "WeChat Materials",
+      "account-prefix": "Account Prefix",
+      "open-mp-page": "Open WeChat Official Account Management Page"
+    },
+    "article-header": {
+      "title": "Article Header",
+      "article-title": "Article Title",
+      "article-title-placeholder": "article title",
+      "author": "Author",
+      "author-name": "author name",
+      "digest": "Digest",
+      "generate-digest-by-ai": "Generate Digest by AI",
+      "digest-text": "digest text",
+      "open-comments": "Open Comments",
+      "comments-description": "If open for comments, default is closed.",
+      "fans-comment-description": "If only fans can comment, default is all can comment.",
+      "only-fans-can-comment": "Only Fans Can Comment",
+      "no-active-note": "No Active Note",
+      "cover-image": "Cover Image",
+      "cover-image-description": "Cover image for this article. It is mandatory to publish. You may drag and drop an image from vault, or from left side materials view.",
+      "generate-cover-image-by-ai": "Generate Cover Image by AI",
+      "upload-cover-image-error": "upload cover image error"
+    },
+    "previewer": {
+      "wewrite-previewer": "WeWrite Previewer",
+      "to-verify-the-images-in-article": "To Verify the Images in article",
+      "article-title": "Article Title",
+      "testing-button": "Testing button",
+      "render-article": "Render article.",
+      "send-article-to-draft-box": "send article to draft box.",
+      "please-set-cover-image": "Please set cover image.",
+      "copy-article-to-clipboard": "copy article to clipboard.",
+      "file-not-found-path": "File not found: {0}",
+      "article-copied-to-clipboard": "article copied to clipboard.",
+      "not-a-markdown-view": "not a markdown view",
+      "article-render-failed": "Article render failed."
+    },
+    "theme-manager": {
+      "failed-to-fetch-themes-json-themesrespon": "Failed to fetch themes.json: {0}",
+      "error-downloading-theme": "Error downloading theme:",
+      "total-themes-length-themes-downloaded": "Total {0} themes downloaded.",
+      "error-downloading-themes": "Error downloading themes.",
+      "default-theme": "Default Theme"
     }
+  },
+  "assets": {
+    "image": "Image",
+    "voice": "Voice",
+    "video": "Video",
+    "news": "Graphic Message",
+    "draft": "Draft",
+    "invalid-draft": "Invalid draft: missing accountName or notePath"
+  },
+  "ai": {
+    "no-api-setting": "Please set DeepSeek API Key in plugin settings first."
+  },
+  "wechat-api": {
+    "select-an-wechat-mp-account-first": "Select a wechat mp account first",
+    "add-ip-address-ipv4-0-to-wechat-mp-ip-wh": "Add IP address: [{0}] to WeChat MP IP whitelist.",
+    "failed-to-get-wechat-access-token": "Failed to get wechat access token",
+    "send-article-to-draft-box-successfully": "Send article to draft box successfully."
+  },
+  "main": {
+    "wewrite-ai": "WeWrite AI",
+    "poolish": "Polish",
+    "to-english": "to English",
+    "to-chinese": "to Chinese",
+    "generate-mermaid": "generate mermaid",
+    "generate-latex": "generate LaTeX",
+    "polish": "Polish",
+    "proof": "Proof",
+    "no-wechat-mp-account-selected": "No WeChat MP account selected",
+    "please-check-you-appid-and-appsecret": "Please check you appId and appSecret.",
+    "chat-llm-has-not-been-configured": "Chat LLM has not been configured.",
+    "translating-to-english": "Translating to English...",
+    "chinese": "Chinese",
+    "translating-to-chinese": "Translating to Chinese...",
+    "get-synonyms": "Get synonyms...",
+    "generating-mermaid": "Generating Mermaid...",
+    "generating-latex": "Generating LaTeX..."
   }
 }

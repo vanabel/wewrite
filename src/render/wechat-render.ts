@@ -33,22 +33,7 @@ import { Summary } from './marked-extensions/summary'
 const markedOptiones = {
     gfm: true,
     breaks: true,
-    // highlight: function (code: string, lang: string) {
-    //     if (lang && hljs.getLanguage(lang)) {
-    //         return hljs.highlight(code, { language: lang }).value;
-    //     }
-    //     return hljs.highlightAuto(code).value;
-    // }
 };
-
-// const customRenderer = {
-// 	heading(token:Tokens.Heading): string {
-// 		return `<h${token.depth}><span class="h-content">${token.text}++</span></h${token.depth}>`;
-// 	},
-// 	hr(): string {
-// 		return '<hr>';
-// 	},
-// };
 
 export class WechatRender {
     plugin: WeWritePlugin;
@@ -63,10 +48,7 @@ export class WechatRender {
         this.client = WechatClient.getInstance(plugin);
         this.marked = new Marked()
         this.marked.use(markedOptiones)
-        // this.marked.use(extendedTables())
         this.useExtensions()
-
-        // this.marked.use({renderer: customRenderer});
     }
     static getInstance(plugin: WeWritePlugin, previewRender: PreviewRender) {
         if (!WechatRender.instance) {

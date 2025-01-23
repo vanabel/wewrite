@@ -26,7 +26,7 @@ export class ThemeManager {
             // Download themes.json
             const themesResponse = await requestUrl(`${baseUrl}themes.json`);
             if (themesResponse.status !== 200) {
-                throw new Error(`Failed to fetch themes.json: ${themesResponse.text}`);
+                throw new Error($t('views.theme-manager.failed-to-fetch-themes-json-themesrespon', [themesResponse.text]));
             }
 
             const themesData = themesResponse.json;
@@ -59,15 +59,15 @@ export class ThemeManager {
                     await this.plugin.app.vault.create(filePath, fileContent);
                 } catch (error) {
                     console.error(error);
-                    new Notice("Error downloading theme: " + error.message );
+                    new Notice($t('views.theme-manager.error-downloading-theme') + error.message );
                     continue;
                 }
             }
-            new Notice($t('custom-theme.total-themes-downloaded', [themes.length]));
+            new Notice($t('views.theme-manager.total-themes-length-themes-downloaded', [themes.length]))
         } catch (error) {
             console.error("Error downloading themes:", error);
             // throw error;
-            new Notice("Error downloading themes.");
+            new Notice($t('views.theme-manager.error-downloading-themes'));
         }
     }
     private plugin: WeWritePlugin;

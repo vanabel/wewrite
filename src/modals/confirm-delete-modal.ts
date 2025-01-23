@@ -3,10 +3,10 @@
  * 
 */
 
-import { Modal, Notice } from 'obsidian';
-import WeWritePlugin from 'src/main';
-import { MaterialItem } from './../wechat-api/wechat-types';
+import { Modal } from 'obsidian';
 import { $t } from 'src/lang/i18n';
+import WeWritePlugin from 'src/main';
+import { MaterialItem } from '../wechat-api/wechat-types';
 
 export class ConfirmDeleteModal extends Modal {
     plugin: WeWritePlugin;
@@ -24,26 +24,23 @@ export class ConfirmDeleteModal extends Modal {
         this.callback = callback
     }
     onOpen() {
-        // console.log(`onOpen!`, this.item);
-
         const { contentEl } = this;
-        // containerEl.addClass('confirm-pulbish-dialog');
         contentEl.addClass('confirm-pulbish-dialog-content')
 
-        contentEl.createEl('h3', { text: $t('modals.delete.title') });
+        contentEl.createEl('h3', { text:$t('modals.delete.title')});
         const content = contentEl.createDiv({ cls: 'description' })
         content.createEl('p', { text: $t('modals.delete.message') });
-        content.createEl('p', { text: $t('modals.delete.warning') });
-        content.createEl('p', { text: $t('modals.delete.instruction') });
-        content.createEl('p', { text: $t('modals.delete.caution') });
+        content.createEl('p', { text: $t('modals.delete.warning')});
+        content.createEl('p', { text: $t('modals.delete.action')});
+        content.createEl('p', { text: $t('modals.caution') });
         
         const toolbar = contentEl.createDiv({ cls: 'confirm-pulbish-dialog-tool-bar' })
         const confirmButton = toolbar.createEl('button', { 
-            text: $t('modals.delete.confirm'),
+            text: $t('modals.confirm'),
             cls: "danger-button"
         });
         const cancelButton = toolbar.createEl('button', { 
-            text: $t('modals.delete.cancel')
+            text: $t('modals.cancel')
         });
 
         confirmButton.addEventListener('click', () => {
@@ -52,8 +49,6 @@ export class ConfirmDeleteModal extends Modal {
         });
 
         cancelButton.addEventListener('click', () => {
-            // console.log(`cancel`);
-
             this.close();
         });
     }

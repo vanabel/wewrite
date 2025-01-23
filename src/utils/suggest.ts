@@ -169,10 +169,6 @@ export abstract class TextInputSuggest<T> implements ISuggestOwner<T> {
                     name: "sameWidth",
                     enabled: true,
                     fn: ({ state, instance }) => {
-                        // Note: positioning needs to be calculated twice -
-                        // first pass - positioning it according to the width of the popper
-                        // second pass - position it with the width bound to the reference element
-                        // we need to early exit to avoid an infinite loop
                         const targetWidth = `${state.rects.reference.width}px`;
                         if (state.styles.popper.width === targetWidth) {
                             return;

@@ -8,7 +8,7 @@ import { UrlUtils } from 'src/utils/urls';
 import { fetchImageBlob } from "src/utils/utils";
 import { WechatClient } from "src/wechat-api/wechat-client";
 import { MaterialMeidaItem } from "src/wechat-api/wechat-types";
-import { ImageGenerateModal } from "./image-generate-modal";
+import { ImageGenerateModal } from "../modals/image-generate-modal";
 import { ResourceManager } from "src/assets/resource-manager";
 
 interface Point {
@@ -107,12 +107,12 @@ export class MPArticleHeader {
     private BuildUI(containerEl: HTMLElement) {
         const container = containerEl.createEl('div', { cls: 'wewrite-article-header' })
         const details = container.createEl('details')
-        details.createEl('summary', { text: $t('mpArticleHeader.title') })
+        details.createEl('summary', { text: $t('views.article-header.title') })
 
-        new Setting(details).setName($t('mpArticleHeader.titleLabel'))
+        new Setting(details).setName($t('views.article-header.article-title'))
             .addText(text => {
                 this._title = text;
-                text.setPlaceholder($t('mpArticleHeader.titleLabel'))
+                text.setPlaceholder($t('views.article-header.article-title-placeholder'))
                     .onChange(async (value) => {
                         if (this.activeLocalDraft !== undefined) {
                             this.activeLocalDraft.title = value
@@ -121,10 +121,10 @@ export class MPArticleHeader {
                         }
                     })
             })
-        new Setting(details).setName($t('mpArticleHeader.authorLabel'))
+        new Setting(details).setName($t('views.article-header.author'))
             .addText(text => {
                 this._author = text;
-                text.setPlaceholder($t('mpArticleHeader.authorLabel'))
+                text.setPlaceholder($t('views.article-header.author-name'))
                     .onChange(async (value) => {
                         if (this.activeLocalDraft !== undefined) {
                             this.activeLocalDraft.author = value
@@ -133,16 +133,16 @@ export class MPArticleHeader {
                     })
             })
 
-        new Setting(details).setName($t('mpArticleHeader.digestLabel'))
+        new Setting(details).setName($t('views.article-header.digest'))
             .addExtraButton(button => {
                 button.setIcon("sparkles")
-                    .setTooltip($t('mpArticleHeader.generateDigestTooltip'))
+                    .setTooltip($t('views.article-header.generate-digest-by-ai'))
                     .onClick(async () => {
                         this.generateDigest();
                     })
             })
 
-        this._digest = details.createEl('textarea', { cls: 'digest', attr: { rows: 3, placeholder: $t('mpArticleHeader.digestPlaceholder') } })
+        this._digest = details.createEl('textarea', { cls: 'digest', attr: { rows: 3, placeholder: $t('views.article-header.digest-text') } })
         this._digest.onkeyup = (event: KeyboardEvent) => {
             const target = event.target as HTMLTextAreaElement;
             if (this.activeLocalDraft !== undefined) {
@@ -154,8 +154,8 @@ export class MPArticleHeader {
         this.coverFrame = this.createCoverFrame(details)
 
         new Setting(details)
-            .setName($t('mpArticleHeader.needOpenCommentsLabel'))
-            .setDesc($t('mpArticleHeader.needOpenCommentsDesc'))
+            .setName($t('views.article-header.open-comments'))
+            .setDesc($t('views.article-header.comments-description'))
             .addToggle(toggle => {
                 this._needOpenComment = toggle;
                 toggle.setValue(false);
@@ -167,8 +167,8 @@ export class MPArticleHeader {
                 })
             })
         new Setting(details)
-            .setName($t('mpArticleHeader.onlyFansCanCommentLabel'))
-            .setDesc($t('mpArticleHeader.onlyFansCanCommentDesc'))
+            .setName($t('views.article-header.only-fans-can-comment'))
+            .setDesc($t('views.article-header.fans-comment-description'))
             .addToggle(toggle => {
                 this._onlyFansCanComment = toggle;
                 toggle.setValue(false);
@@ -183,15 +183,15 @@ export class MPArticleHeader {
     }
     async generateDigest() {
         if (!this.plugin.aiClient) {
-            new Notice('Please set DeepSeek API Key in plugin settings first.')
+            new Notice($t('ai.no-api-setting'))
             return
         }
         if (this.activeLocalDraft === undefined) {
-            new Notice('No Active Note')
+            new Notice($t('views.article-header.no-active-note'))
             return
         }
         if (this.activeLocalDraft.notePath === undefined) {
-            new Notice('No Active Note')
+            new Notice($t('views.article-header.no-active-note'))
             return
         }
         this.plugin.showSpinner()
@@ -206,8 +206,8 @@ export class MPArticleHeader {
     }
     private createCoverFrame(details: HTMLElement) {
         new Setting(details)
-            .setName($t('mpArticleHeader.coverLabel'))
-            .setDesc($t('mpArticleHeader.coverDesc'))
+            .setName($t('views.article-header.cover-image'))
+            .setDesc($t('views.article-header.cover-image-description'))
             // .addExtraButton(
             //     button => button
             //         .setIcon('panel-left-close')
@@ -228,14 +228,12 @@ export class MPArticleHeader {
             .addExtraButton(
                 button => button
                     .setIcon('sparkles')
-                    .setTooltip($t('mpArticleHeader.generateCoverTooltip'))
+                    .setTooltip($t('views.article-header.generate-cover-image-by-ai'))
                     .onClick(async () => {
                         this.imageGenerateModal?.open()
                     })
             )
         const container = details.createDiv({ cls: 'cover-container' })
-        // const it = new ImageTransformer(container)    
-        // return it.container
         const coverframe = container.createDiv({ cls: 'cover-frame', attr: { droppable: true } })
 
         // const img = coverframe.createEl('img', {attr:{dragable:false}})
@@ -258,8 +256,6 @@ export class MPArticleHeader {
             this.current_y = 0
 
             const url = e.dataTransfer?.getData('text/uri-list')
-            // console.log(`drop url:${url}`);
-
             if (url) {
                 if (url.startsWith('obsidian://')) {
                     //image from vault
@@ -284,14 +280,12 @@ export class MPArticleHeader {
                     const base64 = await this.arrayBufferToBase64(file);
                     this.cover_image = `data:image/png;base64,${base64}`;
                 } else {
-                    // console.log(`unsupport image url:`, url);
                     this.cover_image = ''
                     this.setCoverImageXY();
                 }
                 if (this.activeLocalDraft !== undefined) {
                     this.activeLocalDraft.cover_image_url = this.cover_image!
                 }
-                // coverframe.setAttr('style', `background-image: url('${url}'); background-size:cover; background-position: 0px 0px;`);
                 this.localDraftmanager.setDraft(this.activeLocalDraft!)
                 this.setCoverImage(this.cover_image!)
             }
@@ -310,7 +304,6 @@ export class MPArticleHeader {
         return btoa(binary);
     }
     setCoverImage(url: string | null) {
-        // console.log(`setCoverImage:`, url);
         while (this.coverFrame.firstChild) {
             this.coverFrame.firstChild.remove()
         }
@@ -324,9 +317,6 @@ export class MPArticleHeader {
         img.src = url
 
         img.onload = () => {
-            // console.log(`image loaded`);
-
-
 
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d')!;
@@ -375,7 +365,6 @@ export class MPArticleHeader {
     async getCoverImageMediaId(url: string, upload: boolean = false) {
         let _media_id = this.plugin.findImageMediaId(url)
         if (_media_id === undefined && upload) {
-            // const blob = await fetch(url).then(res => res.blob());
             const blob = await fetchImageBlob(url)
             if (blob === undefined || !blob) {
                 return
@@ -387,7 +376,7 @@ export class MPArticleHeader {
                 const { errcode, media_id } = res
 
                 if (errcode !== 0) {
-                    new Notice('upload cover image error')
+                    new Notice($t('views.article-header.upload-cover-image-error'))
                     return
                 } else {
                     _media_id = media_id
@@ -399,11 +388,6 @@ export class MPArticleHeader {
     }
     private setCoverImageXY(x: number = 0, y: number = 0) {
 
-        // this.coverframe.setAttr('style', `background-image: url('${this.cover_image}'); background-size:cover; background-repeat: no-repeat; background-position:  ${x}px ${y}px;`);
-        // if (this.activeLocalDraft !== undefined) {
-        //     this.activeLocalDraft.cover_image_url = this.cover_image!
-        //     this.activeLocalDraft.pic_crop_235_1 = '' + x + ' ' + y
-        // }
         this.setCoverImage(this.cover_image)
     }
     async updateLocalDraft() {
@@ -411,14 +395,12 @@ export class MPArticleHeader {
         if (this.localDraftmanager.isActiveNoteDraft(this.activeLocalDraft)) {
             return;
         }
-        //could be called when switch account name
 
         this.activeLocalDraft = await this.localDraftmanager.getDrafOfActiveNote()
         this.updateHeaderProporties()
         return true;
     }
     updateHeaderProporties() {
-        // console.log(`updateHeaderProporties:`, this.activeLocalDraft);
         if (this.activeLocalDraft !== undefined) {
             this._title.setValue(this.activeLocalDraft.title)
             this._author.setValue(this.activeLocalDraft.author || "")
@@ -426,10 +408,8 @@ export class MPArticleHeader {
             this._needOpenComment.setValue((this.activeLocalDraft.need_open_comment || 0) > 0)
             this._onlyFansCanComment.setValue((this.activeLocalDraft.only_fans_can_comment || 0) > 0)
             this.cover_image = this.activeLocalDraft.cover_image_url || ""
-            // this.setCoverImageXY()
             const x = this.activeLocalDraft.pic_crop_235_1?.split(' ')[0] || 0
             const y = this.activeLocalDraft.pic_crop_235_1?.split(' ')[1] || 0
-            // this.coverframe.setAttr('style', `background-image: url('${this.cover_image}'); background-size:cover; background-repeat: no-repeat; background-position:  ${x}px ${y}px;`);
         } else {
             this._title.setValue('')
             this._author.setValue("")
@@ -439,7 +419,6 @@ export class MPArticleHeader {
             this.cover_image = ""
             const x = 0
             const y = 0
-            // this.coverframe.setAttr('style', `background-image: url('${this.cover_image}'); background-size:cover; background-repeat: no-repeat; background-position:  ${x}px ${y}px;`);
         }
         this.setCoverImageXY()
         this.plugin.messageService.sendMessage('draft-title-updated', this._title.getValue())

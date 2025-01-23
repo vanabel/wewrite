@@ -36,7 +36,7 @@ export class IconizeRender extends WeWriteMarkedExtension {
             rootSpan.innerHTML = iconObject.svgElement; 
             return rootSpan.outerHTML;
         }
-        return `<span>${iconName}渲染失败</span>`
+        return `<span>${iconName}$t('render.render-failed')</span>`
     }
 
     markedExtension(): MarkedExtension {

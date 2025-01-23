@@ -33,7 +33,7 @@ export class ThemeSelector {
 
         //clear all options
         this._themeDropdown.selectEl.length = 0
-        this._themeDropdown.addOption('', $t('custom-theme.default'))
+        this._themeDropdown.addOption('', $t('views.theme-manager.default-theme'))
         themes.forEach(theme => {
             this._themeDropdown.addOption(theme.path, theme.name)
         })

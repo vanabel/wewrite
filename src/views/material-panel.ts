@@ -21,7 +21,6 @@ export class MaterialPanel {
   private content: HTMLElement;
   private titleSpan: HTMLSpanElement;
   private totalSpan: HTMLSpanElement;
-  // private toggleButton: HTMLElement;
   private refreshButton: HTMLElement;
   private plugin: WeWritePlugin;
   public type: MediaType;
@@ -39,8 +38,6 @@ export class MaterialPanel {
     this.totalSpan = this.header.createSpan({ cls: 'wewrite-material-panel-total' });
 
     this.content = parent.createDiv({ cls: 'wewrite-material-panel-content' });
-    // this.toggleButton = parent.createEl<'i'>('i', { cls: 'toggle-icon chevron-right ' });
-    // setIcon(this.toggleButton, 'chevron-right')
     setIcon(this.refreshButton, 'folder-sync')
 
 
@@ -48,11 +45,9 @@ export class MaterialPanel {
     this.totalSpan.textContent = '0';
     this.content.innerHTML = 'content';
 
-    // this.header.appendChild(this.toggleButton);
     this.container.appendChild(this.header);
     this.container.appendChild(this.content);
 
-    // this.toggleButton.addEventListener('click', () => this.toggleContent());
     this.refreshButton.addEventListener('click', () => this.refreshContent());
     this.initContent()
 
@@ -70,11 +65,9 @@ export class MaterialPanel {
         this.updateItemUsed(item)
       })
     }
-    // this.getLocalItems()
   }
   getLocalItems(){
     const list = this.plugin.assetsManager.assets.get(this.type)
-    // console.log(`getLocalItems:${this.type}`, list);
     
     if (list !== undefined) {
       list.forEach((item) => {
@@ -97,27 +90,23 @@ export class MaterialPanel {
     await this.plugin.assetsManager.getAllMaterialOfType(this.type, (item) => {
       this.addItem(item)
     }, this.plugin.settings.selectedAccount)
-    //TODO: enable after all content 
 
   }
   showContextMenu(mediaItem: MaterialMeidaItem, event: MouseEvent) {
     const menu = new Menu();
 
-    //if the item type is image/voice/video && it has not been used by any news or draft.
     if (mediaItem.type === 'image') {
       const urls = AssetsManager.getInstance(this.plugin.app, this.plugin).getImageUsedUrl(mediaItem)
       if (urls === null || urls === undefined) {
         menu.addItem((item) => {
-          item.setTitle('delete image')
+          item.setTitle($t('views.delete-image'))
             .setIcon('image-minus')
             .setDisabled(mediaItem.used)
             .onClick(() => {
-              // new Notice(`删除图片: ${mediaItem.name}`);
               this.plugin.messageService.sendMessage("delete-media-item", mediaItem)
             });
         });
       }else{
-        // console.log(`image used by:`, urls);
         
       }
 
@@ -141,7 +130,6 @@ export class MaterialPanel {
             .setIcon('eye')
             .setDisabled(mediaItem.used)
             .onClick(() => {
-              // new Notice(`删除媒体: ${mediaItem.name}`);
               this.plugin.messageService.sendMessage("delete-media-item", mediaItem)
             });
         });
@@ -150,37 +138,32 @@ export class MaterialPanel {
     }
 
     if (mediaItem.type === 'draft') {
-      //if it is a draft
       menu.addItem((item) => {
-        item.setTitle('Delete draft')
+        item.setTitle($t('views.delete-draft'))
           .setIcon('trash-2')
           .onClick(async () => {
-            // console.log('to delete draft:', item)
             this.plugin.messageService.sendMessage("delete-draft-item", mediaItem)
           });
       });
       menu.addItem((item) => {
-        item.setTitle('free publish')
+        item.setTitle($t('views.free-publish'))
           .setIcon('send')
           .onClick(async () => {
-            // console.log('to delete draft:', item)
             this.plugin.messageService.sendMessage("publish-draft-item", mediaItem)
           });
       });
       menu.addItem((item) => {
-        item.setTitle('preview draft')
+        item.setTitle($t('views.preview-draft'))
           .setIcon('eye')
           .onClick(async () => {
-            // console.log('to delete draft:', item)
             this.plugin.wechatClient.senfForPreview(mediaItem.media_id, this.plugin.settings.previewer_wxname, this.plugin.settings.selectedAccount)
 
           });
       });
       menu.addItem((item) => {
-        item.setTitle('send mass message')
+        item.setTitle($t('views.send-mass-message'))
           .setIcon('send')
           .onClick(async () => {
-            // console.log('to delete draft:', item)
             this.plugin.wechatClient.massSendAll(mediaItem.media_id, this.plugin.settings.selectedAccount)
             
           });
@@ -189,16 +172,6 @@ export class MaterialPanel {
 
     menu.showAtPosition({ x: event.clientX, y: event.clientY });
   }
-
-  // private toggleContent() {
-  //   if (this.content.style.display === 'none') {
-  //     this.content.style.display = 'block';
-  //     setIcon(this.toggleButton, 'chevron-up')
-  //   } else {
-  //     this.content.style.display = 'none';
-  //     setIcon(this.toggleButton, 'chevron-right')
-  //   }
-  // }
 
   public getElement(): HTMLElement {
     return this.container;
@@ -226,7 +199,6 @@ export class MaterialPanel {
   }
   addItem(item: any) {
     if (this.isItemExist(item)){
-      // console.log(`item exist, do nothing.`);
       return
     }
     const itemDiv = this.content.createDiv({ cls: 'wewrite-material-panel-item' });
@@ -240,7 +212,7 @@ export class MaterialPanel {
       // console.log(`draft/news item=>`, item);
       let title = item.content.news_item[0].title
       if (title === undefined || !title){
-        title = 'No title article.'
+        title = $t('views.no-title-article')
       }
       itemDiv.innerHTML = `<a href=${item.content.news_item[0].url}> ${title}</a>`
       itemDiv.addEventListener('click', () => { })
@@ -251,7 +223,7 @@ export class MaterialPanel {
         //TODO 
       })
     } else {
-      console.error(`other type has not been implemented.`);
+      console.error($t('views.other-type-has-not-been-implemented'));
 
     }
     this.setTotal(this.items.length)
@@ -278,7 +250,7 @@ export class MaterialPanel {
     })
     
     if (index !== -1) {
-      this.items[index].el.remove(); //parentElement?.removeChild(this.items[index].el) 
+      this.items[index].el.remove(); 
       this.items.splice(index, 1)
     }
     this.setTotal(this.items.length)
@@ -308,7 +280,6 @@ export class MaterialPanel {
     this.setTotal(0);
     let total = 0;
     this.content.style.display = 'block';
-    // setIcon(this.toggleButton, 'chevron-up')
 
     const items = this.plugin.assetsManager.assets.get(this.type)
     if (items === undefined || items === null) {

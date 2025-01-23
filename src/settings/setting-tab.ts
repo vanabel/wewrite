@@ -4,8 +4,13 @@
 
 import { App, DropdownComponent, Notice, PluginSettingTab, Setting } from "obsidian";
 import WeWritePlugin from "src/main";
+import { getPublicIpAddress } from "src/utils/ip-address";
+import { ThemeManager } from "src/views/theme-manager";
+import { FolderSuggest } from "./folder-suggester";
+import { WECHAT_MP_WEB_PAGE } from "./mp-web-images";
+import { WeWriteAccountInfo, WeWriteSetting } from "./wewrite-setting";
+import { $t } from "src/lang/i18n";
 
-// FileSystem API type definitions
 interface FileSystemFileHandle {
 	createWritable(): Promise<FileSystemWritableFileStream>;
 	getFile(): Promise<File>;
@@ -33,12 +38,7 @@ interface FilePickerAcceptType {
 	description: string;
 	accept: Record<string, string[]>;
 }
-import { getPublicIpAddress } from "src/utils/ip-address";
-import { ThemeManager } from "src/views/theme-manager";
-import { FolderSuggest } from "./folder-suggester";
-import { WECHAT_MP_WEB_PAGE } from "./images";
-import { WeWriteAccountInfo, WeWriteSetting } from "./wewrite-setting";
-import { $t } from "src/lang/i18n";
+
 
 export class WeWriteSettingTab extends PluginSettingTab {
 	private plugin: WeWritePlugin;
@@ -55,43 +55,12 @@ export class WeWriteSettingTab extends PluginSettingTab {
 		const { containerEl } = this;
 
 		containerEl.empty();
-
-		// containerEl.createEl('h2', { text: $t('wewrite-settings') })
-	
-		// containerEl.createEl('hr')
 		this.createWeChatSettings(containerEl)
 		this.creatCSSStyleSetting(containerEl)
 		this.createAiChatSettings(containerEl)
 		this.createAiDrawSettings(containerEl)
 
-	} //display	()
-	// async exportAccountInfo() {
-	// 	try {
-	// 		if (this.plugin.settings.mpAccounts.length === 0) {
-	// 			new Notice($t('no-accounts-to-export'));
-	// 			return;
-	// 		}
-
-	// 		// Create and download file with all accounts
-	// 		const accountsData = JSON.stringify(this.plugin.settings.mpAccounts, null, 2);
-	// 		const blob = new Blob([accountsData], { type: 'application/json' });
-	// 		const url = URL.createObjectURL(blob);
-
-	// 		const a = document.createElement('a');
-	// 		a.href = url;
-	// 		a.download = `wechat-accounts-${new Date().toISOString().slice(0, 10)}.json`;
-	// 		document.body.appendChild(a);
-	// 		a.click();
-
-	// 		document.body.removeChild(a);
-	// 		URL.revokeObjectURL(url);
-
-	// 		new Notice($t('accounts-exported-successfully') + ` (${this.plugin.settings.mpAccounts.length} accounts)`);
-	// 	} catch (error) {
-	// 		new Notice($t('failed-to-export-account') + error);
-	// 		console.error(error);
-	// 	}
-	// }
+	} 
 	async exportSettings() {
 		try {
 			const settingData = JSON.stringify(this.plugin.settings, null, 2);
@@ -111,104 +80,19 @@ export class WeWriteSettingTab extends PluginSettingTab {
 			await writable.write(blob);
 			await writable.close();
 			
-			new Notice($t('settings-exported-successfully'));
+			new Notice($t('settings.settings-exported'));
 			return true;
 		} catch (error) {
 			if (error.name === 'AbortError') {
 				// User canceled the save dialog
 				return false;
 			}
-			new Notice($t('settings-export-failed') + error);
+			new Notice($t('settings.settings-exporting-failed')+ error);
 			console.error(error);
 			return false;
 		}
 	}
 
-	// async importAccountInfo() {
-	// 	try {
-	// 		// Create file input
-	// 		const input = document.createElement('input');
-	// 		input.type = 'file';
-	// 		input.accept = '.json';
-
-	// 		input.onchange = async (e) => {
-	// 			const file = (e.target as HTMLInputElement).files?.[0];
-	// 			if (!file) return;
-
-	// 			const reader = new FileReader();
-	// 			reader.onload = async (e) => {
-	// 				try {
-	// 					const content = e.target?.result as string;
-	// 					let importedData: WeWriteAccountInfo | WeWriteAccountInfo[];
-
-	// 					// Validate JSON structure
-	// 					try {
-	// 						importedData = JSON.parse(content);
-	// 					} catch (error) {
-	// 						new Notice($t('invalid-json-file'));
-	// 						return;
-	// 					}
-
-	// 					// Validate account data structure
-	// 					const validateAccount = (account: any): account is WeWriteAccountInfo => {
-	// 						return typeof account === 'object' &&
-	// 							typeof account.accountName === 'string' &&
-	// 							typeof account.appId === 'string' &&
-	// 							typeof account.appSecret === 'string';
-	// 					};
-
-	// 					let accountsToImport: WeWriteAccountInfo[] = [];
-
-	// 					if (Array.isArray(importedData)) {
-	// 						// Multiple accounts
-	// 						if (!importedData.every(validateAccount)) {
-	// 							new Notice($t('invalid-account-data-format'));
-	// 							return;
-	// 						}
-	// 						accountsToImport = importedData;
-	// 					} else if (validateAccount(importedData)) {
-	// 						// Single account
-	// 						accountsToImport = [importedData];
-	// 					} else {
-	// 						new Notice($t('invalid-account-data-format'));
-	// 						return;
-	// 					}
-
-	// 					// Filter out duplicates and invalid accounts
-	// 					const existingAccounts = this.plugin.settings.mpAccounts;
-	// 					const newAccounts = accountsToImport.filter(newAccount =>
-	// 						!existingAccounts.some(existingAccount =>
-	// 							existingAccount.accountName === newAccount.accountName &&
-	// 							existingAccount.appId === newAccount.appId &&
-	// 							existingAccount.appSecret === newAccount.appSecret
-	// 						)
-	// 					);
-
-	// 					if (newAccounts.length === 0) {
-	// 						new Notice($t('no-new-accounts-to-import'));
-	// 						return;
-	// 					}
-
-	// 					// Add new accounts
-	// 					this.plugin.settings.mpAccounts.push(...newAccounts);
-	// 					await this.plugin.saveSettings();
-	// 					this.updateAccountOptions();
-	// 					new Notice($t('accounts-imported-successfully') + ` (${newAccounts.length} accounts)`);
-	// 				} catch (error) {
-	// 					new Notice($t('failed-to-import-accounts') + error);
-	// 					console.error(error);
-	// 				}
-	// 			};
-
-	// 			reader.readAsText(file);
-	// 		};
-
-	// 		input.click();
-	// 	} catch (error) {
-	// 		new Notice($t('failed-to-import-account') + error);
-	// 		console.error(error);
-	// 	}
-	// }
 	async importSettings() {
 		try {
 			// Create file input
@@ -230,7 +114,7 @@ export class WeWriteSettingTab extends PluginSettingTab {
 						try {
 							importedData = JSON.parse(content);
 						} catch (error) {
-							new Notice($t('settings.import.invalid_json'));
+							new Notice($t('settings.invalid-json-file'));
 							return;
 						}
 
@@ -238,7 +122,7 @@ export class WeWriteSettingTab extends PluginSettingTab {
 						// Validate account data structure
 						const {mpAccounts, css_styles_folder} = importedData;
 						if (mpAccounts === undefined || css_styles_folder === undefined){
-							new Notice($t('settings.import.invalid_file'));
+							new Notice($t('settings.invalid-wewerite-settings-file'));
 							return 
 						}
 						console.log(`settings:`, importedData);
@@ -248,9 +132,9 @@ export class WeWriteSettingTab extends PluginSettingTab {
 						await this.plugin.saveSettings();
 						this.updateAccountOptions();
 						this.display();
-						new Notice($t('settings.import.success'));
+						new Notice($t('settings.settings-imported-successfully'));
 					} catch (error) {
-						new Notice($t('settings.import.failed') + error);
+						new Notice($t('settings.settings-imported-failed') + error);
 						console.error(error);
 					}
 				};
@@ -260,31 +144,30 @@ export class WeWriteSettingTab extends PluginSettingTab {
 
 			input.click();
 		} catch (error) {
-			new Notice($t('settings.import.error') + error);
+			new Notice($t('settings.settings-imported-error') + error);
 			console.error(error);
 		}
 	}
 
 	creatCSSStyleSetting(container: HTMLElement) {
 		const frame = container.createDiv({ cls: 'wewrite-setting-frame' })
-		frame.createEl('h4', { text: $t('settings.title.css_styles'), cls: 'wechat-setting-title' })
+		frame.createEl('h4', { text: $t('settings.custom-themes'), cls: 'wechat-setting-title' })
 
 		new Setting(frame)
-			.setName($t('settings.css.folder_location'))
-			.setDesc($t('settings.css.folder_desc'))
+			.setName($t('settings.custom-themes-folder'))
+			.setDesc($t('settings.the-folder-where-your-custom-themes'))
 			.addSearch((cb) => {
 				new FolderSuggest(this.app, cb.inputEl);
-				cb.setPlaceholder($t('settings.css.folder_placeholder'))
+				cb.setPlaceholder($t('settings.themes-folder-path'))
 					.setValue(this.plugin.settings.css_styles_folder)
 					.onChange((new_folder) => {
 						this.plugin.settings.css_styles_folder = new_folder;
-						// this.plugin.saveSettings();
 						this.plugin.saveThemeFolderDebounce();
 					});
 			}).addExtraButton(
 				(button) => {
 					button.setIcon("download")
-						.setTooltip($t('settings.css.download_tooltip'))
+						.setTooltip($t('settings.download-predefined-custom-themes-from'))
 						.onClick(async () => {
 							ThemeManager.getInstance(this.plugin).downloadThemes();
 						});
@@ -293,14 +176,14 @@ export class WeWriteSettingTab extends PluginSettingTab {
 	}
 	newAccountInfo() {
 		let n = 0
-		let newName = $t('settings.account.new')
+		let newName = $t('settings.new-account')
 		while (true) {
 			const account = this.plugin.settings.mpAccounts.find((account: WeWriteAccountInfo) => account.accountName === newName)
 			if (account === undefined || account === null) {
 				break
 			}
 			n += 1
-			newName = $t('settings.account.new') + n
+			newName = $t('settings.new-account') + '-'+ n
 		}
 
 		const newAccount = {
@@ -326,8 +209,8 @@ export class WeWriteSettingTab extends PluginSettingTab {
 
 		//account Name
 		new Setting(cEl)
-			.setName($t('settings.account.name'))
-			.setDesc($t('settings.account.name_desc'))
+			.setName($t('settings.account-name'))
+			.setDesc($t('settings.account-name-for-your-wechat-official'))
 			.setClass('wewrite-setting-input')
 			.addText(text => text
 				.setValue(account.accountName)
@@ -339,8 +222,8 @@ export class WeWriteSettingTab extends PluginSettingTab {
 				}));
 		//addId		
 		new Setting(cEl)
-			.setName($t('settings.account.appid_desc'))
-			.setDesc($t('settings.account.appid_desc'))
+			.setName('AppId')
+			.setDesc($t('settings.appid-for-your-wechat-official-account'))
 			.setClass('wewrite-setting-input')
 			.addText(text => text
 				.setValue(account.appId)
@@ -352,8 +235,8 @@ export class WeWriteSettingTab extends PluginSettingTab {
 
 		//addSecret
 		new Setting(cEl)
-			.setName($t('settings.account.secret_desc'))
-			.setDesc($t('settings.account.secret_desc'))
+			.setName($t('settings.app-secret'))
+			.setDesc($t('settings.app-secret-for-your-wechat-official'))
 			.setClass('wewrite-setting-input')
 			.addText(text => text
 				.setValue(account.appSecret)
@@ -363,14 +246,14 @@ export class WeWriteSettingTab extends PluginSettingTab {
 				}));
 		// refresh token
 		new Setting(cEl)
-			.setName($t('settings.account.test_connection'))
-			.setDesc($t('settings.account.test_desc'))
+			.setName($t('settings.test-connection'))
+			.setDesc($t('settings.check-if-your-account-setting-is-correct'))
 			.addExtraButton(async button => {
-				button.setTooltip($t('settings.account.test_tooltip')).setIcon('plug-zap');
+				button.setTooltip($t('settings.click-to-connect-wechat-server')).setIcon('plug-zap');
 				button.onClick(async () => {
 					const success = await this.plugin.TestAccessToken(account.accountName);
 					if (success) {
-						new Notice($t('settings.account.connected'));
+						new Notice($t('settings.successfully-connected-to-wechat-officia'));
 					} else {
 
 					}
@@ -379,11 +262,11 @@ export class WeWriteSettingTab extends PluginSettingTab {
 
 		// delete this account
 		new Setting(cEl)
-			.setName($t('settings.account.delete'))
-			.setDesc($t('settings.account.delete_desc'))
+			.setName($t('settings.delete-account'))
+			.setDesc($t('settings.t-settings-be-carefull-this-will-delete-'))
 			.setClass('danger-extra-button')
 			.addExtraButton(async button => {
-				button.setTooltip($t('settings.account.delete_tooltip')).setIcon('trash-2');
+				button.setTooltip($t('settings.delete-account')).setIcon('trash-2');
 				button.onClick(async () => {
 					const accountToDelete = this.plugin.settings.selectedAccount
 					this.plugin.settings.mpAccounts = this.plugin.settings.mpAccounts.filter(account => account.accountName !== accountToDelete)
@@ -408,7 +291,7 @@ export class WeWriteSettingTab extends PluginSettingTab {
 	async detectIP(ip: Setting) {
 		let address = await getPublicIpAddress();
 		if (address === undefined) {
-			address = $t('settings.ip.no_address')
+			address = $t('settings.no-ip-address')
 		}
 		ip.addButton(button => {
 			button.setButtonText(address)
@@ -421,20 +304,20 @@ export class WeWriteSettingTab extends PluginSettingTab {
 		})
 		ip.addExtraButton(button => {
 			button.setIcon('clipboard-copy')
-				.setTooltip($t('copy-ip-to-clipboard-0'))
+				.setTooltip($t('settings.copy-ip-address-to-clipboard'))
 				.onClick(async () => {
 					await navigator.clipboard.writeText(await getPublicIpAddress());
-					new Notice($t('ip-copied-to-clipboard-0'));
+					new Notice($t('settings.ip-copied-to-clipboard'));
 				});
 		});
 	}
 	createAiChatSettings(container: HTMLElement) {
 		const frame = container.createDiv({ cls: 'wewrite-setting-frame' })
-		frame.createEl('h4', { text: $t('settings.title.chat_llm'), cls: 'wechat-setting-title' })
+		frame.createEl('h4', { text: $t('settings.text-llm-settings'), cls: 'wechat-setting-title' })
 
 		new Setting(frame)
-			.setName($t('settings.llm.base_url'))
-			.setDesc($t('settings.llm.base_url_desc'))
+			.setName('base_url')
+			.setDesc($t('settings.llm-access-base-url'))
 			.setClass('wewrite-setting-input')
 			.addText(text => text
 				.setValue(this.plugin.settings.chatLLMBaseUrl || '')
@@ -444,8 +327,8 @@ export class WeWriteSettingTab extends PluginSettingTab {
 				}));
 
 		new Setting(frame)
-			.setName($t('settings.llm.api_key'))
-			.setDesc($t('settings.llm.api_key_desc'))
+			.setName('api_key')
+			.setDesc($t('settings.llm-access-api-key'))
 			.setClass('wewrite-setting-input')
 			.addText(text => text
 				.setValue(this.plugin.settings.chatLLMApiKey || '')
@@ -455,8 +338,8 @@ export class WeWriteSettingTab extends PluginSettingTab {
 				}));
 
 		new Setting(frame)
-			.setName($t('settings.llm.model'))
-			.setDesc($t('settings.llm.model_desc'))
+			.setName('model')
+			.setDesc($t('settings.llm-model-to-be-used'))
 			.setClass('wewrite-setting-input')
 			.addText(text => text
 				.setValue(this.plugin.settings.chatLLMModel || '')
@@ -467,11 +350,11 @@ export class WeWriteSettingTab extends PluginSettingTab {
 	}
 	createAiDrawSettings(container: HTMLElement) {
 		const frame = container.createDiv({ cls: 'wewrite-setting-frame' })
-		frame.createEl('h4', { text: $t('settings.title.draw_llm'), cls: 'wechat-setting-title' })
+		frame.createEl('h4', { text: $t('settings.image-llm-settings'), cls: 'wechat-setting-title' })
 
 		new Setting(frame)
-			.setName($t('settings.llm.base_url'))
-			.setDesc($t('settings.llm.base_url_desc'))
+			.setName('base_url')
+			.setDesc($t('settings.llm-access-base-url'))
 			.setClass('wewrite-setting-input')
 			.addText(text => text
 				.setValue(this.plugin.settings.drawLLMBaseUrl || '')
@@ -481,8 +364,8 @@ export class WeWriteSettingTab extends PluginSettingTab {
 				}));
 
 		new Setting(frame)
-			.setName($t('settings.llm.draw_task_url'))
-			.setDesc($t('settings.llm.draw_task_desc'))
+			.setName('task_url')
+			.setDesc($t('settings.image-llm-checking-task-progress-url'))
 			.setClass('wewrite-setting-input')
 			.addText(text => text
 				.setValue(this.plugin.settings.drawLLMTaskUrl || '')
@@ -492,8 +375,8 @@ export class WeWriteSettingTab extends PluginSettingTab {
 				}));
 
 		new Setting(frame)
-			.setName($t('settings.llm.api_key'))
-			.setDesc($t('settings.llm.api_key_desc'))
+			.setName('api_key')
+			.setDesc($t('settings.llm-access-api-key'))
 			.setClass('wewrite-setting-input')
 			.addText(text => text
 				.setValue(this.plugin.settings.drawLLMApiKey || '')
@@ -503,8 +386,8 @@ export class WeWriteSettingTab extends PluginSettingTab {
 				}));
 
 		new Setting(frame)
-			.setName($t('settings.llm.model'))
-			.setDesc($t('settings.llm.model_desc'))
+			.setName('model')
+			.setDesc($t('settings.llm-model-to-be-used'))
 			.setClass('wewrite-setting-input')
 			.addText(text => text
 				.setValue(this.plugin.settings.drawLLMModel || '')
@@ -515,30 +398,30 @@ export class WeWriteSettingTab extends PluginSettingTab {
 	}
 	createWeChatSettings(container: HTMLElement) {
 		const mpFrame = container.createDiv({ cls: 'wewrite-setting-frame' })
-		mpFrame.createEl('h4', { text: $t('settings.title.wechat_mp'), cls: 'wechat-setting-title' })
+		mpFrame.createEl('h4', { text: $t('settings.wechat-account-settings'), cls: 'wechat-setting-title' })
 		mpFrame.createEl('hr')
 
 		const ip = new Setting(mpFrame)
-			.setName($t('settings.ip.public_address') + ': ' + this.plugin.settings.ipAddress)
+			.setName($t('settings.public-ip-address') + ': ' + this.plugin.settings.ipAddress)
 			.setHeading()
-			.setDesc($t('settings.ip.whitelist_tip'))
+			.setDesc($t('settings.you-should-add-this-ip-to-ip-whitelist-o'))
 
 		this.plugin.updateIpAddress().then(ipAddress => {
-			ip.setName($t('settings.ip.public_address') + ': ' + ipAddress)
+			ip.setName($t('settings.public-ip-address') + ': ' + ipAddress)
 		})
 
 		ip.addExtraButton(button => {
 			button.setIcon('clipboard-copy')
-				.setTooltip($t('settings.ip.copy_tooltip'))
+				.setTooltip($t('settings.copy-ip-to-clipboard'))
 				.onClick(async () => {
 					await navigator.clipboard.writeText(this.plugin.settings.ipAddress ?? '');
-					new Notice($t('settings.ip.copied'));
+					new Notice($t('settings.ip-copied-to-clipboard'));
 				});
 		});
 
 		new Setting(mpFrame)
-			.setName($t('settings.center_token.title'))
-			.setDesc($t('settings.center_token.desc'))
+			.setName($t('settings.use-center-token-server'))
+			.setDesc($t('settings.if-your-device-cannot-get-static-pubic-i'))
 			.addToggle(toggle => {
 				toggle.setValue(this.plugin.settings.useCenterToken)
 					.onChange(async (value) => {
@@ -550,15 +433,15 @@ export class WeWriteSettingTab extends PluginSettingTab {
 		mpFrame.createEl('hr')
 
 		new Setting(mpFrame)
-			.setName($t('settings.account.info'))
+			.setName($t('settings.account-info'))
 			.setHeading()
 
 		const div = mpFrame.createDiv({ cls: 'wewrite-web-image elevated-shadow' })
 		div.innerHTML = `<a href="https://mp.weixin.qq.com/cgi-bin/frame?t=pages/developsetting/page/developsetting_frame&nav=10141"><img src="${WECHAT_MP_WEB_PAGE}" alt="wewrite-web-page"></a> </p>`
 
 		new Setting(mpFrame)
-			.setName($t('settings.account.select'))
-			.setDesc($t('settings.account.select_desc'))
+			.setName($t('settings.select-account'))
+			.setDesc($t('settings.choose-the-account-to-modify'))
 			.addDropdown(
 				(dropdown) => {
 					dropdown.selectEl.empty();
@@ -571,7 +454,7 @@ export class WeWriteSettingTab extends PluginSettingTab {
 						})
 					}
 					dropdown
-						.setValue(this.plugin.settings.selectedAccount ?? $t('settings.account.select'))
+						.setValue(this.plugin.settings.selectedAccount ?? $t('settings.select-account'))
 						.onChange(async (value) => {
 							this.plugin.settings.selectedAccount = value;
 							this.updateAccountSettings(this.plugin.settings.selectedAccount, this.accountEl)
@@ -583,7 +466,7 @@ export class WeWriteSettingTab extends PluginSettingTab {
 			.addExtraButton(
 				(button) => {
 					button.setIcon('plus')
-						.setTooltip($t('settings.account.add_new'))
+						.setTooltip($t('settings.create-new-account'))
 						.onClick(async () => {
 							this.newAccountInfo();
 						})
@@ -594,8 +477,8 @@ export class WeWriteSettingTab extends PluginSettingTab {
 		const title = frame.createEl('div', { cls: 'wewrite-account-info-title', text: $t('settings.account.info') })
 
 		new Setting(mpFrame)
-			.setName($t('settings.account.previewer'))
-			.setDesc($t('settings.account.previewer_desc'))
+			.setName($t('settings.draft-previewer-wechat-id'))
+			.setDesc($t('settings.draft-only-visible-for-the-wechat-user-o'))
 			.addText(text => text
 				.setValue(this.plugin.settings.previewer_wxname || '')
 				.onChange(async (value) => {
@@ -607,13 +490,13 @@ export class WeWriteSettingTab extends PluginSettingTab {
 		this.updateAccountSettings(this.accountDropdown.getValue(), this.accountEl)
 
 		new Setting(mpFrame)
-			.setName($t('settings.account.import_export'))
-			.setDesc($t('settings.account.import_export_desc'))
+			.setName($t('settings.import-export-wewrite-account'))
+			.setDesc($t('settings.import-or-export-your-account-info-for-b'))
 			.setClass('wewrite-import-export-config')
 			.addExtraButton(
 				(button) => {
 					button.setIcon('upload')
-						.setTooltip($t('settings.account.import_tooltip'))
+						.setTooltip($t('settings.import-account-info'))
 						.onClick(async () => {
 							this.importSettings();
 						})
@@ -622,7 +505,7 @@ export class WeWriteSettingTab extends PluginSettingTab {
 			.addExtraButton(
 				(button) => {
 					button.setIcon('download')
-						.setTooltip($t('settings.account.export_tooltip'))
+						.setTooltip($t('settings.export-account-info'))
 						.onClick(async () => {
 							this.exportSettings();
 						})

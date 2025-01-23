@@ -10,6 +10,7 @@ import WeWritePlugin from "src/main";
 import PouchDB from 'pouchdb';
 import PouchDBFind from 'pouchdb-find';
 import { areObjectsEqual } from "src/utils/utils";
+import { $t } from "src/lang/i18n";
 PouchDB.plugin(PouchDBFind);
 
 
@@ -99,7 +100,7 @@ export class LocalDraftManager {
     public async setDraft(doc: LocalDraftItem): Promise<boolean> {
         return new Promise((resolve, reject) => {
             if (!doc.accountName || !doc.notePath) {
-                return reject(new Error('Invalid draft: missing accountName or notePath'));
+                return reject(new Error($t('assets.invalid-draft')));
             }
 
             if (!doc._id) {
@@ -119,8 +120,6 @@ export class LocalDraftManager {
                         return this.db.put(doc)
                             .then(() => resolve(true))
                             .catch(error => {
-                                // console.error('Error updating draft:', error);
-                                // reject(error);
                                 resolve(false);
                             });
                     }
