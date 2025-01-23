@@ -1,7 +1,7 @@
 ---
 author: wewrite
 theme_name: wewrite default theme
-created_at: 2025-01-21
+created_at: 2025-01-22
 ---
 
 
@@ -229,6 +229,7 @@ created_at: 2025-01-21
   .wewrite strong {
     /* color: #3eaf7c; */
     font-weight: 600;
+    color: rgb(0,128,128);
   }
   .wewrite img {
     max-width: 100%;

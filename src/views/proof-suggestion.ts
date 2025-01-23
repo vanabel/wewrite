@@ -1,5 +1,8 @@
-import { MessageService } from './../utils/message-service';
-import { Modal, Editor } from 'obsidian';
+import { EditorView, Decoration, DecorationSet } from "@codemirror/view";
+import { EditorState, StateField, Transaction } from "@codemirror/state";
+import { Editor } from 'obsidian';
+import { RangeSetBuilder } from "@codemirror/state";
+import { StateEffect } from "@codemirror/state";
 
 interface ProofItem {
     type: string;
@@ -9,138 +12,225 @@ interface ProofItem {
     suggestion: string;
 }
 
-export class ProofSuggestionModal extends Modal {
-    private currentIndex: number = 0;
-    private proofItems: ProofItem[];
-    private editor: Editor;
-    private selectionOffset: number;
+export class ProofService {
+    private static instance: ProofService | null = null;
+    private tooltip: HTMLElement | null = null;
+    private activeItem: ProofItem | null = null;
+    private proofField: StateField<DecorationSet>;
+    private editorView: EditorView;
+    private hideTimeoutId: number | null = null;
 
-    constructor(app: any, proofItems: ProofItem[], editor: Editor) {
-        super(app);
-        this.proofItems = proofItems;
-        this.editor = editor;
-        this.selectionOffset = this.getSelectionOffset();
-    }
-    private getSelectionOffset(): number {
-        const selection = this.editor.getSelection();
-        if (selection) {
-            const cursor = this.editor.getCursor('from');
-            return this.editor.posToOffset(cursor);
-        }
-        return 0;
+    private constructor(
+        private editor: Editor,
+        private proofItems: ProofItem[]
+    ) {
+        this.editorView = (this.editor as any).cm;
+        this.setupProofField();
+        this.setupEventListeners();
     }
 
-    onOpen() {
-        const { contentEl } = this;
-        contentEl.empty();
-        contentEl.addClass('proof-suggestion-modal');
-
-        const currentItem = this.proofItems[this.currentIndex];
-        if (!currentItem) return;
-
-        // Adjust start and end positions based on selection offset
-        const adjustedStart = currentItem.start + this.selectionOffset;
-        const adjustedEnd = currentItem.end + this.selectionOffset;
-        
-        // Select the text to be replaced
-        const startPos = this.editor.offsetToPos(adjustedStart);
-        // const endPos = this.editor.offsetToPos(adjustedEnd);
-        // this.editor.setSelection(startPos, endPos);
-
-        // Position modal near the text
-        const coords = (this.editor as any).cm.coordsAtPos?.(startPos);
-        if (coords) {
-            this.modalEl.style.position = 'absolute';
-            this.modalEl.style.top = `${coords.top + 20}px`;
-            this.modalEl.style.left = `${coords.left}px`;
+    public static getInstance(editor: Editor, proofItems: ProofItem[]): ProofService {
+        if (ProofService.instance) {
+            ProofService.instance.destroy();
         }
+        ProofService.instance = new ProofService(editor, proofItems);
+        return ProofService.instance;
+    }
 
-        // Modal content
-        const container = contentEl.createDiv('proof-suggestion-container');
+    private setupProofField() {
+        this.proofField = StateField.define<DecorationSet>({
+            create: (state: EditorState) => {
+                return this.createDecorations(state);
+            },
+            update: (decorations: DecorationSet, transaction: Transaction) => {
+                if (transaction.docChanged) {
+                    return this.createDecorations(transaction.state);
+                }
+                return decorations.map(transaction.changes);
+            },
+            provide: (field) => EditorView.decorations.from(field)
+        });
+
+        this.editorView.dispatch({
+            effects: StateEffect.appendConfig.of([this.proofField])
+        });
+    }
+
+    private createDecorations(state: EditorState): DecorationSet {
+        let builder = new RangeSetBuilder<Decoration>();
         
-        // Type
-        const typeEl = container.createDiv('proof-type');
-        typeEl.setText(currentItem.type);
-
-        // Description
-        const descEl = container.createDiv('proof-description');
-        descEl.setText(currentItem.description);
-
-        // Suggestion
-        const suggestionEl = container.createDiv('proof-suggestion');
-        suggestionEl.setText(`建议: ${currentItem.suggestion}`);
-
-        // Buttons
-        const buttonContainer = container.createDiv('proof-buttons');
-        
-        const acceptButton = buttonContainer.createEl('button', { text: '接受' });
-        acceptButton.onclick = () => {
-            this.handleAccept(currentItem);
-            this.showNext();
-        };
-
-        const rejectButton = buttonContainer.createEl('button', { text: '拒绝' });
-        rejectButton.onclick = () => {
-            this.showNext();
-        };
-        
-        const selectBtn = buttonContainer.createEl('button', { text: `select${adjustedStart}-${adjustedEnd}` });
-        selectBtn.onclick = () => {
-            console.log(`select${adjustedStart}-${adjustedEnd}`, this.editor);
-            
-            this.editor.setSelection(
-                this.editor.offsetToPos(adjustedStart),
-                this.editor.offsetToPos(adjustedEnd)
+        this.proofItems.forEach((item, index) => {
+            builder.add(
+                item.start,
+                item.end,
+                Decoration.mark({
+                    class: 'proof-underline',
+                    attributes: { 'data-proof-id': index.toString() }
+                })
             );
-        };
+        });
 
+        return builder.finish();
     }
 
-    private handleAccept(item: ProofItem) {
-        this.editor.replaceRange(
-            item.suggestion,
-            this.editor.offsetToPos(item.start),
-            this.editor.offsetToPos(item.end)
-        );
+    private setupEventListeners() {
+        const dom = this.editorView.dom;
+        dom.addEventListener('mouseover', this.handleMouseOver.bind(this));
+        dom.addEventListener('mouseout', this.handleMouseOut.bind(this));
     }
 
-    private showNext() {
-        this.close()
-        this.currentIndex++;
-        if (this.currentIndex < this.proofItems.length) {
-            // this.onOpen();
-            this.show()
-        } else {
-            // this.close();
+    private handleMouseOver(e: MouseEvent) {
+        const target = e.target as HTMLElement;
+        if (target.classList.contains('proof-underline')) {
+            const proofId = parseInt(target.getAttribute('data-proof-id') || '-1');
+            if (proofId >= 0) {
+                this.showTooltip(this.proofItems[proofId], e);
+            }
         }
     }
 
-    onClose() {
-        const { contentEl } = this;
-        contentEl.empty();
-    }
-    public show(){
-        const item = this.proofItems[this.currentIndex];
-        if (item === undefined || !item){
-            this.close()
+    private handleMouseOut(e: MouseEvent) {
+        const relatedTarget = e.relatedTarget as HTMLElement;
+        const tooltip = this.tooltip;
+        
+        if (relatedTarget?.closest('.proof-tooltip') || 
+            tooltip?.contains(e.target as Node)) {
+            if (this.hideTimeoutId) {
+                window.clearTimeout(this.hideTimeoutId);
+                this.hideTimeoutId = null;
+            }
+            return;
         }
-        // Adjust start and end positions based on selection offset
-        const adjustedStart = item.start + this.selectionOffset;
-        const adjustedEnd = item.end + this.selectionOffset;
+
+        if (!this.hideTimeoutId) {
+            this.hideTimeoutId = window.setTimeout(() => {
+                this.hideTooltip();
+                this.hideTimeoutId = null;
+            }, 500);
+        }
+    }
+
+    private showTooltip(item: ProofItem, e: MouseEvent) {
+        if (this.hideTimeoutId) {
+            window.clearTimeout(this.hideTimeoutId);
+            this.hideTimeoutId = null;
+        }
+
+        if (this.tooltip && this.activeItem === item) {
+            return;
+        }
+
+        this.hideTooltip();
+        this.activeItem = item;
+
+        this.tooltip = document.createElement('div');
+        this.tooltip.className = 'proof-tooltip';
         
-        // Select the text to be replaced
-        const startPos = this.editor.offsetToPos(adjustedStart);
-        const endPos = this.editor.offsetToPos(adjustedEnd);
-        this.editor.setSelection(startPos, endPos);
-        this.open()
+        const content = `
+            <div class="proof-type">${item.type}</div>
+            <div class="proof-description">${item.description}</div>
+            <div class="proof-suggestion">建议: ${item.suggestion}</div>
+            <div class="proof-actions">
+                <button class="proof-accept">✓ 接受</button>
+                <button class="proof-reject">✗ 拒绝</button>
+            </div>
+        `;
+        this.tooltip.innerHTML = content;
+
+        const rect = (e.target as HTMLElement).getBoundingClientRect();
         
+        document.body.appendChild(this.tooltip);
+        const tooltipHeight = this.tooltip.offsetHeight;
+        const tooltipWidth = this.tooltip.offsetWidth;
+        
+        let top = rect.bottom + 5;
+        if (top + tooltipHeight > window.innerHeight) {
+            top = rect.top - tooltipHeight - 5;
+        }
+        
+        let left = rect.left;
+        if (left + tooltipWidth > window.innerWidth) {
+            left = window.innerWidth - tooltipWidth - 5;
+        }
+        
+        this.tooltip.style.position = 'fixed';
+        this.tooltip.style.top = `${top}px`;
+        this.tooltip.style.left = `${left}px`;
+
+        this.tooltip.addEventListener('mouseenter', () => {
+            if (this.hideTimeoutId) {
+                window.clearTimeout(this.hideTimeoutId);
+                this.hideTimeoutId = null;
+            }
+        });
+
+        this.tooltip.addEventListener('mouseleave', (e) => {
+            if (!(e.relatedTarget as HTMLElement)?.closest('.proof-underline')) {
+                this.handleMouseOut(e);
+            }
+        });
+
+        this.tooltip.querySelector('.proof-accept')?.addEventListener('click', () => this.acceptSuggestion(item));
+        this.tooltip.querySelector('.proof-reject')?.addEventListener('click', () => this.rejectSuggestion(item));
+    }
+
+    private hideTooltip() {
+        if (this.hideTimeoutId) {
+            window.clearTimeout(this.hideTimeoutId);
+            this.hideTimeoutId = null;
+        }
+        if (this.tooltip) {
+            this.tooltip.remove();
+            this.tooltip = null;
+            this.activeItem = null;
+        }
+    }
+
+    private acceptSuggestion(item: ProofItem) {
+        const from = this.editor.offsetToPos(item.start);
+        const to = this.editor.offsetToPos(item.end);
+        
+        this.editor.setSelection(from, to);
+        this.editor.replaceSelection(item.suggestion);
+        
+        const lengthDiff = item.suggestion.length - (item.end - item.start);
+        this.proofItems.forEach(proofItem => {
+            if (proofItem.start > item.end) {
+                proofItem.start += lengthDiff;
+                proofItem.end += lengthDiff;
+            }
+        });
+        
+        this.removeProofItem(item);
+    }
+
+    private rejectSuggestion(item: ProofItem) {
+        this.removeProofItem(item);
+    }
+
+    private removeProofItem(item: ProofItem) {
+        const index = this.proofItems.indexOf(item);
+        if (index > -1) {
+            this.proofItems.splice(index, 1);
+            this.editorView.dispatch({
+                effects: StateEffect.reconfigure.of([this.proofField])
+            });
+        }
+        this.hideTooltip();
+    }
+
+    public destroy() {
+        this.hideTooltip();
+        if (this.editorView) {
+            this.editorView.dom.removeEventListener('mouseover', this.handleMouseOver);
+            this.editorView.dom.removeEventListener('mouseout', this.handleMouseOut);
+            this.editorView.dispatch({
+                effects: StateEffect.reconfigure.of([])
+            });
+        }
     }
 }
 
-
-export function showProofSuggestions(app: any, proofItems: ProofItem[], editor: Editor) {
-    console.log(`showProofSuggestions:`, proofItems);
-    
-    const modal = new ProofSuggestionModal(app, proofItems, editor);
-    modal.show();
+export function showProofSuggestions(editor: Editor, proofItems: ProofItem[]): ProofService {
+    return ProofService.getInstance(editor, proofItems);
 }

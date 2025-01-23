@@ -6,6 +6,7 @@
 import { Modal, Notice } from 'obsidian';
 import WeWritePlugin from 'src/main';
 import { DraftItem } from './../wechat-api/wechat-types';
+import { $t } from 'src/lang/i18n';
 
 export class ConfirmPublishModal extends Modal {
     plugin: WeWritePlugin;
@@ -28,18 +29,15 @@ export class ConfirmPublishModal extends Modal {
         // containerEl.addClass('confirm-pulbish-dialog');
         contentEl.addClass('confirm-pulbish-dialog-content')
 
-        contentEl.createEl('h3', { text: 'Confirm Publish' });
+        contentEl.createEl('h3', { text: $t('modals.publish.title') });
         const content = contentEl.createDiv({ cls: 'description' })
-        content.createEl('p', { text: `Are you sure to publish this article?`})
-        content.createEl('p', { text: `publish draft outside of WeChat MP platform, 
-            is not as efficient as publish inside WeChat MP platform. 
-            some features may not work as expected. for example the tag, pushing to public account, etc.
-            `})
-        content.createEl('p', { text: `Be careful!`})
+        content.createEl('p', { text: $t('modals.publish.message') });
+        content.createEl('p', { text: $t('modals.publish.warning') });
+        content.createEl('p', { text: $t('modals.publish.caution') });
         
         const toolbar = contentEl.createDiv({ cls: 'confirm-pulbish-dialog-tool-bar' })
-        const confirmButton = toolbar.createEl('button', { text: 'Confirm' ,cls:"danger-button"});
-        const cancelButton = toolbar.createEl('button', { text: 'Cancel' });
+        const confirmButton = toolbar.createEl('button', { text: $t('modals.publish.confirm'), cls: "danger-button" });
+        const cancelButton = toolbar.createEl('button', { text: $t('modals.publish.cancel') });
 
         confirmButton.addEventListener('click', () => {
             console.log(`confirm publish:`, this.draftItem);
@@ -63,10 +61,10 @@ export class ConfirmPublishModal extends Modal {
         if (id !== undefined && id) {
             this.plugin.wechatClient.publishDraft(id)
                 .then(() => {
-                    new Notice('Publish Successfully')
+                    new Notice($t('modals.notice.publish_success'));
                 })
                 .catch((error: any) => {
-                    new Notice('Publish Failed')
+                    new Notice($t('modals.notice.publish_failed'));
                 })
         }
     }

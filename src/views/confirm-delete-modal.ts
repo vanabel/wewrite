@@ -6,6 +6,7 @@
 import { Modal, Notice } from 'obsidian';
 import WeWritePlugin from 'src/main';
 import { MaterialItem } from './../wechat-api/wechat-types';
+import { $t } from 'src/lang/i18n';
 
 export class ConfirmDeleteModal extends Modal {
     plugin: WeWritePlugin;
@@ -29,19 +30,21 @@ export class ConfirmDeleteModal extends Modal {
         // containerEl.addClass('confirm-pulbish-dialog');
         contentEl.addClass('confirm-pulbish-dialog-content')
 
-        contentEl.createEl('h3', { text: 'Confirm Delete' });
+        contentEl.createEl('h3', { text: $t('modals.delete.title') });
         const content = contentEl.createDiv({ cls: 'description' })
-        content.createEl('p', { text: `Are you sure to delete this item?`})
-        content.createEl('p', { text: `Delete is permernent. This action cannot be undone.`})
-        content.createEl('p', { text: `
-                If you want to delete this item, please click the button below.
-                If you want to cancel, please click the button below.
-            `})
-        content.createEl('p', { text: `Be careful!`})
+        content.createEl('p', { text: $t('modals.delete.message') });
+        content.createEl('p', { text: $t('modals.delete.warning') });
+        content.createEl('p', { text: $t('modals.delete.instruction') });
+        content.createEl('p', { text: $t('modals.delete.caution') });
         
         const toolbar = contentEl.createDiv({ cls: 'confirm-pulbish-dialog-tool-bar' })
-        const confirmButton = toolbar.createEl('button', { text: 'Confirm' ,cls:"danger-button"});
-        const cancelButton = toolbar.createEl('button', { text: 'Cancel' });
+        const confirmButton = toolbar.createEl('button', { 
+            text: $t('modals.delete.confirm'),
+            cls: "danger-button"
+        });
+        const cancelButton = toolbar.createEl('button', { 
+            text: $t('modals.delete.cancel')
+        });
 
         confirmButton.addEventListener('click', () => {
             this.delete();

@@ -3,6 +3,8 @@ import { ItemView, WorkspaceLeaf, Menu, ButtonComponent } from "obsidian";
 import WeWritePlugin from "src/main";
 import { WeChatMPAccountSwitcher } from "src/settings/account-switcher";
 import { MaterialPanel } from "./material-panel";
+import { $t } from "src/lang/i18n";
+
 export const VIEW_TYPE_MP_MATERIAL = "mp-material";
 
 export const MediaTypeIcon = new Map([
@@ -13,13 +15,19 @@ export const MediaTypeIcon = new Map([
   ['draft', 'text-select']
 ]);
 
+export const MediaTypeNames = new Map([
+  ['image', $t('material_view.media_types.image')],
+  ['voice', $t('material_view.media_types.voice')],
+  ['video', $t('material_view.media_types.video')],
+  ['news', $t('material_view.media_types.news')],
+  ['draft', $t('material_view.media_types.draft')]
+]);
 
 export class MaterialView extends ItemView {
   private readonly plugin: WeWritePlugin;
   constructor(leaf: WorkspaceLeaf, plugin: WeWritePlugin) {
     super(leaf);
     this.plugin = plugin;
-
   }
 
   getViewType() {
@@ -27,7 +35,7 @@ export class MaterialView extends ItemView {
   }
 
   getDisplayText() {
-    return "WeChat MP Material";
+    return $t('material_view.title');
   }
 
   getIcon() {
@@ -37,8 +45,8 @@ export class MaterialView extends ItemView {
   async onOpen() {
     this.redraw();
     if (this.plugin.settings.selectedAccount !== undefined) {
-			this.plugin.assetsManager.loadMaterial(this.plugin.settings.selectedAccount)
-		}
+      this.plugin.assetsManager.loadMaterial(this.plugin.settings.selectedAccount)
+    }
   }
 
   async onClose() { }
@@ -46,7 +54,7 @@ export class MaterialView extends ItemView {
   public readonly redraw = (): void => {
     const rootEl = createDiv({ cls: 'nav-folder mod-root' });
     const accountEl = new WeChatMPAccountSwitcher(this.plugin, rootEl)
-    accountEl.setName('MP Account: ')
+    accountEl.setName($t('material_view.account_prefix'))
 
     // Create tab container
     const tabContainer = rootEl.createDiv({ cls: 'wewrite-material-view-tabs' });
@@ -58,20 +66,21 @@ export class MaterialView extends ItemView {
       .map(material => new MaterialPanel(
         this.plugin,
         tabContent,
-        material.name,
+        MediaTypeNames.get(material.type) ?? material.name,
         material.type
       ))
-
 
     // Create tabs
     panels.forEach(panel => {
       new ButtonComponent(tabHeader)
         .setIcon(MediaTypeIcon.get(panel.type) ?? 'package')
-        .setTooltip(panel.name).onClick(() => {
+        .setTooltip(panel.name)
+        .onClick(() => {
           panels.forEach(p => p.containerEl.toggle(p === panel));
-        }).setClass("wewrite-material-view-tab");
-
+        })
+        .setClass("wewrite-material-view-tab");
     });
+
     panels.forEach(panel => {
       panel.containerEl.hide();
     });
@@ -86,7 +95,7 @@ export class MaterialView extends ItemView {
 
     new ButtonComponent(tabHeader)
       .setIcon('school')
-      .setTooltip('WeChat MP Web')
+      .setTooltip($t('material_view.buttons.wechat_mp'))
       .setClass("wewrite-material-view-tab")
       .onClick(() => {
         window.open('https://mp.weixin.qq.com/', '_blank');

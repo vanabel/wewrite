@@ -3,7 +3,7 @@
 */
 
 import { EditorView } from "@codemirror/view";
-import { DropdownComponent, Editor, EventRef, getFrontMatterInfo, ItemView, MarkdownView, Notice, sanitizeHTMLToDom, Setting, TFile, WorkspaceLeaf } from 'obsidian';
+import { debounce, DropdownComponent, Editor, EventRef, ItemView, MarkdownView, Notice, sanitizeHTMLToDom, Setting, TFile, WorkspaceLeaf } from 'obsidian';
 import WeWritePlugin from 'src/main';
 import { PreviewRender } from 'src/render/marked-extensions/extension';
 import { uploadCanvas, uploadSVGs, uploadURLImage } from 'src/render/post-render';
@@ -15,7 +15,6 @@ import { MPArticleHeader } from './mp-article-header';
 import { ThemeManager } from './theme-manager';
 import { ThemeSelector } from './theme-selector';
 import { WebViewModal } from './webview';
-import { showProofSuggestions } from "./proof-suggestion";
 
 export const VIEW_TYPE_NP_PREVIEW = 'wechat-np-article-preview';
 export interface ElectronWindow extends Window {
@@ -32,6 +31,11 @@ export class PreviewPanel extends ItemView implements PreviewRender {
     private wechatClient: WechatClient;
     private plugin: WeWritePlugin
     private themeSelector: ThemeSelector;
+    private debouncedRender: Function;
+    private debounce: Function;
+    private debouncedUpdate = debounce(async () => {
+        await this.renderDraft();
+    }, 5000);
 
     private draftHeader: MPArticleHeader
     articleProperties: Map<string, string> = new Map();
@@ -56,7 +60,9 @@ export class PreviewPanel extends ItemView implements PreviewRender {
         this.plugin = plugin
         this.wechatClient = WechatClient.getInstance(this.plugin)
         this.themeSelector = new ThemeSelector(plugin)
-
+        this.debouncedRender = debounce(async () => {
+            await this.renderDraft();
+        }, 4000);
     }
 
     async onOpen() {
@@ -171,9 +177,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
                     button.setIcon('anchor')
                         .setTooltip('testing .')
                         .onClick(async () => {
-                            const markdownView = this.plugin.app.workspace.getActiveViewOfType(MarkdownView);
-                            const editor = markdownView?.editor;
-                            if (editor!== undefined ) showProofSuggestions(null, [], editor)
+                            console.log(`testing...`);
 
 
                         })
@@ -360,9 +364,9 @@ export class PreviewPanel extends ItemView implements PreviewRender {
         this.listeners.push(ec);
 
         const el = this.app.workspace.on('active-leaf-change', async () => {
-            if (await this.draftHeader.updateLocalDraft()) {
-                this.renderDraft()
-            }
+            
+            this.debouncedUpdate();
+           
         })
         this.listeners.push(el);
     }
@@ -371,7 +375,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
     }
 
     onEditorChange(editor: Editor, info: MarkdownView) {
-        this.renderDraft()
+        this.debouncedRender();
     }
     updateElementByID(id: string, html: string): void {
         const item = this.articleDiv.querySelector('#' + id) as HTMLElement;

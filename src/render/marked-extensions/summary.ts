@@ -5,9 +5,9 @@
  * 
  */
 
-import { MarkedExtension, Tokens } from "marked";
-import { WeWriteMarkedExtension } from "./extension";
+import { MarkedExtension } from "marked";
 import { sanitizeHTMLToDom } from "obsidian";
+import { WeWriteMarkedExtension } from "./extension";
 
 export class Summary extends WeWriteMarkedExtension {
 
@@ -40,7 +40,6 @@ export class Summary extends WeWriteMarkedExtension {
     }
     async postprocess(html: string) {
         const headingFolder = this.previewRender.articleProperties.get('folded-headings')
-        console.log(`folded-headings:`, headingFolder);
 
         if (headingFolder === undefined || !headingFolder) {
             return html

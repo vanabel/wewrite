@@ -403,7 +403,7 @@ material view
   width: 150px;
   height: 150px;
   border-radius: 50%;
-  background: conic-gradient(from 0deg, #4facfe, #00f2fe, #4facfe);
+  background: conic-gradient(from 0deg, #e3edf5, #00f2fe, #4facfe);
   animation: spin 1s linear infinite;
   display: flex;
   justify-content: center;
@@ -430,7 +430,6 @@ material view
   text-align: center;
   z-index: 1;
   padding: 3px;
-  /* 确保文字在环形渐变之上 */
 }
 
 .wewrite-spinner-hidden {
@@ -544,4 +543,83 @@ ol {
   min-height: 200px;
   max-width: 80vw;
   max-height: 80vh;
+}
+.proof-tooltip {
+    position: fixed;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    z-index: 1000;
+    max-width: 300px;
+    pointer-events: auto;
+}
+
+.proof-underline {
+    text-decoration: wavy underline #2196F3;
+    cursor: pointer;
+    position: relative;
+    z-index: 1;
+}
+
+.proof-tooltip .proof-type {
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.proof-tooltip .proof-description {
+    margin-bottom: 4px;
+}
+
+.proof-tooltip .proof-suggestion {
+    margin-bottom: 8px;
+    color: #2196F3;
+}
+
+.proof-tooltip .proof-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.proof-tooltip button {
+    padding: 4px 8px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.proof-tooltip .proof-accept {
+    background: #4CAF50;
+    color: white;
+}
+
+.proof-tooltip .proof-reject {
+    background: #f44336;
+    color: white;
+}
+
+.synonyms-modal {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.synonyms-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.synonym-item {
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.synonym-item:hover {
+    background-color: var(--background-modifier-hover);
+}
+
+.synonym-item.selected {
+    background-color: var(--background-modifier-active);
 }

@@ -31,5 +31,151 @@
   "click-to-delete-account": "click to delete account",
   "no-ip-address": "No IP Address",
   "copy-ip-to-clipboard-0": "Copy IP to clipboard",
-  "ip-copied-to-clipboard-0": "IP copied to clipboard"
+  "ip-copied-to-clipboard-0": "IP copied to clipboard",
+  "plugin": {
+    "name": "WeWrite",
+    "description": "WeWrite plugin for Obsidian"
+  },
+  "notice": {
+    "select_account": "Please select a WeChat account first",
+    "select_mp_account": "Please select a WeChat MP Account",
+    "check_credentials": "Please give check your [appid] and [secret]",
+    "ai_not_configured": "AI API is not configured",
+    "polish_success": "Selected content polished successfully!",
+    "proof_success": "Selected content proofed successfully!",
+    "publish_success": "Publish Successfully",
+    "publish_failed": "Publish Failed"
+  },
+  "menu": {
+    "ai": {
+      "title": "WeWrite AI",
+      "polish_selected": "Polish Selected Text",
+      "proof_selected": "Proof Selected Text",
+      "synonyms": "Synonyms for Selected Text",
+      "to_english": "to English",
+      "to_chinese": "to Chinese",
+      "to_mermaid": "to Mermaid",
+      "to_latex": "to LaTeX",
+      "polish_note": "Polish Whole Note",
+      "proof_note": "Proof Whole Note"
+    }
+  },
+  "spinner": {
+    "generating_summary": "Generating summary...",
+    "translating_english": "tranlating to English...",
+    "translating_chinese": "tranlating to Chinese...",
+    "getting_synonyms": "get synonyms ...",
+    "getting_mermaid": "get mermaid ...",
+    "getting_latex": "get LaTex ...",
+    "proofing": "proofing content...",
+    "polishing": "polishing content..."
+  },
+  "modal": {
+    "ok": "OK",
+    "cancel": "Cancel",
+    "confirm": "Confirm"
+  },
+  "settings": {
+    "title": {
+      "wechat_mp": "WeChat MP platform settings",
+      "css_styles": "Custom CSS styles Setting",
+      "chat_llm": "chat LLM settings, for text handling",
+      "draw_llm": "Draw picture LLM settings, for text handling"
+    },
+    "ip": {
+      "public_address": "Public IP Address",
+      "whitelist_tip": "You should add this IP to IP whitelist of WeChat MP platform",
+      "copy_tooltip": "Copy IP to clipboard",
+      "copied": "IP copied to clipboard",
+      "no_address": "No IP address"
+    },
+    "center_token": {
+      "title": "Use Center Token Refresh?",
+      "desc": "If you don't have a static pubic IP, then use center token refresh."
+    },
+    "account": {
+      "info": "Account Info",
+      "select": "Select WeWrite Account",
+      "select_desc": "Choose the account you want to edit",
+      "new": "New Account",
+      "name": "Account Name",
+      "name_desc": "Account name for your WeChat official account",
+      "appid_desc": "AppId for your WeChat official account",
+      "secret_desc": "App Secret for your WeChat official account",
+      "test_connection": "Test Connection",
+      "test_desc": "To check whether the App ID and App Secret are correct",
+      "test_tooltip": "Click to test connection",
+      "connected": "Successfully connected to WeChat official account",
+      "delete": "Delete Account",
+      "delete_desc": "Be careful! This will delete all your settings for this account",
+      "delete_tooltip": "Click to delete account",
+      "import_export": "Import/Export WeWrite Account",
+      "import_export_desc": "Import or export your account info",
+      "import_tooltip": "Import account info",
+      "export_tooltip": "Export account info",
+      "previewer": "Previewer WX Name",
+      "previewer_desc": "Send this user for preview of the article"
+    },
+    "css": {
+      "folder_location": "CSS Styles Folder Location",
+      "folder_desc": "Files in this folder will be available as CSS styles",
+      "folder_placeholder": "Example: folder1/folder2",
+      "download_tooltip": "Download CSS style themes from server"
+    },
+    "llm": {
+      "base_url": "base_url",
+      "base_url_desc": "chat LLM API base url",
+      "api_key": "api_key",
+      "api_key_desc": "chat LLM API key",
+      "model": "model",
+      "model_desc": "chat LLM model",
+      "draw_task_url": "task_url",
+      "draw_task_desc": "draw LLM API query task progress url"
+    },
+    "import": {
+      "invalid_json": "Invalid JSON file",
+      "invalid_file": "Not valid settings file!",
+      "success": "Settings imported successfully!",
+      "failed": "Failed to import settings: ",
+      "error": "Import error: "
+    }
+  },
+  "material_view": {
+    "title": "WeChat MP Material",
+    "account_prefix": "MP Account: ",
+    "media_types": {
+      "image": "Images",
+      "voice": "Audio",
+      "video": "Video",
+      "news": "Articles",
+      "draft": "Drafts"
+    },
+    "buttons": {
+      "wechat_mp": "WeChat MP Web",
+      "refresh": "Refresh Materials"
+    }
+  },
+  "modals": {
+    "delete": {
+      "title": "Confirm Delete",
+      "message": "Are you sure to delete this item?",
+      "warning": "Delete is permanent. This action cannot be undone.",
+      "instruction": "If you want to delete this item, please click the button below.\nIf you want to cancel, please click the button below.",
+      "caution": "Be careful!",
+      "confirm": "Confirm",
+      "cancel": "Cancel"
+    },
+    "publish": {
+      "title": "Confirm Publish",
+      "message": "Are you sure to publish this article?",
+      "warning": "Publishing draft outside of WeChat MP platform is not as efficient as publishing inside WeChat MP platform. Some features may not work as expected, for example the tag, pushing to public account, etc.",
+      "caution": "Be careful!",
+      "confirm": "Confirm",
+      "cancel": "Cancel"
+    },
+    "notice": {
+      "publish_success": "Publish Successfully",
+      "publish_failed": "Publish Failed"
+    }
+  }
 }

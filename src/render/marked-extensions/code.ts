@@ -180,10 +180,10 @@ export class CodeRenderer extends WeWriteMarkedExtension {
 				name: 'code',
 				level: 'block',
 				renderer: (token: Tokens.Generic) => {
-					const type = CodeRenderer.getMathType(token.lang ?? '');
-					if (type) {
-						return new MathRenderer(this.plugin, this.previewRender, this.marked).renderer(token, false, type); //MathRendererQueue.getInstance().render(token, false, type, this.callback);
-					}
+					// const type = CodeRenderer.getMathType(token.lang ?? '');
+					// if (type) {
+					// 	return new MathRenderer(this.plugin, this.previewRender, this.marked).renderer(token, false, type); //MathRendererQueue.getInstance().render(token, false, type, this.callback);
+					// }
 					if (token.lang && token.lang.trim().toLocaleLowerCase() == 'mermaid') {
 						// return this.renderMermaid(token);
 						return token.html
