@@ -3,6 +3,7 @@
 */
 
 import { EditorView } from "@codemirror/view";
+// import i18next from 'i18next';
 import { debounce, DropdownComponent, Editor, EventRef, ItemView, MarkdownView, Notice, sanitizeHTMLToDom, Setting, TFile, WorkspaceLeaf } from 'obsidian';
 import WeWritePlugin from 'src/main';
 import { PreviewRender } from 'src/render/marked-extensions/extension';
@@ -15,6 +16,7 @@ import { MPArticleHeader } from './mp-article-header';
 import { ThemeManager } from './theme-manager';
 import { ThemeSelector } from './theme-selector';
 import { WebViewModal } from './webview';
+import { $t } from 'src/lang/i18n';
 
 export const VIEW_TYPE_NP_PREVIEW = 'wechat-np-article-preview';
 export interface ElectronWindow extends Window {
@@ -50,7 +52,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
         return VIEW_TYPE_NP_PREVIEW;
     }
     getDisplayText(): string {
-        return "WeChat Article Preview";
+        return $t('previewer.viewTitle');
     }
     getIcon() {
         return 'pen-tool';
@@ -91,6 +93,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
         this.themeSelector.startWatchThemes()
         this.startWatchActiveNoteChange()
         this.plugin.messageService.registerListener('custom-theme-changed', async (theme: string) => {
+			this.getArticleProperties()
             this.articleProperties.set('custom_theme', theme)
             this.setArticleProperties()
         })
@@ -167,7 +170,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
 
         const mainDiv = container.createDiv({ cls: 'wewrite-previewer-container' });
         this.articleTitle = new Setting(mainDiv)
-            .setName('Article Title')
+            .setName($t('previewer.articleTitle'))
             .setHeading()
             .addDropdown((dropdown: DropdownComponent) => {
                 this.themeSelector.dropdown(dropdown);
@@ -175,7 +178,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
             .addExtraButton(
                 (button) => {
                     button.setIcon('anchor')
-                        .setTooltip('testing .')
+                        .setTooltip($t('previewer.testButtonTooltip'))
                         .onClick(async () => {
                             console.log(`testing...`);
 
@@ -187,7 +190,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
                 (button) => {
                     button.setIcon('refresh-cw')
                         // button.setIcon('wewrite-translate')
-                        .setTooltip('Rerender the article content.')
+                        .setTooltip($t('previewer.rerenderButtonTooltip'))
                         .onClick(async () => {
                             this.renderDraft()
                         })
@@ -197,12 +200,12 @@ export class PreviewPanel extends ItemView implements PreviewRender {
                 (button) => {
                     // button.setIcon('wewrite-send')
                     button.setIcon('send-horizontal')
-                        .setTooltip('send to draft box.')
+                        .setTooltip($t('previewer.sendToDraftTooltip'))
                         .onClick(async () => {
                             if (await this.checkCoverImage()) {
                                 this.sendArticleToDraftBox()
                             } else {
-                                new Notice('Cover image is required.')
+                                new Notice($t('previewer.coverImageRequired'))
                             }
                         })
                 }
@@ -211,13 +214,13 @@ export class PreviewPanel extends ItemView implements PreviewRender {
                 (button) => {
                     // button.setIcon('wewrite-send')
                     button.setIcon('clipboard-copy')
-                        .setTooltip('copy draft to clipboard')
+                        .setTooltip($t('previewer.copyDraftTooltip'))
                         .onClick(async () => {
                             const data = this.getArticleContent()
                             await navigator.clipboard.write([new ClipboardItem({
                                 'text/html': new Blob([data], { type: 'text/html' })
                             })])
-                            new Notice('draft copied to clipboard')
+                            new Notice($t('previewer.draftCopied'))
                         })
                 }
             )
@@ -389,7 +392,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
             }
         }
         else {
-            item.innerText = '渲染失败';
+            item.innerText = $t('previewer.renderFailed');
         }
     }
     addElementByID(id: string, node: HTMLElement | string): void {

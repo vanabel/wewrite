@@ -33,7 +33,8 @@ export type MSG_TYPE  =
   'set-image-as-cover' |
   'delete-media-item' |
   'delete-draft-item' |
-  'publish-draft-item'
+  'publish-draft-item' |
+  'custom-theme-folder-changed'
 
   
 

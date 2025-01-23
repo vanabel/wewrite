@@ -16,6 +16,7 @@ interface Point {
     y: number;
 }
 
+import { $t } from 'src/lang/i18n';
 
 export class MPArticleHeader {
     updateDraftDraftId(media_id: any) {
@@ -106,12 +107,12 @@ export class MPArticleHeader {
     private BuildUI(containerEl: HTMLElement) {
         const container = containerEl.createEl('div', { cls: 'wewrite-article-header' })
         const details = container.createEl('details')
-        details.createEl('summary', { text: 'WeChat MP Article Properties' })
+        details.createEl('summary', { text: $t('mpArticleHeader.title') })
 
-        new Setting(details).setName('Title')
+        new Setting(details).setName($t('mpArticleHeader.titleLabel'))
             .addText(text => {
                 this._title = text;
-                text.setPlaceholder('Title')
+                text.setPlaceholder($t('mpArticleHeader.titleLabel'))
                     .onChange(async (value) => {
                         if (this.activeLocalDraft !== undefined) {
                             this.activeLocalDraft.title = value
@@ -120,10 +121,10 @@ export class MPArticleHeader {
                         }
                     })
             })
-        new Setting(details).setName('Author')
+        new Setting(details).setName($t('mpArticleHeader.authorLabel'))
             .addText(text => {
                 this._author = text;
-                text.setPlaceholder('Author')
+                text.setPlaceholder($t('mpArticleHeader.authorLabel'))
                     .onChange(async (value) => {
                         if (this.activeLocalDraft !== undefined) {
                             this.activeLocalDraft.author = value
@@ -132,16 +133,16 @@ export class MPArticleHeader {
                     })
             })
 
-        new Setting(details).setName('Digest')
+        new Setting(details).setName($t('mpArticleHeader.digestLabel'))
             .addExtraButton(button => {
                 button.setIcon("sparkles")
-                    .setTooltip("Generate Digest by AI")
+                    .setTooltip($t('mpArticleHeader.generateDigestTooltip'))
                     .onClick(async () => {
                         this.generateDigest();
                     })
             })
 
-        this._digest = details.createEl('textarea', { cls: 'digest', attr: { rows: 3, placeholder: '图文消息的摘要，仅有单图文消息才有摘要，多图文此处为空。如果本字段为没有填写，则默认抓取正文前54个字。' } })
+        this._digest = details.createEl('textarea', { cls: 'digest', attr: { rows: 3, placeholder: $t('mpArticleHeader.digestPlaceholder') } })
         this._digest.onkeyup = (event: KeyboardEvent) => {
             const target = event.target as HTMLTextAreaElement;
             if (this.activeLocalDraft !== undefined) {
@@ -153,8 +154,8 @@ export class MPArticleHeader {
         this.coverFrame = this.createCoverFrame(details)
 
         new Setting(details)
-            .setName('Need Open Comments')
-            .setDesc('是否打开评论，0不打开(默认)，1打开')
+            .setName($t('mpArticleHeader.needOpenCommentsLabel'))
+            .setDesc($t('mpArticleHeader.needOpenCommentsDesc'))
             .addToggle(toggle => {
                 this._needOpenComment = toggle;
                 toggle.setValue(false);
@@ -166,8 +167,8 @@ export class MPArticleHeader {
                 })
             })
         new Setting(details)
-            .setName('Only Fans Can Comment')
-            .setDesc('是否粉丝才可评论，0所有人可评论(默认)，1粉丝才可评论')
+            .setName($t('mpArticleHeader.onlyFansCanCommentLabel'))
+            .setDesc($t('mpArticleHeader.onlyFansCanCommentDesc'))
             .addToggle(toggle => {
                 this._onlyFansCanComment = toggle;
                 toggle.setValue(false);
@@ -205,8 +206,8 @@ export class MPArticleHeader {
     }
     private createCoverFrame(details: HTMLElement) {
         new Setting(details)
-            .setName('Cover')
-            .setDesc('Cover image for this article. Its mandatory if you want to publish this article to WeChat Official Account. You may drag and drop an image from vault, or from uploaded images in your WeChat Official Account.')
+            .setName($t('mpArticleHeader.coverLabel'))
+            .setDesc($t('mpArticleHeader.coverDesc'))
             // .addExtraButton(
             //     button => button
             //         .setIcon('panel-left-close')
@@ -227,7 +228,7 @@ export class MPArticleHeader {
             .addExtraButton(
                 button => button
                     .setIcon('sparkles')
-                    .setTooltip('Generate Cover Image by AI ')
+                    .setTooltip($t('mpArticleHeader.generateCoverTooltip'))
                     .onClick(async () => {
                         this.imageGenerateModal?.open()
                     })

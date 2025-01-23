@@ -4,6 +4,7 @@
 import { DropdownComponent, TFile } from "obsidian";
 import WeWritePlugin from "src/main";
 import { ThemeManager } from "./theme-manager";
+import { $t } from "src/lang/i18n";
 
 export class ThemeSelector {
     private plugin: WeWritePlugin;
@@ -13,6 +14,9 @@ export class ThemeSelector {
     constructor(plugin: WeWritePlugin) {
         this.plugin = plugin;
         this._themeManager = ThemeManager.getInstance(plugin)
+		this.plugin.messageService.registerListener('custom-theme-folder-changed', async () => {
+			this.updateThemeOptions()
+		})
     }
     public async dropdown(themDropdown: DropdownComponent) {
         this._themeDropdown = themDropdown;
@@ -29,7 +33,7 @@ export class ThemeSelector {
 
         //clear all options
         this._themeDropdown.selectEl.length = 0
-        this._themeDropdown.addOption('', 'Default')
+        this._themeDropdown.addOption('', $t('custom-theme.default'))
         themes.forEach(theme => {
             this._themeDropdown.addOption(theme.path, theme.name)
         })

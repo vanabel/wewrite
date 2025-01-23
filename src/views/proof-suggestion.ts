@@ -3,6 +3,7 @@ import { EditorState, StateField, Transaction } from "@codemirror/state";
 import { Editor } from 'obsidian';
 import { RangeSetBuilder } from "@codemirror/state";
 import { StateEffect } from "@codemirror/state";
+import { $t } from "src/lang/i18n";
 
 interface ProofItem {
     type: string;
@@ -129,10 +130,10 @@ export class ProofService {
         const content = `
             <div class="proof-type">${item.type}</div>
             <div class="proof-description">${item.description}</div>
-            <div class="proof-suggestion">建议: ${item.suggestion}</div>
+            <div class="proof-suggestion">${$t('proofSuggestion.suggestionPrefix')} ${item.suggestion}</div>
             <div class="proof-actions">
-                <button class="proof-accept">✓ 接受</button>
-                <button class="proof-reject">✗ 拒绝</button>
+                <button class="proof-accept">${$t('proofSuggestion.acceptButton')}</button>
+                <button class="proof-reject">${$t('proofSuggestion.rejectButton')}</button>
             </div>
         `;
         this.tooltip.innerHTML = content;

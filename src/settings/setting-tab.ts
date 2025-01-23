@@ -111,14 +111,14 @@ export class WeWriteSettingTab extends PluginSettingTab {
 			await writable.write(blob);
 			await writable.close();
 			
-			new Notice('Settings exported successfully!');
+			new Notice($t('settings-exported-successfully'));
 			return true;
 		} catch (error) {
 			if (error.name === 'AbortError') {
 				// User canceled the save dialog
 				return false;
 			}
-			new Notice('Settings export failed: ' + error);
+			new Notice($t('settings-export-failed') + error);
 			console.error(error);
 			return false;
 		}
@@ -278,7 +278,8 @@ export class WeWriteSettingTab extends PluginSettingTab {
 					.setValue(this.plugin.settings.css_styles_folder)
 					.onChange((new_folder) => {
 						this.plugin.settings.css_styles_folder = new_folder;
-						this.plugin.saveSettings();
+						// this.plugin.saveSettings();
+						this.plugin.saveThemeFolderDebounce();
 					});
 			}).addExtraButton(
 				(button) => {

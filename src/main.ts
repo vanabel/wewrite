@@ -32,12 +32,29 @@ const DEFAULT_SETTINGS: WeWriteSetting = {
 }
 
 export default class WeWritePlugin extends Plugin {
+	async saveThemeFolder() {
+		const config = {
+			custom_theme_folder : this.settings.css_styles_folder
+		}
+		await this.saveData(config)
+		this.messageService.sendMessage('custom-theme-folder-changed', null)
+	}
+	async loadThemeFolder(){
+		const config = await this.loadData()
+		if (config && config.custom_theme_folder) {
+			this.settings.css_styles_folder = config.custom_theme_folder
+		}
+	}
 	private spinnerEl: HTMLElement;
 	spinnerText: HTMLDivElement;
 	saveSettings: Function =debounce(async () => {
 		delete this.settings._id
 		delete this.settings._rev
 		await saveWeWriteSetting(this.settings);
+		await this.saveThemeFolder()
+	}, 3000);
+	saveThemeFolderDebounce: Function =debounce(async () => {
+		await this.saveThemeFolder()
 	}, 3000);
 	
 	proofService: ProofService;
@@ -335,7 +352,9 @@ export default class WeWritePlugin extends Plugin {
 	}
 
 	async loadSettings() {
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, await getWeWriteSetting());
+		this.settings = await Object.assign({}, DEFAULT_SETTINGS, await getWeWriteSetting());
+		await this.loadThemeFolder()
+
 		// this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
 	}
 	async updateIpAddress(): Promise<string> {

@@ -3,6 +3,7 @@
  */
 import { Menu, Notice, setIcon } from "obsidian";
 import { AssetsManager } from "src/assets/assets-manager";
+import { $t } from "src/lang/i18n";
 import WeWritePlugin from "src/main";
 import { MaterialMeidaItem, MediaType } from "src/wechat-api/wechat-types";
 
@@ -122,10 +123,10 @@ export class MaterialPanel {
 
       //set as cover image
       menu.addItem((item) => {
-        item.setTitle('set as cover of current draft')
+        item.setTitle($t('set-as-cover-of-current-draft'))
           .setIcon('image-plus')
           .onClick(() => {
-            new Notice(`set cover 图片: ${mediaItem.name}`);
+            new Notice($t('set-cover-tu-pian-mediaitemname', [mediaItem.name]));
             this.plugin.messageService.sendMessage("set-image-as-cover", mediaItem)
           });
       });
@@ -158,14 +159,14 @@ export class MaterialPanel {
             this.plugin.messageService.sendMessage("delete-draft-item", mediaItem)
           });
       });
-      // menu.addItem((item) => {
-      //   item.setTitle('publish draft')
-      //     .setIcon('send')
-      //     .onClick(async () => {
-      //       // console.log('to delete draft:', item)
-      //       this.plugin.messageService.sendMessage("publish-draft-item", mediaItem)
-      //     });
-      // });
+      menu.addItem((item) => {
+        item.setTitle('free publish')
+          .setIcon('send')
+          .onClick(async () => {
+            // console.log('to delete draft:', item)
+            this.plugin.messageService.sendMessage("publish-draft-item", mediaItem)
+          });
+      });
       menu.addItem((item) => {
         item.setTitle('preview draft')
           .setIcon('eye')

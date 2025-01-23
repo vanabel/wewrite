@@ -1,8 +1,8 @@
 // Credits go to Liam's Periodic Notes Plugin: https://github.com/liamcain/obsidian-periodic-notes
 
-import { App, Notice, TAbstractFile, TFile, TFolder } from "obsidian";
-import { TextInputSuggest } from "../utils/suggest"
+import { TFolder } from "obsidian";
 import WeWritePlugin from "src/main";
+import { TextInputSuggest } from "../utils/suggest";
 
 import { ThemeManager, WeChatTheme } from "./theme-manager";
 

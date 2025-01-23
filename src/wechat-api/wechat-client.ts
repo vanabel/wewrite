@@ -8,6 +8,7 @@ import { LocalDraftItem } from "src/assets/draft-manager";
 import WeWritePlugin from "src/main";
 
 import { getErrorMessage } from "./error-code";
+import { $t } from "src/lang/i18n";
 
 export class WechatClient {
   private static instance: WechatClient;
@@ -29,7 +30,7 @@ export class WechatClient {
     const url = 'https://wewrite.3thinking.cn/mp_token';
     const account = this.plugin.getSelectedMPAccount()
     if (account === undefined) {
-      new Notice('Please select a WeChat MP Account');
+      new Notice($t('notice.select_mp_account'));
       return null;
     }
     const { appId, appSecret, doc_id } = account;
@@ -45,7 +46,7 @@ export class WechatClient {
         doc_id: doc_id,
       }
     }
-    console.log(`request token params:`, params);
+    // console.log(`request token params:`, params);
     
     try {
       const result = await requestUrl({
@@ -55,7 +56,7 @@ export class WechatClient {
         throw: false,
         body: JSON.stringify(params)
       });
-      console.log('获取token返回结果:', result);
+    //   console.log('获取token返回结果:', result);
       if (result.status !== 200) {
         new Notice(result.text, 0);
         return null;
@@ -64,7 +65,7 @@ export class WechatClient {
       if (code !== 0) {
         if (code == -2){
           // new Notice(message, 0);
-          console.log('app已过期，请重新获取');
+        //   console.log('app已过期，请重新获取');
           account.doc_id = undefined;
           this.plugin.saveSettings();
           return await this.requestToken();
@@ -73,13 +74,15 @@ export class WechatClient {
           //white list
           if (data.errcode === 40164){
             const {ipv4} = extractIPs(data.errmsg)
-            new Notice(`请先将IP地址 [${ipv4[0]}] 加入当前公众号的白名单中`, 0);
+			if (ipv4[0]!== undefined && ipv4[0]){
+				new Notice($t('wechatClient.addIpAddressTowhitelist', [ipv4[0]]), 0);
+			}
           }
         }
         return null;
       }
       if (data.last_token === undefined) {
-        new Notice('获取token失败', 0);
+        new Notice($t('wechatClient.tokenFailed'), 0);
         return null;
       }
       account.access_token = data.last_token;
@@ -91,7 +94,7 @@ export class WechatClient {
 
 
     } catch (error) {
-      console.error('获取token失败:', error);
+      console.error($t('wechatClient.tokenFailed'), error);
       return null;
     }
   }
@@ -177,7 +180,7 @@ export class WechatClient {
       new Notice(getErrorMessage(errcode), 0)
       return false;
     } else {
-      new Notice(`草稿发送成功${media_id}`);
+      new Notice($t('wechatClient.draftSent', [media_id]));
     }
 
     return media_id;
@@ -490,7 +493,7 @@ export class WechatClient {
     };
     const resp = await requestUrl(req);
 
-    console.log(`mass send resp`, resp);
+    // console.log(`mass send resp`, resp);
 
     const { errcode, errmsg } = resp.json;
     if (errcode !== undefined && errcode !== 0) {
@@ -532,7 +535,7 @@ export class WechatClient {
     };
     const resp = await requestUrl(req);
 
-    console.log(`preview resp`, resp);
+    // console.log(`preview resp`, resp);
 
     const { errcode, errmsg } = resp.json;
     if (errcode !== undefined && errcode !== 0) {

@@ -3,6 +3,7 @@ import matter from "gray-matter";
 import { Notice, TFile, TFolder, requestUrl } from "obsidian";
 import postcss from "postcss";
 import { combinedCss } from "src/assets/css/template-css";
+import { $t } from "src/lang/i18n";
 import WeWritePlugin from "src/main";
 
 export type WeChatTheme = {
@@ -62,7 +63,7 @@ export class ThemeManager {
                     continue;
                 }
             }
-            new Notice(`Total ${themes.length} Themes downloaded successfully.`);
+            new Notice($t('custom-theme.total-themes-downloaded', [themes.length]));
         } catch (error) {
             console.error("Error downloading themes:", error);
             // throw error;
