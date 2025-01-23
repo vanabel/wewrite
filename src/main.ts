@@ -82,7 +82,7 @@ export default class WeWritePlugin extends Plugin {
 					if (editor.somethingSelected()) {
 						subMenu.addItem((subItem: MenuItem) => {
 							subItem
-								.setTitle($t('main.poolish'))
+								.setTitle($t('main.polish'))
 								.setIcon('sun')
 								.onClick(async () => {
 									const content = editor.getSelection();
