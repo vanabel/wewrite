@@ -129,7 +129,7 @@
 			"digest-text": "输入摘要文本",
 			"open-comments": "开启评论",
 			"comments-description": "评论默认关闭。",
-			"fans-comment-description": "默认仅粉丝可评论。",
+			"fans-comment-description": "默认所有人都可以评论。",
 			"only-fans-can-comment": "仅粉丝可评论",
 			"no-active-note": "无活动笔记",
 			"cover-image": "封面图片",

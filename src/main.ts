@@ -2,24 +2,22 @@
  * wewrite plugin for Obsidian
  * author: Learner Chen.
  */
-import { App, debounce, EventRef, MenuItem, Modal, Notice, Plugin, TFile, WorkspaceLeaf } from 'obsidian';
+import { debounce, EventRef, MenuItem, Notice, Plugin, TFile, WorkspaceLeaf } from 'obsidian';
 import { getPublicIpAddress } from "src/utils/ip-address";
 import { AssetsManager } from './assets/assets-manager';
 import { ResourceManager } from './assets/resource-manager';
 import { WeWriteSettingTab } from './settings/setting-tab';
 import { getWeWriteSetting, saveWeWriteSetting, WeWriteSetting } from './settings/wewrite-setting';
 import { MessageService } from './utils/message-service';
-// import { loadWeWriteIcons } from './assets/icons';
-import { AiClient } from './utils/ai-client';
-import { getMetadata } from './utils/urls';
-import { MaterialView, VIEW_TYPE_MP_MATERIAL } from './views/material-view';
-import { PreviewPanel, VIEW_TYPE_NP_PREVIEW } from './views/previewer';
-import { ProofService, showProofSuggestions } from './modals/proof-suggestion';
-import { WechatClient } from './wechat-api/wechat-client';
+import { $t } from './lang/i18n';
 import { ConfirmModal } from './modals/confirm-modal';
 import { PromptModal } from './modals/prompt-modal';
+import { ProofService, showProofSuggestions } from './modals/proof-suggestion';
 import { SynonymsModal } from './modals/synonyms-modal';
-import { $t } from './lang/i18n';
+import { AiClient } from './utils/ai-client';
+import { MaterialView, VIEW_TYPE_MP_MATERIAL } from './views/material-view';
+import { PreviewPanel, VIEW_TYPE_NP_PREVIEW } from './views/previewer';
+import { WechatClient } from './wechat-api/wechat-client';
 
 
 const DEFAULT_SETTINGS: WeWriteSetting = {
@@ -34,6 +32,15 @@ const DEFAULT_SETTINGS: WeWriteSetting = {
 }
 
 export default class WeWritePlugin extends Plugin {
+	settings: WeWriteSetting;
+	wechatClient: WechatClient;
+	assetsManager: AssetsManager;
+	aiClient: AiClient | null = null;
+	private editorChangeListener: EventRef | null = null;
+	matierialView: MaterialView;
+	messageService: MessageService;
+	resourceManager = ResourceManager.getInstance(this);
+
 	async saveThemeFolder() {
 		const config = {
 			custom_theme_folder : this.settings.css_styles_folder
@@ -228,15 +235,7 @@ export default class WeWritePlugin extends Plugin {
 		this.settings.selectedAccount = value;
 		this.assetsManager.loadMaterial(value);
 	}
-	settings: WeWriteSetting;
-	wechatClient: WechatClient;
-	assetsManager: AssetsManager;
-	aiClient: AiClient | null = null;
-	private editorChangeListener: EventRef | null = null;
-	matierialView: MaterialView;
-	messageService: MessageService;
-	resourceManager = ResourceManager.getInstance(this);
-
+	
 	createSpinner() {
 		this.spinnerEl = this.addStatusBarItem();
 		this.spinnerEl.addClass('wewrite-spin-container');
@@ -246,35 +245,6 @@ export default class WeWritePlugin extends Plugin {
 		this.spinnerText = this.spinnerEl.createDiv({
 			cls: 'wewrite-spinner-text',
 		});
-	}
-	async onload() {
-		this.messageService = new MessageService();
-		// loadWeWriteIcons()
-
-		await this.loadSettings();
-		this.wechatClient = WechatClient.getInstance(this);
-		this.assetsManager = await AssetsManager.getInstance(this.app, this);
-		this.aiClient = AiClient.getInstance(this);
-
-		this.registerView(
-			VIEW_TYPE_NP_PREVIEW,
-			(leaf) => new PreviewPanel(leaf, this)
-		);
-
-		this.registerView(
-			VIEW_TYPE_MP_MATERIAL,
-			(leaf) => (this.matierialView = new MaterialView(leaf, this)),
-		);
-
-		this.addRibbonIcon('pen-tool', 'WeWrite', () => {
-			this.activateView();
-		});
-
-		this.addSettingTab(new WeWriteSettingTab(this.app, this));
-
-		this.addEditorMenu();
-		this.createSpinner()
-
 	}
 	showSpinner(text: string = "") {
 		this.spinnerEl.style.display = 'flex';
@@ -287,16 +257,7 @@ export default class WeWritePlugin extends Plugin {
 	hideSpinner() {
 		this.spinnerEl.style.display = 'none';
 	}
-	onunload() {
-		if (this.editorChangeListener) {
-			this.app.workspace.offref(this.editorChangeListener);
-		}
-		this.spinnerEl.remove();
-		if (this.proofService) {
-			this.proofService.destroy();
-		}
-	}
-
+	
 	async loadSettings() {
 		this.settings = await Object.assign({}, DEFAULT_SETTINGS, await getWeWriteSetting());
 		await this.loadThemeFolder()
@@ -614,6 +575,44 @@ export default class WeWritePlugin extends Plugin {
 			modal.open()
 		});
 	}
+	async onload() {
+		this.messageService = new MessageService();
+		await this.loadSettings();
+		this.wechatClient = WechatClient.getInstance(this);
+		this.assetsManager = await AssetsManager.getInstance(this.app, this);
+		this.aiClient = AiClient.getInstance(this);
+
+		this.registerView(
+			VIEW_TYPE_NP_PREVIEW,
+			(leaf) => new PreviewPanel(leaf, this)
+		);
+
+		this.registerView(
+			VIEW_TYPE_MP_MATERIAL,
+			(leaf) => (this.matierialView = new MaterialView(leaf, this)),
+		);
+
+		this.addRibbonIcon('pen-tool', 'WeWrite', () => {
+			this.activateView();
+		});
+
+		this.addSettingTab(new WeWriteSettingTab(this.app, this));
+
+		this.addEditorMenu();
+		this.createSpinner()
+
+	}
+
+	onunload() {
+		if (this.editorChangeListener) {
+			this.app.workspace.offref(this.editorChangeListener);
+		}
+		this.spinnerEl.remove();
+		if (this.proofService) {
+			this.proofService.destroy();
+		}
+	}
+
 }
 
 

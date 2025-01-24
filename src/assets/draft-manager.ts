@@ -58,8 +58,11 @@ export class LocalDraftManager {
         const accountName = this.plugin.settings.selectedAccount;
         if (accountName !== undefined && accountName) {
             const f = this.plugin.app.workspace.getActiveFile()
+			console.log(`getDraftOfActiveNote accountName=>${accountName}=>`, f);
+			
             if (f) {
                 draft = await this.getDraft(accountName, f.path)
+				
                 if (draft === undefined) {
                     draft = {
                         accountName: accountName,
@@ -70,6 +73,10 @@ export class LocalDraftManager {
                     await this.setDraft(draft)
 
                 }
+				if (draft.title.trim() === ''){
+					draft.title = f.basename
+					await this.setDraft(draft)
+				}
             }
         }
         return draft

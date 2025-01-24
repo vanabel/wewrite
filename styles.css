@@ -334,8 +334,13 @@ material view
   padding: 1em;
   line-height: 1.8em;
   flex-grow: 1;
-  text-align: justify;
+  text-align: center;
 }
+.confirm-pulbish-dialog-content .warning {
+	color: red;
+	font-weight: bold;
+}
+
 
 .confirm-pulbish-dialog-tool-bar {
   display: flex;
@@ -623,3 +628,5 @@ ol {
 .synonym-item.selected {
     background-color: var(--background-modifier-active);
 }
+
+

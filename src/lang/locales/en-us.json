@@ -129,7 +129,7 @@
       "digest-text": "Enter digest text",
       "open-comments": "Open Comments",
       "comments-description": "Comments are closed by default.",
-      "fans-comment-description": "Only fans can comment by default.",
+      "fans-comment-description": "Everyone can comment by default.",
       "only-fans-can-comment": "Only Fans Can Comment",
       "no-active-note": "No Active Note",
       "cover-image": "Cover Image",

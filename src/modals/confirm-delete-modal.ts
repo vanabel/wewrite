@@ -30,9 +30,8 @@ export class ConfirmDeleteModal extends Modal {
         contentEl.createEl('h3', { text:$t('modals.delete.title')});
         const content = contentEl.createDiv({ cls: 'description' })
         content.createEl('p', { text: $t('modals.delete.message') });
-        content.createEl('p', { text: $t('modals.delete.warning')});
+        content.createEl('p', { text: $t('modals.caution') +' '+ $t('modals.delete.warning'), cls: 'warning' });
         content.createEl('p', { text: $t('modals.delete.action')});
-        content.createEl('p', { text: $t('modals.caution') });
         
         const toolbar = contentEl.createDiv({ cls: 'confirm-pulbish-dialog-tool-bar' })
         const confirmButton = toolbar.createEl('button', { 

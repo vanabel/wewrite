@@ -1,61 +1,59 @@
-# WeWrite Obsidian Plugin
+# WeWrite - Obsidian WeChat Official Account Writing Plugin
 
-This is plugin for Obsidian (https://obsidian.md).
+[中文版](README_CN.md)
 
+WeWrite is an Obsidian plugin designed for WeChat Official Account writing, integrating AI-assisted writing and WeChat Official Account management features.
 
-The plugin is to render obsidian note as WeChat MP article and publish it. Thus make obsidian a good workspace for writing and publishing articles. 
+## Features
 
-It works on Desktop only
+### AI Writing Assistance
+- **Content Polishing**: Optimize article content using AI
+- **Bilingual Translation**: Support bidirectional translation between Chinese and English
+- **Mermaid Generation**: Automatically generate Mermaid diagrams
+- **LaTeX Generation**: Automatically generate LaTeX formulas
+- **Content Proofreading**: Provide grammar and vocabulary suggestions
+- **Synonym Suggestions**: Provide synonym replacement suggestions for selected words
 
-There is no addintional server registeration required, except your own WeChat MP account.
+### WeChat Official Account Integration
+- **Material Management**: Manage WeChat Official Account materials including images, audio, and videos
+- **Draft Management**: Create, preview, and publish WeChat Official Account articles
+- **Account Management**: Support multiple WeChat Official Account switching
+- **IP Whitelist**: Automatically obtain and manage IP whitelist
 
+### Other Features
+- **Theme Management**: Support custom theme styles
+- **Real-time Preview**: Provide real-time article preview
+- **Shortcut Support**: Rich shortcut operations
 
-## Supported contents types
+## Installation Guide
 
-support rendering following contents in a note:
+1. Open Settings in Obsidian
+2. Go to Community Plugins page
+3. Search for "WeWrite"
+4. Click Install and Enable the plugin
 
-- Headings and text
+## Usage Instructions
 
-- callout and admonitions
+### Basic Usage
+1. Create or open a Markdown file in Obsidian
+2. Access WeWrite features via right-click menu or command palette
+3. Select desired features (e.g., content polishing, translation, etc.)
 
-- excalidraw
+### WeChat Official Account Integration
+1. Add WeChat Official Account in settings
+2. Use material management to upload and manage materials
+3. Use draft management to create and publish articles
 
-- mermaid
+## Contributing
 
-- LaTeX
+We welcome contributions of all kinds! Please follow these steps:
 
-- charts
-
-- icons
-
-- code highlighting
-
-## Other features
-
-- Supporting multiple WeChat MP accounts 
-
-- Preview note before publishing
-
-- Automatic upload images
-
-- Move links to footnotes
-
-- Customized CSS template can be edit as note directly.
-
-## Credits
-
-The plugin was inspired by 2 other pluings:
-
-- ai-chen2050's [obsidian-wechat-public-platform](https://github.com/ai-chen2050/obsidian-wechat-public-platform)
-
-- sunbooshi's [note-to-mp](https://github.com/sunbooshi/note-to-mp)
-
-My respect to them.
-
-
-During the development, I also referred to the many of the plugins in the Obsidian community.
-
-
+1. Fork the project
+2. Create a new branch (`git checkout -b feature/YourFeatureName`)
+3. Commit your changes (`git commit -m 'Add some feature'`)
+4. Push the branch (`git push origin feature/YourFeatureName`)
+5. Create a Pull Request
 
 ## License
-This plugin is licensed under the [MIT License](https://opensource.org/licenses/MIT).
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
