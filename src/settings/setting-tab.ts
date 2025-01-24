@@ -6,7 +6,8 @@ import { App, DropdownComponent, Notice, PluginSettingTab, Setting } from "obsid
 import WeWritePlugin from "src/main";
 import { getPublicIpAddress } from "src/utils/ip-address";
 import { ThemeManager } from "src/views/theme-manager";
-import { FolderSuggest } from "./folder-suggester";
+// import { FolderSuggest } from "./folder-suggester";
+import { FolderSuggest } from "src/utils/folder-suggest";
 import { WECHAT_MP_WEB_PAGE } from "./mp-web-images";
 import { WeWriteAccountInfo, WeWriteSetting } from "./wewrite-setting";
 import { $t } from "src/lang/i18n";
@@ -396,8 +397,8 @@ export class WeWriteSettingTab extends PluginSettingTab {
 	}
 	createWeChatSettings(container: HTMLElement) {
 		const mpFrame = container.createDiv({ cls: 'wewrite-setting-frame' })
-		mpFrame.createEl('h4', { text: $t('settings.wechat-account-settings'), cls: 'wechat-setting-title' })
-		mpFrame.createEl('hr')
+		// mpFrame.createEl('h4', { text: $t('settings.wechat-account-settings'), cls: 'wechat-setting-title' })
+		// mpFrame.createEl('hr')
 
 		const ip = new Setting(mpFrame)
 			.setName($t('settings.public-ip-address') + ': ' + this.plugin.settings.ipAddress)

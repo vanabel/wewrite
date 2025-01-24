@@ -3,34 +3,45 @@
  * author: Learner Chen.
  * latest update: 2025-01-24
  */
-import { debounce, EventRef, MenuItem, Notice, Plugin, TFile, WorkspaceLeaf } from 'obsidian';
+import {
+	debounce,
+	EventRef,
+	MenuItem,
+	Notice,
+	Plugin,
+	TFile,
+	WorkspaceLeaf,
+} from "obsidian";
 import { getPublicIpAddress } from "src/utils/ip-address";
-import { AssetsManager } from './assets/assets-manager';
-import { ResourceManager } from './assets/resource-manager';
-import { WeWriteSettingTab } from './settings/setting-tab';
-import { getWeWriteSetting, saveWeWriteSetting, WeWriteSetting } from './settings/wewrite-setting';
-import { MessageService } from './utils/message-service';
-import { $t } from './lang/i18n';
-import { ConfirmModal } from './modals/confirm-modal';
-import { PromptModal } from './modals/prompt-modal';
-import { ProofService, showProofSuggestions } from './modals/proof-suggestion';
-import { SynonymsModal } from './modals/synonyms-modal';
-import { AiClient } from './utils/ai-client';
-import { MaterialView, VIEW_TYPE_MP_MATERIAL } from './views/material-view';
-import { PreviewPanel, VIEW_TYPE_NP_PREVIEW } from './views/previewer';
-import { WechatClient } from './wechat-api/wechat-client';
-
+import { AssetsManager } from "./assets/assets-manager";
+import { ResourceManager } from "./assets/resource-manager";
+import { WeWriteSettingTab } from "./settings/setting-tab";
+import {
+	getWeWriteSetting,
+	saveWeWriteSetting,
+	WeWriteSetting,
+} from "./settings/wewrite-setting";
+import { MessageService } from "./utils/message-service";
+import { $t } from "./lang/i18n";
+import { ConfirmModal } from "./modals/confirm-modal";
+import { PromptModal } from "./modals/prompt-modal";
+import { ProofService, showProofSuggestions } from "./modals/proof-suggestion";
+import { SynonymsModal } from "./modals/synonyms-modal";
+import { AiClient } from "./utils/ai-client";
+import { MaterialView, VIEW_TYPE_MP_MATERIAL } from "./views/material-view";
+import { PreviewPanel, VIEW_TYPE_NP_PREVIEW } from "./views/previewer";
+import { WechatClient } from "./wechat-api/wechat-client";
 
 const DEFAULT_SETTINGS: WeWriteSetting = {
 	mpAccounts: [],
-	ipAddress: '',
-	css_styles_folder: 'wewrite-css-styles',
+	ipAddress: "",
+	css_styles_folder: "wewrite-css-styles",
 	codeLineNumber: true,
-	accountDataPath: 'wewrite-accounts',
-	chatLLMBaseUrl: '',
-	chatLLMApiKey: '',
+	accountDataPath: "wewrite-accounts",
+	chatLLMBaseUrl: "",
+	chatLLMApiKey: "",
 	useCenterToken: false,
-}
+};
 
 export default class WeWritePlugin extends Plugin {
 	settings: WeWriteSetting;
@@ -44,60 +55,63 @@ export default class WeWritePlugin extends Plugin {
 
 	async saveThemeFolder() {
 		const config = {
-			custom_theme_folder : this.settings.css_styles_folder
-		}
-		await this.saveData(config)
-		this.messageService.sendMessage('custom-theme-folder-changed', null)
+			custom_theme_folder: this.settings.css_styles_folder,
+		};
+		await this.saveData(config);
+		this.messageService.sendMessage("custom-theme-folder-changed", null);
 	}
-	async loadThemeFolder(){
-		const config = await this.loadData()
+	async loadThemeFolder() {
+		const config = await this.loadData();
 		if (config && config.custom_theme_folder) {
-			this.settings.css_styles_folder = config.custom_theme_folder
+			this.settings.css_styles_folder = config.custom_theme_folder;
 		}
 	}
 	private spinnerEl: HTMLElement;
 	spinnerText: HTMLDivElement;
-	saveSettings: Function =debounce(async () => {
-		delete this.settings._id
-		delete this.settings._rev
+	saveSettings: Function = debounce(async () => {
+		delete this.settings._id;
+		delete this.settings._rev;
 		await saveWeWriteSetting(this.settings);
-		await this.saveThemeFolder()
+		await this.saveThemeFolder();
 	}, 3000);
-	saveThemeFolderDebounce: Function =debounce(async () => {
-		await this.saveThemeFolder()
+	saveThemeFolderDebounce: Function = debounce(async () => {
+		await this.saveThemeFolder();
 	}, 3000);
-	
+
 	proofService: ProofService;
 
 	async addEditorMenu() {
 		this.registerEvent(
-			this.app.workspace.on('editor-menu', (menu, editor) => {
-				const file: TFile
+			this.app.workspace.on("editor-menu", (menu, editor) => {
+				const file: TFile =
 					// @ts-ignore: Obsidian ts defined incomplete.
-					= editor.editorComponent.file as (TFile | undefined) ?? this.app.workspace.getActiveFile()!;
+					(editor.editorComponent.file as TFile | undefined) ??
+					this.app.workspace.getActiveFile()!;
 				if (!file) {
 					return;
 				}
 
 				menu.addItem((item) => {
-					item
-						.setTitle($t('main.wewrite-ai'))
-						.setIcon('sparkles')
+					item.setTitle($t("main.wewrite-ai")).setIcon("sparkles");
 
-					const subMenu = item.setSubmenu()
-
+					const subMenu = item.setSubmenu();
 
 					if (editor.somethingSelected()) {
 						subMenu.addItem((subItem: MenuItem) => {
 							subItem
-								.setTitle($t('main.polish'))
-								.setIcon('sun')
+								.setTitle($t("main.polish"))
+								.setIcon("sun")
 								.onClick(async () => {
 									const content = editor.getSelection();
-									const polished = await this.polishContent(content);
+									const polished = await this.polishContent(
+										content
+									);
 
 									if (polished) {
-										editor.replaceSelection(polished, content)
+										editor.replaceSelection(
+											polished,
+											content
+										);
 									}
 								});
 						});
@@ -116,118 +130,152 @@ export default class WeWritePlugin extends Plugin {
 						// });
 						subMenu.addItem((subItem: MenuItem) => {
 							subItem
-								.setTitle('synonyms')
-								.setIcon('book-a')
+								.setTitle("synonyms")
+								.setIcon("book-a")
 								.onClick(async () => {
 									const content = editor.getSelection();
-									const synonym = await this.getSynonyms(content);
+									const synonym = await this.getSynonyms(
+										content
+									);
 									this.hideSpinner();
 
 									if (synonym) {
-										editor.replaceSelection(synonym, content)
+										editor.replaceSelection(
+											synonym,
+											content
+										);
 									}
 								});
 						});
 						subMenu.addItem((subItem: MenuItem) => {
 							subItem
-								.setTitle($t('main.to-english'))
-								.setIcon('languages')
+								.setTitle($t("main.to-english"))
+								.setIcon("languages")
 								.onClick(async () => {
 									const content = editor.getSelection();
-									const translated = await this.translateToEnglish(content);
+									const translated =
+										await this.translateToEnglish(content);
 
 									if (translated) {
-										editor.replaceSelection(translated, content)
+										editor.replaceSelection(
+											translated,
+											content
+										);
 									}
 								});
 						});
 						subMenu.addItem((subItem: MenuItem) => {
 							subItem
-								.setTitle($t('main.to-chinese'))
-								.setIcon('languages')
+								.setTitle($t("main.to-chinese"))
+								.setIcon("languages")
 								.onClick(async () => {
 									const content = editor.getSelection();
-									const translated = await this.translateToChinese(content);
+									const translated =
+										await this.translateToChinese(content);
 
 									if (translated) {
-										editor.replaceSelection(translated, content)
+										editor.replaceSelection(
+											translated,
+											content
+										);
 									}
 								});
 						});
 						subMenu.addItem((subItem: MenuItem) => {
 							subItem
-								.setTitle($t('main.generate-mermaid'))
-								.setIcon('git-compare-arrows')
+								.setTitle($t("main.generate-mermaid"))
+								.setIcon("git-compare-arrows")
 								.onClick(async () => {
 									const content = editor.getSelection();
-									const mermaid = await this.generateMermaid(content);
+									const mermaid = await this.generateMermaid(
+										content
+									);
 
 									if (mermaid) {
-										editor.replaceSelection(mermaid, content)
+										editor.replaceSelection(
+											mermaid,
+											content
+										);
 									}
 								});
 						});
 						subMenu.addItem((subItem: MenuItem) => {
 							subItem
-								.setTitle($t('main.generate-latex'))
-								.setIcon('square-radical')
+								.setTitle($t("main.generate-latex"))
+								.setIcon("square-radical")
 								.onClick(async () => {
 									const content = editor.getSelection();
-									let latex = await this.generateLaTex(content);
+									let latex = await this.generateLaTex(
+										content
+									);
 
 									if (latex) {
-										latex = latex.replace(/\\begin{document}/g, '').replace(/\\end{document}/g, '');
-										latex = latex.replace(/\\\\/g, '\\');
-										editor.replaceSelection(latex, content)
+										latex = latex
+											.replace(/\\begin{document}/g, "")
+											.replace(/\\end{document}/g, "");
+										latex = latex.replace(/\\\\/g, "\\");
+										editor.replaceSelection(latex, content);
 									}
 								});
 						});
 					} else {
-						subMenu.addItem(subItem => {
+						subMenu.addItem((subItem) => {
 							subItem
-								.setTitle($t('main.polish'))
-								.setIcon('user-pen')
+								.setTitle($t("main.polish"))
+								.setIcon("user-pen")
 								.onClick(async () => {
-									const content = await this.app.vault.read(file);
-									const polished = await this.polishContent(content);
+									const content = await this.app.vault.read(
+										file
+									);
+									const polished = await this.polishContent(
+										content
+									);
 									if (polished) {
-										await this.app.vault.modify(file, polished);
+										await this.app.vault.modify(
+											file,
+											polished
+										);
 									}
 								});
 						});
-						subMenu.addItem(subItem => {
+						subMenu.addItem((subItem) => {
 							subItem
-								.setTitle($t('main.proof'))
-								.setIcon('user-round-pen')
+								.setTitle($t("main.proof"))
+								.setIcon("user-round-pen")
 								.onClick(async () => {
-									const content = await this.app.vault.read(file);
-									const proofed = await this.proofContent(content);
+									const content = await this.app.vault.read(
+										file
+									);
+									const proofed = await this.proofContent(
+										content
+									);
 
 									if (proofed) {
-										this.proofService = showProofSuggestions(editor, proofed)
+										this.proofService =
+											showProofSuggestions(
+												editor,
+												proofed
+											);
 									}
 								});
 						});
 					}
 				});
-
-
-			}),
+			})
 		);
 	}
 	showLeftView() {
-		this.activateMaterialView()
+		this.activateMaterialView();
 	}
 	pullAllWeChatMPMaterial() {
 		if (this.settings.selectedAccount === undefined) {
-			new Notice($t('main.no-wechat-mp-account-selected'));
+			new Notice($t("main.no-wechat-mp-account-selected"));
 			return;
 		}
-		this.assetsManager.pullAllMaterial(this.settings.selectedAccount)
+		this.assetsManager.pullAllMaterial(this.settings.selectedAccount);
 	}
 	assetsUpdated() {
-		this.messageService.sendMessage('material-updated', null)
-
+		this.messageService.sendMessage("material-updated", null);
 	}
 	onWeChantMPAccountChange(value: string) {
 		if (value === undefined || !value) {
@@ -236,46 +284,49 @@ export default class WeWritePlugin extends Plugin {
 		this.settings.selectedAccount = value;
 		this.assetsManager.loadMaterial(value);
 	}
-	
+
 	createSpinner() {
 		this.spinnerEl = this.addStatusBarItem();
-		this.spinnerEl.addClass('wewrite-spin-container');
+		this.spinnerEl.addClass("wewrite-spin-container");
 		this.spinnerEl.createDiv({
-			cls: 'wewrite-spinner',
+			cls: "wewrite-spinner",
 		});
 		this.spinnerText = this.spinnerEl.createDiv({
-			cls: 'wewrite-spinner-text',
+			cls: "wewrite-spinner-text",
 		});
 	}
 	showSpinner(text: string = "") {
-		this.spinnerEl.style.display = 'flex';
+		this.spinnerEl.style.display = "flex";
 		this.spinnerText.setText(text);
 	}
-	isSpinning(){
-		return this.spinnerEl.style.display !== 'none';
+	isSpinning() {
+		return this.spinnerEl.style.display !== "none";
 	}
 
 	hideSpinner() {
-		this.spinnerEl.style.display = 'none';
+		this.spinnerEl.style.display = "none";
 	}
-	
+
 	async loadSettings() {
-		this.settings = await Object.assign({}, DEFAULT_SETTINGS, await getWeWriteSetting());
-		await this.loadThemeFolder()
+		this.settings = await Object.assign(
+			{},
+			DEFAULT_SETTINGS,
+			await getWeWriteSetting()
+		);
+		await this.loadThemeFolder();
 	}
 	async updateIpAddress(): Promise<string> {
-		return new Promise(resolve => {
+		return new Promise((resolve) => {
 			getPublicIpAddress().then(async (ip) => {
 				if (ip !== undefined && ip && ip !== this.settings.ipAddress) {
 					this.settings.ipAddress = ip;
 					await this.saveSettings();
 					resolve(ip);
 				}
-			})
+			});
 		});
 	}
 
-	
 	async activateView() {
 		const { workspace } = this.app;
 
@@ -286,12 +337,13 @@ export default class WeWritePlugin extends Plugin {
 			leaf = leaves[0];
 		} else {
 			leaf = workspace.getRightLeaf(false);
-			await leaf?.setViewState({ type: VIEW_TYPE_NP_PREVIEW, active: false });
+			await leaf?.setViewState({
+				type: VIEW_TYPE_NP_PREVIEW,
+				active: false,
+			});
 		}
 
 		if (leaf) workspace.revealLeaf(leaf);
-
-
 	}
 	async activateMaterialView() {
 		const { workspace } = this.app;
@@ -303,84 +355,123 @@ export default class WeWritePlugin extends Plugin {
 			leaf = leaves[0];
 		} else {
 			leaf = workspace.getLeftLeaf(false);
-			await leaf?.setViewState({ type: VIEW_TYPE_MP_MATERIAL, active: false });
+			await leaf?.setViewState({
+				type: VIEW_TYPE_MP_MATERIAL,
+				active: false,
+			});
 		}
 
 		if (leaf) workspace.revealLeaf(leaf);
-
-
 	}
 	async getAccessToken(accountName: string) {
 		const account = this.getMPAccountByName(accountName);
 		if (account === undefined) {
-			new Notice($t('main.no-wechat-mp-account-selected'));
+			new Notice($t("main.no-wechat-mp-account-selected"));
 			return false;
 		}
-		return account.access_token
+		return account.access_token;
 	}
 	async TestAccessToken(accountName: string) {
 		if (this.settings.useCenterToken) {
-			return this.wechatClient.requestToken()
+			return this.wechatClient.requestToken();
 		} else {
-
 			const account = this.getMPAccountByName(accountName);
 			if (account === undefined) {
-				new Notice($t('main.no-wechat-mp-account-selected'));
+				new Notice($t("main.no-wechat-mp-account-selected"));
 				return false;
 			}
-			const token = await this.wechatClient.getAccessToken(account.appId, account.appSecret)
+			const token = await this.wechatClient.getAccessToken(
+				account.appId,
+				account.appSecret
+			);
 			if (token) {
-				this.setAccessToken(accountName, token.access_token, token.expires_in)
-				return token.access_token
+				this.setAccessToken(
+					accountName,
+					token.access_token,
+					token.expires_in
+				);
+				return token.access_token;
 			}
 		}
-		return false
+		return false;
 	}
 	async refreshAccessToken(accountName: string | undefined) {
 		if (this.settings.useCenterToken) {
-			return this.wechatClient.requestToken()
+			return this.wechatClient.requestToken();
 		}
 		if (accountName === undefined) {
-			return false
+			return false;
 		}
 		const account = this.getMPAccountByName(accountName);
 		if (account === undefined) {
-			new Notice($t('main.no-wechat-mp-account-selected'));
+			new Notice($t("main.no-wechat-mp-account-selected"));
 			return false;
 		}
 		const { appId, appSecret } = account;
-		if (appId === undefined || appSecret === undefined || !appId || !appSecret) {
-			new Notice($t('main.please-check-you-appid-and-appsecret'));
+		if (
+			appId === undefined ||
+			appSecret === undefined ||
+			!appId ||
+			!appSecret
+		) {
+			new Notice($t("main.please-check-you-appid-and-appsecret"));
 			return false;
 		}
-		const { access_token: accessToken, expires_in: expiresIn, lastRefreshTime } = account
-		if (accessToken === undefined || accessToken === '') {
-			const token = await this.wechatClient.getAccessToken(appId, appSecret)
+		const {
+			access_token: accessToken,
+			expires_in: expiresIn,
+			lastRefreshTime,
+		} = account;
+		if (accessToken === undefined || accessToken === "") {
+			const token = await this.wechatClient.getAccessToken(
+				appId,
+				appSecret
+			);
 			if (token) {
-				this.setAccessToken(accountName, token.access_token, token.expires_in)
-				return token.access_token
+				this.setAccessToken(
+					accountName,
+					token.access_token,
+					token.expires_in
+				);
+				return token.access_token;
 			}
-		} else if ((lastRefreshTime! + expiresIn! * 1000) < new Date().getTime()) {
-			const token = await this.wechatClient.getAccessToken(appId, appSecret)
+		} else if (
+			lastRefreshTime! + expiresIn! * 1000 <
+			new Date().getTime()
+		) {
+			const token = await this.wechatClient.getAccessToken(
+				appId,
+				appSecret
+			);
 			if (token) {
-				this.setAccessToken(accountName, token.access_token, token.expires_in)
-				return token.access_token
+				this.setAccessToken(
+					accountName,
+					token.access_token,
+					token.expires_in
+				);
+				return token.access_token;
 			}
 		} else {
-			return accessToken
+			return accessToken;
 		}
-		return false 
+		return false;
 	}
 	getMPAccountByName(accountName: string | undefined) {
-		return this.settings.mpAccounts.find(account => account.accountName === accountName);
+		return this.settings.mpAccounts.find(
+			(account) => account.accountName === accountName
+		);
 	}
 	getSelectedMPAccount() {
 		return this.getMPAccountByName(this.settings.selectedAccount);
 	}
-	setAccessToken(accountName: string, accessToken: string, expires_in: number) {
+	setAccessToken(
+		accountName: string,
+		accessToken: string,
+		expires_in: number
+	) {
 		const account = this.getMPAccountByName(accountName);
 		if (account === undefined) {
-			return
+			return;
 		}
 		account.access_token = accessToken;
 		account.lastRefreshTime = new Date().getTime();
@@ -388,21 +479,21 @@ export default class WeWritePlugin extends Plugin {
 		this.saveSettings();
 	}
 	findImageMediaId(url: string) {
-		return this.assetsManager.findMediaIdOfUrl('image', url)
+		return this.assetsManager.findMediaIdOfUrl("image", url);
 	}
 
 	async generateSummary(content: string): Promise<string | null> {
 		if (!this.aiClient) {
-			new Notice($t('main.chat-llm-has-not-been-configured'));
+			new Notice($t("main.chat-llm-has-not-been-configured"));
 			return null;
 		}
 		try {
-			this.showSpinner('summarizing...');
+			this.showSpinner("summarizing...");
 			const result = await this.aiClient.generateSummary(content);
 			this.hideSpinner();
 			return result;
 		} catch (error) {
-			console.error('Error showing spinner:', error);
+			console.error("Error showing spinner:", error);
 		} finally {
 			this.hideSpinner();
 		}
@@ -410,16 +501,20 @@ export default class WeWritePlugin extends Plugin {
 	}
 	async translateToEnglish(content: string): Promise<string | null> {
 		if (!this.aiClient) {
-			new Notice($t('main.chat-llm-has-not-been-configured'));
+			new Notice($t("main.chat-llm-has-not-been-configured"));
 			return null;
 		}
 		try {
-			this.showSpinner($t('main.translating-to-english'));
-			const result = await this.aiClient.translateText(content, 'Chinese', 'English');
+			this.showSpinner($t("main.translating-to-english"));
+			const result = await this.aiClient.translateText(
+				content,
+				"Chinese",
+				"English"
+			);
 			this.hideSpinner();
 			return result;
 		} catch (error) {
-			console.error('Error showing spinner:', error);
+			console.error("Error showing spinner:", error);
 		} finally {
 			this.hideSpinner();
 		}
@@ -427,16 +522,16 @@ export default class WeWritePlugin extends Plugin {
 	}
 	async translateToChinese(content: string): Promise<string | null> {
 		if (!this.aiClient) {
-			new Notice($t('main.chat-llm-has-not-been-configured'));
+			new Notice($t("main.chat-llm-has-not-been-configured"));
 			return null;
 		}
 		try {
-			this.showSpinner($t('main.translating-to-chinese'));
+			this.showSpinner($t("main.translating-to-chinese"));
 			const result = await this.aiClient.translateText(content);
 			this.hideSpinner();
 			return result;
 		} catch (error) {
-			console.error('Error showing spinner:', error);
+			console.error("Error showing spinner:", error);
 		} finally {
 			this.hideSpinner();
 		}
@@ -444,22 +539,24 @@ export default class WeWritePlugin extends Plugin {
 	}
 	async getSynonyms(content: string): Promise<string | null> {
 		if (!this.aiClient) {
-			new Notice($t('main.chat-llm-has-not-been-configured'));
+			new Notice($t("main.chat-llm-has-not-been-configured"));
 			return null;
 		}
 		try {
-			this.showSpinner($t('main.get-synonyms'));
+			this.showSpinner($t("main.get-synonyms"));
 			const result = await this.aiClient.synonym(content);
 			if (result) {
-				const synonyms = result.map(s => s.replace(/^\d+\.\s*/, '')); 
-				const selectedWord = await new Promise<string | null>((resolve) => {
-					new SynonymsModal(this.app, synonyms, resolve).open();
-				});
+				const synonyms = result.map((s) => s.replace(/^\d+\.\s*/, ""));
+				const selectedWord = await new Promise<string | null>(
+					(resolve) => {
+						new SynonymsModal(this.app, synonyms, resolve).open();
+					}
+				);
 				return selectedWord ? selectedWord : null;
 			}
 			return null;
 		} catch (error) {
-			console.error('Error showing spinner:', error);
+			console.error("Error showing spinner:", error);
 		} finally {
 			this.hideSpinner();
 		}
@@ -467,14 +564,16 @@ export default class WeWritePlugin extends Plugin {
 	}
 	async generateMermaid(content: string): Promise<string | null> {
 		if (!this.aiClient) {
-			new Notice($t('main.chat-llm-has-not-been-configured'));
+			new Notice($t("main.chat-llm-has-not-been-configured"));
 			return null;
 		}
 		try {
-			this.showSpinner($t('main.generating-mermaid'));
+			this.showSpinner($t("main.generating-mermaid"));
 			const result = await this.aiClient.generateMermaid(content);
 			if (result) {
-				const mermaidMatch = result.match(/```mermaid\n([\s\S]*?)\n```/);
+				const mermaidMatch = result.match(
+					/```mermaid\n([\s\S]*?)\n```/
+				);
 				if (mermaidMatch && mermaidMatch[1]) {
 					return `\n\`\`\`mermaid\n${mermaidMatch[1].trim()}\n\`\`\`\n`;
 				}
@@ -482,7 +581,7 @@ export default class WeWritePlugin extends Plugin {
 			}
 			return null;
 		} catch (error) {
-			console.error('Error generating mermaid:', error);
+			console.error("Error generating mermaid:", error);
 		} finally {
 			this.hideSpinner();
 		}
@@ -490,20 +589,23 @@ export default class WeWritePlugin extends Plugin {
 	}
 	async generateLaTex(content: string): Promise<string | null> {
 		if (!this.aiClient) {
-			new Notice($t('main.chat-llm-has-not-been-configured'));
+			new Notice($t("main.chat-llm-has-not-been-configured"));
 			return null;
 		}
 		try {
-			this.showSpinner($t('main.generating-latex'));
+			this.showSpinner($t("main.generating-latex"));
 			const result = await this.aiClient.generateLaTeX(content);
 			if (result) {
 				const latexMatch = result.match(/\$\$([\s\S]*?)\$\$/);
 				if (latexMatch && latexMatch[0]) {
 					return latexMatch[0].trim();
 				}
-				const codeBlockMatch = result.match(/```latex\n([\s\S]*?)\n```/);
+				const codeBlockMatch = result.match(
+					/```latex\n([\s\S]*?)\n```/
+				);
 				if (codeBlockMatch && codeBlockMatch[1]) {
-					const innerLatexMatch = codeBlockMatch[1].match(/\$\$([\s\S]*?)\$\$/);
+					const innerLatexMatch =
+						codeBlockMatch[1].match(/\$\$([\s\S]*?)\$\$/);
 					if (innerLatexMatch && innerLatexMatch[0]) {
 						return innerLatexMatch[0].trim();
 					}
@@ -513,7 +615,7 @@ export default class WeWritePlugin extends Plugin {
 			}
 			return null;
 		} catch (error) {
-			console.error('Error generating LaTeX:', error);
+			console.error("Error generating LaTeX:", error);
 		} finally {
 			this.hideSpinner();
 		}
@@ -522,17 +624,17 @@ export default class WeWritePlugin extends Plugin {
 
 	async proofContent(content: string): Promise<any[] | null> {
 		if (!this.aiClient) {
-			new Notice($t('main.chat-llm-has-not-been-configured'));
+			new Notice($t("main.chat-llm-has-not-been-configured"));
 			return null;
 		}
 		try {
-			this.showSpinner('Proofing...');
+			this.showSpinner("Proofing...");
 			const result = await this.aiClient.proofContent(content);
 			if (result) {
 				return result.corrections;
 			}
 		} catch (error) {
-			console.error('Error showing spinner:', error);
+			console.error("Error showing spinner:", error);
 		} finally {
 			this.hideSpinner();
 		}
@@ -541,7 +643,7 @@ export default class WeWritePlugin extends Plugin {
 
 	async polishContent(content: string): Promise<string | null> {
 		if (!this.aiClient) {
-			new Notice($t('main.chat-llm-has-not-been-configured'));
+			new Notice($t("main.chat-llm-has-not-been-configured"));
 			return null;
 		}
 		const result = await this.aiClient.polishContent(content);
@@ -552,7 +654,7 @@ export default class WeWritePlugin extends Plugin {
 	}
 	async generateCoverImage(content: string): Promise<string | null> {
 		if (!this.aiClient) {
-			new Notice($t('main.chat-llm-has-not-been-configured'));
+			new Notice($t("main.chat-llm-has-not-been-configured"));
 			return null;
 		}
 		const result = await this.aiClient.generateCoverImage(content);
@@ -562,17 +664,25 @@ export default class WeWritePlugin extends Plugin {
 		return null;
 	}
 
-	async prompt(message: string, defaultValue?: string): Promise<string | null> {
+	async prompt(
+		message: string,
+		defaultValue?: string
+	): Promise<string | null> {
 		return new Promise((resolve) => {
-			const modal = new PromptModal(this.app, message, defaultValue, resolve);
-			modal.open()
+			const modal = new PromptModal(
+				this.app,
+				message,
+				defaultValue,
+				resolve
+			);
+			modal.open();
 		});
 	}
 
 	async confirm(message: string): Promise<boolean> {
 		return new Promise((resolve) => {
 			const modal = new ConfirmModal(this.app, message, resolve);
-			modal.open()
+			modal.open();
 		});
 	}
 	async onload() {
@@ -589,18 +699,28 @@ export default class WeWritePlugin extends Plugin {
 
 		this.registerView(
 			VIEW_TYPE_MP_MATERIAL,
-			(leaf) => (this.matierialView = new MaterialView(leaf, this)),
+			(leaf) => (this.matierialView = new MaterialView(leaf, this))
 		);
 
-		this.addRibbonIcon('pen-tool', 'WeWrite', () => {
+		this.addCommand({
+			id: "wewrite-open-previewer",
+			name: $t('main.wewrite-open-previewer'),
+			callback: () => this.activateView(),
+		});
+		this.addCommand({
+			id: "wewrite-open-material-view",
+			name: $t('main.wewrite-open-material-view'),
+			callback: () => this.activateMaterialView(),
+		});
+
+		this.addRibbonIcon("pen-tool", "WeWrite", () => {
 			this.activateView();
 		});
 
 		this.addSettingTab(new WeWriteSettingTab(this.app, this));
 
 		this.addEditorMenu();
-		this.createSpinner()
-
+		this.createSpinner();
 	}
 
 	onunload() {
@@ -612,11 +732,4 @@ export default class WeWritePlugin extends Plugin {
 			this.proofService.destroy();
 		}
 	}
-
 }
-
-
-
-
-
-

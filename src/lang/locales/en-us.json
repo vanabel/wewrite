@@ -201,6 +201,8 @@
     "translating-to-chinese": "Translating to Chinese...",
     "get-synonyms": "Get Synonyms...",
     "generating-mermaid": "Generating Mermaid...",
-    "generating-latex": "Generating LaTeX..."
+    "generating-latex": "Generating LaTeX...",
+    "wewrite-open-previewer": "Article Render Previewer",
+    "wewrite-open-material-view": "Material Management"
   }
 }
