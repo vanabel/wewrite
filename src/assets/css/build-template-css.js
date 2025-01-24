@@ -45,5 +45,4 @@ fs.readdir(cssDir, (err, files) => {
     fs.writeFileSync(targetTSFile, cssString, 'utf8');
     fs.writeFileSync(defaultThemeFile, mdString, 'utf8');
 
-    console.log(`CSS 文件内容已合并并保存到${targetTSFile} `);
 });

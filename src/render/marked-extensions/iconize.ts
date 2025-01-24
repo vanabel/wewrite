@@ -2,7 +2,7 @@
  * marked extension for iconize 
  */
 import { MarkedExtension, Tokens } from "marked";
-import { Plugin } from 'obsidian';
+import { Plugin, sanitizeHTMLToDom } from 'obsidian';
 import { WeWriteMarkedExtension } from "./extension";
 
 const iconsRegex = /:(.*?):/;
@@ -33,7 +33,9 @@ export class IconizeRender extends WeWriteMarkedExtension {
             });
             rootSpan.style.display = 'inline-flex';
             rootSpan.style.transform = 'translateY(13%)';
-            rootSpan.innerHTML = iconObject.svgElement; 
+            // rootSpan.innerHTML = iconObject.svgElement; 
+
+			rootSpan.appendChild(sanitizeHTMLToDom( iconObject.svgElement))
             return rootSpan.outerHTML;
         }
         return `<span>${iconName}$t('render.render-failed')</span>`

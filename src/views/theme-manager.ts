@@ -66,7 +66,6 @@ export class ThemeManager {
             new Notice($t('views.theme-manager.total-themes-length-themes-downloaded', [themes.length]))
         } catch (error) {
             console.error("Error downloading themes:", error);
-            // throw error;
             new Notice($t('views.theme-manager.error-downloading-themes'));
         }
     }
@@ -96,21 +95,16 @@ export class ThemeManager {
     public cleanCSS(css: string): string {
 
         css = css.replace(/```[cC][Ss]{2}\s*|\s*```/g, '').trim()
-        // 删除
-        // 删除多行注释
         const reg_multiple_line_comments = /\/\*[\s\S]*?\*\//g;
-        // 删除单行注释
         const reg_single_line_comments = /\/\/.*/g;
-        // 删除多余的空格和换行符
         const reg_whitespace = /\s+/g;
-        // 删除非法不可见字符
         const reg_invisible_chars = /[\u200B\u00AD\uFEFF\u00A0]/g;
 
         let cleanedCSS = css
-            .replace(reg_multiple_line_comments, '') // 删除多行注释
-            .replace(reg_single_line_comments, '') // 删除单行注释
-            .replace(reg_whitespace, ' ') // 删除多余的空格和换行符
-            .replace(reg_invisible_chars, ''); // 删除非法不可见字符
+            .replace(reg_multiple_line_comments, '') 
+            .replace(reg_single_line_comments, '') 
+            .replace(reg_whitespace, ' ') 
+            .replace(reg_invisible_chars, ''); 
 
         return cleanedCSS.trim();
     }
@@ -123,16 +117,13 @@ export class ThemeManager {
 
         const reg_css_block = /```[cC][Ss]{2}\s*([\s\S]*?)\s*```/g;
 
-        // 使用正则表达式提取 CSS 代码块
-        // const cssBlocks = fileContent.match(reg);
-        const cssBlocks: string[] = []; //fileContent.match(reg);
+        const cssBlocks: string[] = []; 
         let match
         while ((match = reg_css_block.exec(fileContent)) !== null) {
-            // 提取匹配的内容并清理
             cssBlocks.push(this.cleanCSS(match[1].trim()));
         }
 
-        return cssBlocks.join('\n'); // 将所有 CSS 代码块合并成一个字符串
+        return cssBlocks.join('\n'); 
 
     }
     public async getCSS() {
@@ -210,10 +201,6 @@ export class ThemeManager {
                 rule.walkDecls(decl => {
                     // always replace the property
                     root.style.setProperty(decl.prop, decl.value);
-                    // const setted = cssText.includes(decl.prop);
-                    // if (!setted || decl.important) {
-                    //     root.style.setProperty(decl.prop, decl.value);
-                    // }
                 })
             }
         });
@@ -247,10 +234,6 @@ export class ThemeManager {
         return mergedRoot
     }
     removeClassName(root: HTMLElement) {
-        // if (root instanceof SVGElement){
-        //     return
-        // }
-        // root.className = '';
         root.removeAttribute('class')
         let element = root.firstElementChild;
         while (element) {

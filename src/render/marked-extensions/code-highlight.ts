@@ -16,7 +16,6 @@ export class CodeHighlight extends WeWriteMarkedExtension {
       highlight(code, lang, info) {
         const type = CodeRenderer.getMathType(lang)
         if (type) return code;
-        if (lang && lang.trim().toLocaleLowerCase() == 'mpcard') return code;
         if (lang && lang.trim().toLocaleLowerCase() == 'mermaid') return code;
         if (lang && lang.trim().toLocaleLowerCase() == 'charts') return code;
         if (lang && lang.trim().toLocaleLowerCase() == 'dataview') return code;

@@ -14,9 +14,9 @@ declare global {
 i18n.init({
 	debug: false,
 	lng: moment.locale(), //obsidian language
-	fallbackLng: "en", // 默认语言，当用户语言不匹配时回退的语言
+	fallbackLng: "en", 
 	interpolation: {
-		escapeValue: false, // React中不需要转义，因为它默认会转义
+		escapeValue: false, 
 	},
 	resources: {
 		en: {

@@ -11,11 +11,10 @@
  
 
 import { Tokens } from "marked";
+import { $t } from "src/lang/i18n";
+import { replaceDivWithSection } from "src/utils/utils";
 import { ObsidianMarkdownRenderer } from "../markdown-render";
 import { WeWriteMarkedExtension } from "./extension";
-import { MathRenderer } from "./math";
-import { replaceDivWithSection } from "src/utils/utils";
-import { $t } from "src/lang/i18n";
 export class CodeRenderer extends WeWriteMarkedExtension {
 	showLineNumber: boolean;
 	mermaidIndex: number = 0;
@@ -46,7 +45,6 @@ export class CodeRenderer extends WeWriteMarkedExtension {
 		let codeSection = '<section class="code-container"><section class="code-section-banner"></section><section class="code-section">';
 		
 		const codeLineNumber = this.previewRender.articleProperties.get('show-code-line-number')
-		console.log(`codeLineNumber:${codeLineNumber}`);
 		
 		if (codeLineNumber === 'true' || codeLineNumber === 'yes' || codeLineNumber === '1') {
 			const lines = code.split('\n');
@@ -181,27 +179,14 @@ export class CodeRenderer extends WeWriteMarkedExtension {
 				name: 'code',
 				level: 'block',
 				renderer: (token: Tokens.Generic) => {
-					// const type = CodeRenderer.getMathType(token.lang ?? '');
-					// if (type) {
-					// 	return new MathRenderer(this.plugin, this.previewRender, this.marked).renderer(token, false, type); //MathRendererQueue.getInstance().render(token, false, type, this.callback);
-					// }
 					if (token.lang && token.lang.trim().toLocaleLowerCase() == 'mermaid') {
-						// return this.renderMermaid(token);
 						return token.html
 					}
 					if (token.lang && token.lang.trim().toLocaleLowerCase() == 'chart') {
 						return this.renderCharts(token);
 					}
-					if (token.lang && token.lang.trim().toLocaleLowerCase() == 'mpcard') {
-						// return this.renderCard(token);
-					}
 					if (token.lang && token.lang.trim().toLocaleLowerCase().startsWith('ad-')) {
 						return token.html
-						//admonition
-						// let type = token.lang.trim().toLocaleLowerCase().replace('ad-', '');
-						// if (type === '') type = 'note';
-
-						// return this.renderAdmonition(token, type);admno
 					}
 					return this.codeRenderer(token.text, token.lang);
 				},

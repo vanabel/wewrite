@@ -37,14 +37,13 @@ export class MaterialPanel {
     this.titleSpan = this.header.createSpan({ cls: 'wewrite-material-panel-title' });
     this.totalSpan = this.header.createSpan({ cls: 'wewrite-material-panel-total' });
 
-    this.content = parent.createDiv({ cls: 'wewrite-material-panel-content' });
+    this.content = parent.createDiv({ cls: 'wewrite-material-panel-content', text: 'content' });
     setIcon(this.refreshButton, 'folder-sync')
 	
 
 
     this.titleSpan.textContent = title;
     this.totalSpan.textContent = '0';
-    this.content.innerHTML = 'content';
 
     this.container.appendChild(this.header);
     this.container.appendChild(this.content);
@@ -78,7 +77,7 @@ export class MaterialPanel {
     }
   }
   async refreshContent(): Promise<any> {
-    this.content.innerHTML = '';
+    this.content.empty();
     this.items = []
     this.setTotal(0);
 
@@ -188,7 +187,7 @@ export class MaterialPanel {
   }
   clearContent() {
     this.items = [];
-    this.content.innerHTML = '';
+    this.content.empty();
     this.setTotal(0);
 
   }
@@ -210,18 +209,21 @@ export class MaterialPanel {
     
 
     if (this.type === 'draft' || this.type === 'news') {
-      // console.log(`draft/news item=>`, item);
       let title = item.content.news_item[0].title
       if (title === undefined || !title){
         title = $t('views.no-title-article')
       }
-      itemDiv.innerHTML = `<a href=${item.content.news_item[0].url}> ${title}</a>`
+      //itemDiv.innerHTML = `<a href=${item.content.news_item[0].url}> ${title}</a>`
+      const link = itemDiv.createEl('a', {href:item.content.news_item[0].url}) 
+	  link.text = title
       itemDiv.addEventListener('click', () => { })
       itemDiv.addClass("draft-news-item")
     } else if (this.type === 'image') {
-      itemDiv.innerHTML = '<img src="' + item.url + '" alt="' + item.name + '" />'
+    //   itemDiv.innerHTML = '<img src="' + item.url + '" alt="' + item.name + '" />'
+	const img = itemDiv.createEl('img')
+	img.src = item.url 
+	img.alt = item.name
       itemDiv.addEventListener('click', () => {
-        //TODO 
       })
     } else {
       console.error($t('views.other-type-has-not-been-implemented'));
@@ -277,7 +279,7 @@ export class MaterialPanel {
     return itemsToRemove.length;
   }
   async initContent(): Promise<any> {
-    this.content.innerHTML = '';
+    this.content.empty();
     this.setTotal(0);
     let total = 0;
     this.content.style.display = 'block';

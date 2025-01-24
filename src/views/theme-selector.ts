@@ -54,14 +54,11 @@ export class ThemeSelector {
     public startWatchThemes() {
         this.plugin.registerEvent(
             this.plugin.app.vault.on('rename', (file: TFile) => {
-                // 在这里处理文件修改的逻辑
                 this.onThemeChange(file)
-
             })
         );
         this.plugin.registerEvent(
             this.plugin.app.vault.on('modify', (file: TFile) => {
-                // 在这里处理文件修改的逻辑
                 this.onThemeChange(file)
 
             })
@@ -69,22 +66,14 @@ export class ThemeSelector {
 
         this.plugin.registerEvent(
             this.plugin.app.vault.on('create', (file: TFile) => {
-                // 在这里处理文件创建的逻辑
                 this.onThemeChange(file)
             })
         );
 
         this.plugin.registerEvent(
             this.plugin.app.vault.on('delete', (file: TFile) => {
-                // 在这里处理文件删除的逻辑
                 this.onThemeChange(file)
             })
         );
     }
-    public stopWatchThemes() {
-        //TODO
-        // throw new Error('Method not implemented.');
-
-    }
-
 }

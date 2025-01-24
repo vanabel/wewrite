@@ -99,8 +99,6 @@ export async function uploadCanvas(root:HTMLElement, wechatClient:WechatClient):
             if (res){
                 canvas.outerHTML = `<img src="${res.url}" />`
             }else{
-                console.log(`upload canvas failed.`);
-                
             }
         })
     })

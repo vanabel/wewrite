@@ -20,8 +20,6 @@ export class ImageGenerateModal extends Modal {
         this.callback = callback
     }
     onOpen() {
-        // console.log(`onOpen!`);
-
         const { contentEl } = this;
         contentEl.addClass('image-generate-dialog-content')
 
@@ -54,14 +52,11 @@ export class ImageGenerateModal extends Modal {
         const cancelButton = toolbar.createEl('button', { text: $t('modals.cancel') });
 
         confirmButton.addEventListener('click', () => {
-            // console.log(`start generating:`, this.callback);
             this.generate(size.value, prompt.value, negativePrompt.value);
             this.close();
         });
 
         cancelButton.addEventListener('click', () => {
-            // console.log(`cancel`);
-
             this.close();
         });
     }

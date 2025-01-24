@@ -36,7 +36,6 @@ export const MediaTypeLable = new Map([
     ['draft', $t('assets.draft')]
 ]);
 
-// 扩展 MaterialItem 类型以包含 _deleted 属性
 type DeletableMaterialItem = MaterialItem & {
     _deleted?: boolean;
 }
@@ -73,11 +72,9 @@ export class AssetsManager {
             this.loadMaterial(data)
         })
         this.plugin.messageService.registerListener('delete-media-item', (item: MaterialItem) => {
-            //this.deleteMediaItem(item as MaterialMeidaItem)
             this.confirmDelete(item)
         })
         this.plugin.messageService.registerListener('delete-draft-item', (item: MaterialItem) => {
-            //this.deleteDraftItem(item)
             this.confirmDelete(item)
         })
         this.plugin.messageService.registerListener('image-item-updated', (item: MaterialItem) => {
@@ -107,40 +104,7 @@ export class AssetsManager {
         }
         return AssetsManager.instance;
     }
-    public async deltaSyncMaterial(accountName: string) {
-        // load local assets
-        await this.loadMaterial(accountName)
-
-        // get total number from remote
-        const json = await this.plugin.wechatClient.getMaterialCounts(accountName)
-        if (json) {
-            const { errcode, voice_count, video_count, image_count, news_count } = json
-            if (this.assets.get('news')?.length != news_count) {
-                //TODO: parcial get the data.
-            }
-            if (this.assets.get('image')?.length != image_count) {
-                //TODO: parcial get the data.
-            }
-            if (this.assets.get('video')?.length != video_count) {
-                //TODO: parcial get the data.
-            }
-            if (this.assets.get('voice')?.length != voice_count) {
-                //TODO: parcial get the data.
-            }
-
-        }
-
-        // the drafts
-        const draft_count = await this.plugin.wechatClient.getDraftCount(accountName)
-        if (draft_count) {
-            if (this.assets.get('draft')?.length != draft_count) {
-                //TODO: parcial get the data.
-            }
-        }
-
-        // this.checkAssets()
-
-    }
+    
     public async loadMaterial(accountName: string) {
         const types: MediaType[] = [
             'draft', 'image', 'video', 'voice', 'news'
@@ -405,9 +369,9 @@ export class AssetsManager {
     async getAllMeterialOfTypeFromDB(accountName: string, type: string): Promise<MaterialItem[]> {
         return new Promise(async (resolve) => {
 
-            const pageSize = 10; // 每页记录数
-            let offset = 0; // 当前偏移量
-            let total = 10; // 总记录数
+            const pageSize = 10; 
+            let offset = 0; 
+            let total = 10; 
             const items: Array<MaterialItem> = []
             if (accountName === undefined || !accountName) {
                 resolve(items)
@@ -425,7 +389,7 @@ export class AssetsManager {
 
                 const docs = result.docs as Array<MaterialItem>;
                 if (docs.length === 0) {
-                    break; // 没有更多记录
+                    break; 
                 }
 
                 items.push(...docs)
@@ -493,7 +457,6 @@ export class AssetsManager {
             // Perform bulk deletion
             return this.db.bulkDocs(docsToDelete);
         }).then((result) => {
-            // console.log('Documents deleted successfully:', result);
         }).catch((err) => {
             console.error('Error deleting documents:', err);
         });
@@ -504,30 +467,22 @@ export class AssetsManager {
             console.error('deleteMediaItem type is undefined', item)
             return;
         }
-        //1. delete from remote
         if (!await this.plugin.wechatClient.deleteMedia(item.media_id)) {
             console.error('delete media failed', item)
             return false;
         }
-        //2. delete from local
         await this.removeDocFromDB(item._id!)
-        //3. 
         this.plugin.messageService.sendMessage(`${type}-item-deleted`, item)
-        //4. 
         this.updateUsed(item.url)
         return true
     }
     public async deleteDraftItem(item: any) {
-        //1. delete from remote
         if (!await this.plugin.wechatClient.deleteDraft(item.media_id)) {
             console.error('delete draft failed', item)
             return false;
         }
-        //2. delete from local
         this.removeDocFromDB(item._id)
-        //3. 
         this.plugin.messageService.sendMessage('draft-item-deleted', item)
-        //4. 
         this.updateUsed(item.url)
         return true;
     }
@@ -536,7 +491,6 @@ export class AssetsManager {
             return this.db.remove(doc);
         })
             .then((result) => {
-                // console.log('Document deleted successfully:', result);
             })
             .catch((err) => {
                 console.error('Error deleting document:', err);
@@ -544,7 +498,6 @@ export class AssetsManager {
 
     }
     confirmPublish(item: DraftItem) {
-        // console.log(`confirm publish`);
         if (this.confirmPublishModal === undefined) {
             this.confirmPublishModal = new ConfirmPublishModal(this.plugin, item)
         } else {
@@ -553,7 +506,6 @@ export class AssetsManager {
         this.confirmPublishModal.open()
     }
     confirmDelete(item: MaterialItem) {
-        // console.log(`confirm delete`);
         let callback = this.deleteMediaItem.bind(this)
         if (item.type === 'draft') {
             callback = this.deleteDraftItem.bind(this)

@@ -18,19 +18,14 @@ export class Summary extends WeWriteMarkedExtension {
             const currentHeading = hEls[i]
             const nextHeading = hEls[i+1]
             if (currentHeading) {
-                console.log(`currentHeading:`, currentHeading);
-                
                 const d = createEl('details')
                 d.createEl('summary', { text: currentHeading.textContent as string })
-                // d.appendChild(currentHeading.cloneNode(true))
-
                 let current = currentHeading.nextSibling
                 
                 while (current && current !== nextHeading) {
                     const nextSibling = current.nextSibling
                     d.appendChild(current)
                     current = nextSibling
-                    console.log(`current=>`, current);
                 }
                 currentHeading.replaceWith(d)
             }

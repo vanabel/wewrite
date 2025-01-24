@@ -23,10 +23,7 @@ export class ConfirmPublishModal extends Modal {
         this.draftItem = item
     }
     onOpen() {
-        // console.log(`onOpen!`);
-
         const { contentEl, containerEl } = this;
-        // containerEl.addClass('confirm-pulbish-dialog');
         contentEl.addClass('confirm-pulbish-dialog-content')
 
         contentEl.createEl('h3', { text: $t('modals.publish.title') });
@@ -40,14 +37,11 @@ export class ConfirmPublishModal extends Modal {
         const cancelButton = toolbar.createEl('button', { text: $t('modals.cancel') });
 
         confirmButton.addEventListener('click', () => {
-            console.log(`confirm publish:`, this.draftItem);
             this.publish();
             this.close();
         });
 
         cancelButton.addEventListener('click', () => {
-            console.log(`cancel`);
-
             this.close();
         });
     }

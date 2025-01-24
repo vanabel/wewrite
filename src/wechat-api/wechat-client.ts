@@ -46,7 +46,6 @@ export class WechatClient {
         doc_id: doc_id,
       }
     }
-    // console.log(`request token params:`, params);
     
     try {
       const result = await requestUrl({
@@ -56,7 +55,6 @@ export class WechatClient {
         throw: false,
         body: JSON.stringify(params)
       });
-    //   console.log('获取token返回结果:', result);
       if (result.status !== 200) {
         new Notice(result.text, 0);
         return null;
@@ -64,8 +62,6 @@ export class WechatClient {
       const { code, data, message, server_errcode, server_errmsg } = result.json;
       if (code !== 0) {
         if (code == -2){
-          // new Notice(message, 0);
-        //   console.log('app已过期，请重新获取');
           account.doc_id = undefined;
           this.plugin.saveSettings();
           return await this.requestToken();
@@ -146,8 +142,6 @@ export class WechatClient {
     return await res.json;
   }
   public async sendArticleToDraftBox(localDraft: LocalDraftItem, data: string) {
-    // console.log(`send draft:`, localDraft, data);
-
     const accessToken = await this.plugin.refreshAccessToken(this.plugin.settings.selectedAccount);
     if (!accessToken) {
       return false;
@@ -159,8 +153,6 @@ export class WechatClient {
         content: data,
         digest: localDraft.digest,
         thumb_media_id: localDraft.thumb_media_id,
-        // ...localDraft.pic_crop_235_1 && { pic_crop_235_1: localDraft.pic_crop_235_1 },
-        // ...localDraft.pic_crop_1_1 && { pic_crop_1_1: localDraft.pic_crop_1_1 },
         ...localDraft.content_source_url && { content_source_url: localDraft.content_source_url },
         ...localDraft.need_open_comment !== undefined && { need_open_comment: localDraft.need_open_comment },
         ...localDraft.only_fans_can_comment !== undefined && { only_fans_can_comment: localDraft.only_fans_can_comment },
@@ -493,8 +485,6 @@ export class WechatClient {
     };
     const resp = await requestUrl(req);
 
-    // console.log(`mass send resp`, resp);
-
     const { errcode, errmsg } = resp.json;
     if (errcode !== undefined && errcode !== 0) {
       new Notice(getErrorMessage(errcode), 0);
@@ -515,18 +505,14 @@ export class WechatClient {
     if (!accessToken) {
       return false;
     }
-    // get all images by loop
     const url = `${this.baseUrl}/message/mass/preview?access_token=${accessToken}`
     const body = {
-      // touser: openid,
       towxname: wxname,
       mpnews: {
         media_id: media_id,
       },
       msgtype: "mpnews",
     };
-
-
     const req: RequestUrlParam = {
       url: url,
       method: 'POST',
@@ -534,8 +520,6 @@ export class WechatClient {
       body: JSON.stringify(body)
     };
     const resp = await requestUrl(req);
-
-    // console.log(`preview resp`, resp);
 
     const { errcode, errmsg } = resp.json;
     if (errcode !== undefined && errcode !== 0) {
@@ -552,17 +536,13 @@ export class WechatClient {
 
 
 function extractIPs(input:string) {
-    // 正则表达式匹配 IPv4 和 IPv6 地址
     const ipv4Pattern = /\b(?:\d{1,3}\.){3}\d{1,3}\b/g;
     const ipv6Pattern = /(?:::ffff:)?([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|::(?:ffff:)?(?:\d{1,3}\.){3}\d{1,3}/g;
 
-    // 提取 IPv4 地址
     const ipv4Matches = input.match(ipv4Pattern) || [];
 
-    // 提取 IPv6 地址
     const ipv6Matches = input.match(ipv6Pattern) || [];
 
-    // 返回所有匹配的 IP 地址
     return {
         ipv4: ipv4Matches,
         ipv6: ipv6Matches

@@ -32,7 +32,6 @@ export class ObsidianMarkdownRenderer {
             return;
         }
         this.container = container
-        // this.container.style.maxWidth = 720 + 'px';
         this.container.addClass('wewrite-markdown-render-container')
         this.view = view
         this.path = path
@@ -55,7 +54,6 @@ export class ObsidianMarkdownRenderer {
         this.container.appendChild(this.el)
         await delay(100);
         this.rendering = false
-        // this.container.removeChild(this.el)
     }
     public queryElement(index: number, query: string) {
         if (this.el === undefined || !this.el) {

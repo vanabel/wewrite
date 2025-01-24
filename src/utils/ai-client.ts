@@ -44,10 +44,9 @@ export class AiClient {
           content: `总结下面的一段话, 输出的字数最大100个字符:\n\n${content}`,
         },
       ],
-      max_tokens: 100, // 限制生成的摘要长度
-      temperature: 0.7, // 控制生成内容的随机性
+      max_tokens: 100, 
+      temperature: 0.7, 
     });
-    console.log('digest ', completion);
     return completion.choices[0].message.content
   }
 
@@ -265,17 +264,11 @@ export class AiClient {
         })
       });
 
-      // console.log(`generateCoverImageFromText response=>`, response);
-
       if (response.status !== 200) {
         throw new Error(`API request failed with status ${response.status}`);
       }
 
       const result = response.json;
-      // return result.output.task_id; // Return task ID for async image generation
-
-
-      // 每2秒执行一次
       const intervalId = setInterval(async () => {
         const json = await this.checkImageGenerationStatus(result.output.task_id)
         if (json.output.task_status === 'SUCCEEDED'){
@@ -284,8 +277,6 @@ export class AiClient {
           resolve(json.output.results[0].url)
         }
         if (json.output.task_status === 'FAILED' || json.output.task_status === 'UNKNOWN'){
-          console.log(`task failed.`, json);
-          
           clearInterval(intervalId);
           this.plugin.hideSpinner()
           resolve('')
@@ -293,10 +284,8 @@ export class AiClient {
 
       }, 2000);
 
-      // 10秒后取消定时任务
       setTimeout(() => {
         clearInterval(intervalId);
-        console.log('checking task stopped.');
         reject('')
       }, 30000);
     });
@@ -315,7 +304,6 @@ export class AiClient {
       }
       headers.url += taskId;
       const response = await requestUrl({...headers, url: headers.url})
-      // console.log(`checkImageGenerationStatus response=>`, response);
       resolve(response.json)
     })
   }

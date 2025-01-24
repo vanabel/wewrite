@@ -11,7 +11,6 @@ import { url } from "inspector";
 
 export class ListItem extends WeWriteMarkedExtension {
     async postprocess(html: string) {
-        // console.log(`listItem postprocess:`,html);
         const root = sanitizeHTMLToDom(html)
         const uls = root.querySelectorAll<HTMLElement>('ul,ol')
         for (let ul of uls) {
@@ -32,7 +31,6 @@ export class ListItem extends WeWriteMarkedExtension {
         
     }
     renderItem(item: Tokens.ListItem) {
-        console.log(`listitem:`, item);
         return item.raw;
     }
     renderList(list: Tokens.List) {

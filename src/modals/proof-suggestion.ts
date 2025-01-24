@@ -1,6 +1,6 @@
 import { EditorView, Decoration, DecorationSet } from "@codemirror/view";
 import { EditorState, StateField, Transaction } from "@codemirror/state";
-import { Editor } from 'obsidian';
+import { Editor, sanitizeHTMLToDom } from 'obsidian';
 import { RangeSetBuilder } from "@codemirror/state";
 import { StateEffect } from "@codemirror/state";
 import { $t } from "src/lang/i18n";
@@ -136,7 +136,10 @@ export class ProofService {
                 <button class="proof-reject">${$t('modals.proof.skip')} </button>
             </div>
         `;
-        this.tooltip.innerHTML = content;
+		const dom = sanitizeHTMLToDom(content);
+
+        this.tooltip.empty()
+		this.tooltip.appendChild(dom); //.innerHTML = content;
 
         const rect = (e.target as HTMLElement).getBoundingClientRect();
         

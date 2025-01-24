@@ -16,6 +16,7 @@ import {
 	TFile,
 	WorkspaceLeaf,
 } from "obsidian";
+import { $t } from "src/lang/i18n";
 import WeWritePlugin from "src/main";
 import { PreviewRender } from "src/render/marked-extensions/extension";
 import {
@@ -24,14 +25,12 @@ import {
 	uploadURLImage,
 } from "src/render/post-render";
 import { WechatRender } from "src/render/wechat-render";
-import { SrcThumbList } from "src/utils/src-thumb-list";
 import { ResourceManager } from "../assets/resource-manager";
 import { WechatClient } from "../wechat-api/wechat-client";
 import { MPArticleHeader } from "./mp-article-header";
 import { ThemeManager } from "./theme-manager";
 import { ThemeSelector } from "./theme-selector";
 import { WebViewModal } from "./webview";
-import { $t } from "src/lang/i18n";
 
 export const VIEW_TYPE_NP_PREVIEW = "wechat-np-article-preview";
 export interface ElectronWindow extends Window {
@@ -49,16 +48,16 @@ export class PreviewPanel extends ItemView implements PreviewRender {
 	private themeSelector: ThemeSelector;
 	private debouncedRender = debounce(async () => {
 		await this.renderDraft();
-	}, 4000);
+	}, 2000);
 	private debouncedUpdate = debounce(async () => {
 		await this.renderDraft();
-	}, 5000);
+	}, 1000);
 	private debouncedCustomThemeChange = debounce(async (theme: string) => {
 		this.getArticleProperties();
 		this.articleProperties.set("custom_theme", theme);
 		this.setArticleProperties();
 		this.renderDraft();
-	}, 5000);
+	}, 2000);
 
 	private draftHeader: MPArticleHeader;
 	articleProperties: Map<string, string> = new Map();
@@ -88,27 +87,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
 	async onOpen() {
 		this.buildUI();
 		this.startListen();
-		this.plugin.messageService.registerListener(
-			"src-thumb-list-updated",
-			(data: SrcThumbList) => {
-				this.articleDiv.empty();
-				this.articleDiv
-					.createDiv()
-					.setText(
-						$t("views.previewer.to-verify-the-images-in-article")
-					);
-				const ol = this.articleDiv.createEl("ol");
-				data.list.forEach((articles, url) => {
-					const li = ol.createEl("li");
-					let a = "<ul>";
-					articles.forEach((url) => {
-						a += `<li><a href="${url}">${url}</a><li>`;
-					});
-					a += "</ul>";
-					li.innerHTML = `<img width="100px" src="${url}" alt="${url}" > ${a}`;
-				});
-			}
-		);
+		
 		this.plugin.messageService.registerListener(
 			"draft-title-updated",
 			(title: string) => {
@@ -158,7 +137,6 @@ export class PreviewPanel extends ItemView implements PreviewRender {
 			)
 				.map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
 				.join("\n");
-			console.log(`frontmatterString: `, frontmatterString);
 
 			let updatedContent;
 			if (content.startsWith("---")) {
@@ -246,7 +224,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
 		this.renderDiv.id = "render-div";
 		let shadowDom = this.renderDiv.shawdowRoot;
 		if (shadowDom === undefined || shadowDom === null) {
-			shadowDom = this.renderDiv; //.attachShadow({ mode: 'open' });
+			shadowDom = this.renderDiv //.attachShadow({ mode: 'open' });
 		}
 
 		this.containerDiv = shadowDom.createDiv({ cls: "wewrite-article" });
@@ -297,7 +275,6 @@ export class PreviewPanel extends ItemView implements PreviewRender {
 	async onClose() {
 		// Clean up our view
 		this.stopListen();
-		this.themeSelector.stopWatchThemes();
 	}
 
 	async parseActiveMarkdown() {
@@ -325,10 +302,12 @@ export class PreviewPanel extends ItemView implements PreviewRender {
 			this
 		);
 
-		// return;
-		html = `<div class="wewrite-article-content wewrite" id="article-section">${html}</div>`;
-
-		this.articleDiv.innerHTML = html;
+		// return; //to see the render tree. 
+		const articleSection = createEl('section', {cls:"wewrite-article-content wewrite"})
+		const dom = sanitizeHTMLToDom(html);
+		articleSection.appendChild(dom)
+		this.articleDiv.empty()
+		this.articleDiv.appendChild(articleSection)
 
 		this.elementMap.forEach(
 			async (node: HTMLElement | string, id: string) => {
@@ -350,7 +329,8 @@ export class PreviewPanel extends ItemView implements PreviewRender {
 								this.plugin,
 								this
 							).parseNote(file.path, this.articleDiv, this);
-							item.innerHTML = body;
+							item.empty()
+							item.appendChild(sanitizeHTMLToDom(body))
 						}
 					}
 				} else {
@@ -381,7 +361,6 @@ export class PreviewPanel extends ItemView implements PreviewRender {
 		this.listeners.push(ec);
 
 		const el = this.app.workspace.on("active-leaf-change", async (leaf) => {
-			console.log(`leaf changed.`);
 			if (leaf && leaf.view.getViewType() === "markdown") {
 				this.plugin.messageService.sendMessage(
 					"active-file-changed",
@@ -405,13 +384,14 @@ export class PreviewPanel extends ItemView implements PreviewRender {
 		const doc = sanitizeHTMLToDom(html);
 
 		item.empty();
-		if (doc.childElementCount > 0) {
-			for (const child of doc.children) {
-				item.appendChild(child.cloneNode(true));
-			}
-		} else {
-			item.innerText = $t("views.previewer.article-render-failed");
-		}
+		item.appendChild(doc)
+		// if (doc.childElementCount > 0) {
+		// 	for (const child of doc.children) {
+		// 		item.appendChild(child.cloneNode(true));
+		// 	}
+		// } else {
+		// 	item.innerText = $t("views.previewer.article-render-failed");
+		// }
 	}
 	addElementByID(id: string, node: HTMLElement | string): void {
 		if (typeof node === "string") {

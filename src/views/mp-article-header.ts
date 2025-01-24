@@ -27,11 +27,6 @@ export class MPArticleHeader {
 	}
 
 	private plugin: WeWritePlugin;
-	// private panning: boolean = false
-	// private origin_x: number
-	// private origin_y: number
-	// private current_x: number = 0
-	// private current_y: number = 0
 	private cover_image: string | null;
 	private coverFrame: HTMLElement;
 	private activeLocalDraft: LocalDraftItem | undefined;
@@ -41,9 +36,6 @@ export class MPArticleHeader {
 	private _digest: HTMLTextAreaElement;
 	private _needOpenComment: ToggleComponent;
 	private _onlyFansCanComment: ToggleComponent;
-	// private _cover_image: string | null
-	// private _cover_image_url: string | null
-	// private draggedImage: HTMLCanvasElement | null = null;
 	private imageGenerateModal: ImageGenerateModal | undefined;
 	constructor(plugin: WeWritePlugin, containerEl: HTMLElement) {
 		this.plugin = plugin;
@@ -55,7 +47,7 @@ export class MPArticleHeader {
 				this.updateLocalDraft();
 			}
 		);
-		
+
 		this.plugin.messageService.registerListener(
 			"active-file-changed",
 			(data: string) => {
@@ -102,7 +94,6 @@ export class MPArticleHeader {
 	}
 
 	onNoteRename(file: TFile) {
-		//TODO: only if the file is the active file
 		const activeFile = this.plugin.app.workspace.getActiveFile();
 		if (activeFile === undefined || file !== activeFile) {
 			return;
@@ -225,8 +216,6 @@ export class MPArticleHeader {
 			return;
 		}
 		if (this.activeLocalDraft.notePath === undefined) {
-			console.log(`no note path`);
-
 			new Notice($t("views.article-header.no-active-note"));
 			return;
 		}
@@ -330,7 +319,6 @@ export class MPArticleHeader {
 			this.coverFrame.firstChild.remove();
 		}
 		if (!url) {
-			console.log(`null image url for cover image`);
 			return;
 		}
 
@@ -424,17 +412,8 @@ export class MPArticleHeader {
 		this.setCoverImage(this.cover_image);
 	}
 	async updateLocalDraft() {
-		// console.log(`updateLocalDraft=>`, this.activeLocalDraft);
-
 		this.activeLocalDraft =
 			await this.localDraftmanager.getDrafOfActiveNote();
-		console.log(`activeLocalDraft:`, this.activeLocalDraft);
-
-		// if (this.localDraftmanager.isActiveNoteDraft(this.activeLocalDraft)) {
-		// 	console.log(`not a active draft.`);
-
-		// 	return;
-		// }
 		this.updateHeaderProporties();
 		return true;
 	}

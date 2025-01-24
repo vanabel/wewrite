@@ -1,6 +1,7 @@
 /**
  * wewrite plugin for Obsidian
  * author: Learner Chen.
+ * latest update: 2025-01-24
  */
 import { debounce, EventRef, MenuItem, Notice, Plugin, TFile, WorkspaceLeaf } from 'obsidian';
 import { getPublicIpAddress } from "src/utils/ip-address";
@@ -100,19 +101,19 @@ export default class WeWritePlugin extends Plugin {
 									}
 								});
 						});
-						subMenu.addItem((subItem: MenuItem) => {
-							subItem
-								.setTitle($t('main.proof'))
-								.setIcon('user-pen')
-								.onClick(async () => {
-									const content = editor.getSelection();
-									const proofed = await this.proofContent(content);
+						// subMenu.addItem((subItem: MenuItem) => {
+						// 	subItem
+						// 		.setTitle($t('main.proof'))
+						// 		.setIcon('user-pen')
+						// 		.onClick(async () => {
+						// 			const content = editor.getSelection();
+						// 			const proofed = await this.proofContent(content);
 
-									if (proofed) {
-										this.proofService = showProofSuggestions(editor, proofed)
-									}
-								});
-						});
+						// 			if (proofed) {
+						// 				this.proofService = showProofSuggestions(editor, proofed)
+						// 			}
+						// 		});
+						// });
 						subMenu.addItem((subItem: MenuItem) => {
 							subItem
 								.setTitle('synonyms')
@@ -495,7 +496,6 @@ export default class WeWritePlugin extends Plugin {
 		try {
 			this.showSpinner($t('main.generating-latex'));
 			const result = await this.aiClient.generateLaTeX(content);
-			console.log(`LaTex:`, result);
 			if (result) {
 				const latexMatch = result.match(/\$\$([\s\S]*?)\$\$/);
 				if (latexMatch && latexMatch[0]) {

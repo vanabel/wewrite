@@ -10,12 +10,14 @@ It is designed for rendering notes and publishing to WeChat Official Account pla
 
 ### Obsidan features rendered to WeChat format. 
 - **Markdown Rendering**: Support normalmarkdown content
-- **Excalidraw**: Support direct embedded excalidraw diagrams
+- **Excalidraw**: Support direct embedded excalidraw plugin diagrams
 - **Mermaid**: Support mermaid diagrams
 - **LaTeX**: Support LaTeX formulas
 - **Callout & admonition**: Support native callouts and admonitions
 - **Code Highlighting**: Support code block and line code
-- **Icon**: Support obsidian icon, iconize, remdix icions in markdown content
+- **Icon**: Support obsidian icon, iconize, remix icions in markdown content
+- **Charts**: Support obsidian plugin charts content
+- **PDF++**: Support obsidian plugin PDF++ note and image content
 - **Links & footnotes**: Support move links and footnotes to WeChat format
 
 

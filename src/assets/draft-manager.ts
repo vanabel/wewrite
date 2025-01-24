@@ -58,7 +58,6 @@ export class LocalDraftManager {
         const accountName = this.plugin.settings.selectedAccount;
         if (accountName !== undefined && accountName) {
             const f = this.plugin.app.workspace.getActiveFile()
-			console.log(`getDraftOfActiveNote accountName=>${accountName}=>`, f);
 			
             if (f) {
                 draft = await this.getDraft(accountName, f.path)

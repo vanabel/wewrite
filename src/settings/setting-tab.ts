@@ -125,8 +125,6 @@ export class WeWriteSettingTab extends PluginSettingTab {
 							new Notice($t('settings.invalid-wewerite-settings-file'));
 							return 
 						}
-						console.log(`settings:`, importedData);
-
 						this.plugin.settings = importedData;
 						// save it
 						await this.plugin.saveSettings();
@@ -437,7 +435,11 @@ export class WeWriteSettingTab extends PluginSettingTab {
 			.setHeading()
 
 		const div = mpFrame.createDiv({ cls: 'wewrite-web-image elevated-shadow' })
-		div.innerHTML = `<a href="https://mp.weixin.qq.com/cgi-bin/frame?t=pages/developsetting/page/developsetting_frame&nav=10141"><img src="${WECHAT_MP_WEB_PAGE}" alt="wewrite-web-page"></a> </p>`
+		const link = div.createEl('a', { cls: 'wewrite-web-image-link', href: 'https://mp.weixin.qq.com/cgi-bin/frame?t=pages/developsetting/page/developsetting_frame&nav=10141'} )
+		const img = link.createEl('img', { cls: 'wewrite-web-image-img' })
+		img.src = WECHAT_MP_WEB_PAGE
+		img.alt = 'wewrite-web-page'
+		// div.innerHTML = `<a href="https://mp.weixin.qq.com/cgi-bin/frame?t=pages/developsetting/page/developsetting_frame&nav=10141"><img src="${WECHAT_MP_WEB_PAGE}" alt="wewrite-web-page"></a> </p>`
 
 		new Setting(mpFrame)
 			.setName($t('settings.select-account'))
