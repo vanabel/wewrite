@@ -25,7 +25,7 @@ export class ProofService {
         private editor: Editor,
         private proofItems: ProofItem[]
     ) {
-        this.editorView = (this.editor as any).cm;
+        this.editorView = (this.editor as unknown as { cm: EditorView }).cm;
         this.setupProofField();
         this.setupEventListeners();
     }

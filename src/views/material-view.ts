@@ -1,9 +1,9 @@
 /** view template for different types of material */
-import { ItemView, WorkspaceLeaf, Menu, ButtonComponent } from "obsidian";
+import { ButtonComponent, ItemView, WorkspaceLeaf } from "obsidian";
+import { $t } from "src/lang/i18n";
 import WeWritePlugin from "src/main";
 import { WeChatMPAccountSwitcher } from "src/settings/account-switcher";
 import { MaterialPanel } from "./material-panel";
-import { $t } from "src/lang/i18n";
 
 export const VIEW_TYPE_MP_MATERIAL = "mp-material";
 

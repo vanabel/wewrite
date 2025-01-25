@@ -83,10 +83,11 @@ export default class WeWritePlugin extends Plugin {
 	async addEditorMenu() {
 		this.registerEvent(
 			this.app.workspace.on("editor-menu", (menu, editor) => {
-				const file: TFile =
-					// @ts-ignore: Obsidian ts defined incomplete.
-					(editor.editorComponent.file as TFile | undefined) ??
-					this.app.workspace.getActiveFile()!;
+				// @ts-ignore: Obsidian ts defined incomplete.
+				let file = editor.editorComponent.file;
+				file = file instanceof TFile ? file : this.app.workspace.getActiveFile();
+
+				
 				if (!file) {
 					return;
 				}

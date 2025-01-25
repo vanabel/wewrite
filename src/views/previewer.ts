@@ -338,7 +338,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
 				}
 			}
 		);
-		return this.articleDiv.innerHTML;
+		// return this.articleDiv.innerHTML;
 	}
 	async renderDraft() {
 		await this.parseActiveMarkdown();

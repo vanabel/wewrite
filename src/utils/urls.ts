@@ -4,7 +4,11 @@
 import { App, arrayBufferToBase64, sanitizeHTMLToDom, TAbstractFile, TFile } from 'obsidian';
 
 export function isMarkdownFile(file: TFile | TAbstractFile) {
-    return ['md', 'markdown'].includes((file as TFile)?.extension ?? '');
+	let ext = ''
+	if (file instanceof TFile) {
+        ext = file.extension;
+    } 
+    return ['md', 'markdown'].includes(ext);
 }
 
 export function getMetadata(file: TFile, app: App) {

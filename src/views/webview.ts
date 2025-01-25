@@ -8,10 +8,7 @@ export class WebViewModal extends Modal {
     onOpen() {
         const { contentEl } = this;
 
-        const iframe = document.createElement('iframe');
-        iframe.style.width = '100%';
-        iframe.style.height = '100%';
-        iframe.style.border = 'none';
+        const iframe = createEl('iframe', {cls:'wewrite-webview-iframe'});
 
         iframe.src = 'https://mp.weixin.qq.com/'; 
         contentEl.appendChild(iframe);

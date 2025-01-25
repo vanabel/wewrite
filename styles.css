@@ -89,7 +89,6 @@ left side view
 
 .wewrite-material-panel-content {
   padding: 0.5em;
-  display: none;
 }
 
 .wewrite-setting-frame,
@@ -630,3 +629,13 @@ ol {
 }
 
 
+.wewrite-material-panel-item {
+    cursor : 'pointer';
+}
+
+.wewrite-webview-iframe
+{
+	width: 100%;
+	height: 100%;
+	border: none;
+}

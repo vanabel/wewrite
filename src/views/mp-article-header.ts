@@ -344,10 +344,7 @@ export class MPArticleHeader {
 				img.height * scale
 			);
 
-			canvas.style.position = "absolute";
-			canvas.style.cursor = "move";
-			canvas.style.left = `${offsetX}px`;
-			canvas.style.top = `${offsetY}px`;
+			
 
 			this.coverFrame.appendChild(canvas);
 		};

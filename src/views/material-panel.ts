@@ -202,7 +202,7 @@ export class MaterialPanel {
       return
     }
     const itemDiv = this.content.createDiv({ cls: 'wewrite-material-panel-item' });
-    itemDiv.style.cursor = 'pointer';
+
     
     this.items.push({ item: item, el: itemDiv });
     this.content.appendChild(itemDiv);
@@ -281,8 +281,6 @@ export class MaterialPanel {
   async initContent(): Promise<any> {
     this.content.empty();
     this.setTotal(0);
-    let total = 0;
-    this.content.style.display = 'block';
 
     const items = this.plugin.assetsManager.assets.get(this.type)
     if (items === undefined || items === null) {
