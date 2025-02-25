@@ -131,24 +131,31 @@ export class PreviewPanel extends ItemView implements PreviewRender {
 				);
 			}
 
-			const content = await this.app.vault.read(file);
-			const frontmatterString = Array.from(
-				this.articleProperties.entries()
-			)
-				.map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
-				.join("\n");
+			
+			this.app.fileManager.processFrontMatter(file, (frontmatter) => {
+				this.articleProperties.forEach((value, key) => {
+					frontmatter[key] = value;
+				});
+			});
 
-			let updatedContent;
-			if (content.startsWith("---")) {
-				updatedContent = content.replace(
-					/^---\n[\s\S]*?\n---/,
-					`---\n${frontmatterString}\n---`
-				);
-			} else {
-				updatedContent = `---\n${frontmatterString}\n---\n${content}`;
-			}
+			// const content = await this.app.vault.read(file);
+			// const frontmatterString = Array.from(
+			// 	this.articleProperties.entries()
+			// )
+			// 	.map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
+			// 	.join("\n");
 
-			await this.app.vault.modify(file, updatedContent);
+			// let updatedContent;
+			// if (content.startsWith("---")) {
+			// 	updatedContent = content.replace(
+			// 		/^---\n[\s\S]*?\n---/,
+			// 		`---\n${frontmatterString}\n---`
+			// 	);
+			// } else {
+			// 	updatedContent = `---\n${frontmatterString}\n---\n${content}`;
+			// }
+
+			// await this.app.vault.modify(file, updatedContent);
 		}
 	}
 

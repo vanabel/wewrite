@@ -53,19 +53,19 @@ export class SynonymsModal extends Modal {
 			this.updateSelection(Math.min(this.synonyms.length - 1, this.selectedIndex + 1));
 		});
 		
-		this.scope.register([], $t('modals.enter'), (evt) => {
+		this.scope.register([], 'Enter', (evt) => {
 			evt.preventDefault();
 			this.resolve(this.synonyms[this.selectedIndex]);
 			this.close();
 		});
 		
-		this.scope.register([], $t('modals.space'), (evt) => {
+		this.scope.register([],'Space', (evt) => {
 			evt.preventDefault();
 			this.resolve(this.synonyms[this.selectedIndex]);
 			this.close();
 		});
 		
-		this.scope.register([], $t('modals.escape'), () => {
+		this.scope.register([], 'Escape', () => {
 			this.resolve(null);
 			this.close();
 		});

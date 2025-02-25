@@ -2,6 +2,7 @@
  *  WeChat MP Article Header settings
  */
 import {
+	arrayBufferToBase64,
 	Notice,
 	Setting,
 	TextComponent,
@@ -118,6 +119,7 @@ export class MPArticleHeader {
 
 		new Setting(details)
 			.setName($t("views.article-header.article-title"))
+			.setHeading()
 			.addText((text) => {
 				this._title = text;
 				text.setPlaceholder(
@@ -135,6 +137,7 @@ export class MPArticleHeader {
 			});
 		new Setting(details)
 			.setName($t("views.article-header.author"))
+			.setHeading()
 			.addText((text) => {
 				this._author = text;
 				text.setPlaceholder(
@@ -149,6 +152,7 @@ export class MPArticleHeader {
 
 		new Setting(details)
 			.setName($t("views.article-header.digest"))
+			.setHeading()
 			.addExtraButton((button) => {
 				button
 					.setIcon("sparkles")
@@ -179,6 +183,7 @@ export class MPArticleHeader {
 
 		new Setting(details)
 			.setName($t("views.article-header.open-comments"))
+			.setHeading()
 			.setDesc($t("views.article-header.comments-description"))
 			.addToggle((toggle) => {
 				this._needOpenComment = toggle;
@@ -192,6 +197,7 @@ export class MPArticleHeader {
 			});
 		new Setting(details)
 			.setName($t("views.article-header.only-fans-can-comment"))
+			.setHeading()
 			.setDesc($t("views.article-header.fans-comment-description"))
 			.addToggle((toggle) => {
 				this._onlyFansCanComment = toggle;
@@ -234,6 +240,7 @@ export class MPArticleHeader {
 	private createCoverFrame(details: HTMLElement) {
 		new Setting(details)
 			.setName($t("views.article-header.cover-image"))
+			.setHeading()
 			.setDesc($t("views.article-header.cover-image-description"))
 			.addExtraButton((button) =>
 				button
@@ -289,7 +296,7 @@ export class MPArticleHeader {
 					const file = await this.plugin.app.vault.adapter.readBinary(
 						filePath
 					);
-					const base64 = await this.arrayBufferToBase64(file);
+					const base64 = arrayBufferToBase64(file);
 					this.cover_image = `data:image/png;base64,${base64}`;
 				} else {
 					this.cover_image = "";
@@ -306,14 +313,7 @@ export class MPArticleHeader {
 
 		return coverframe;
 	}
-	private async arrayBufferToBase64(buffer: ArrayBuffer): Promise<string> {
-		const bytes = new Uint8Array(buffer);
-		let binary = "";
-		for (let i = 0; i < bytes.byteLength; i++) {
-			binary += String.fromCharCode(bytes[i]);
-		}
-		return btoa(binary);
-	}
+
 	setCoverImage(url: string | null) {
 		while (this.coverFrame.firstChild) {
 			this.coverFrame.firstChild.remove();

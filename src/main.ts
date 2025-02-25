@@ -704,13 +704,13 @@ export default class WeWritePlugin extends Plugin {
 		);
 
 		this.addCommand({
-			id: "wewrite-open-previewer",
-			name: $t('main.wewrite-open-previewer'),
+			id: "open-previewer",
+			name: $t('main.open-previewer'),
 			callback: () => this.activateView(),
 		});
 		this.addCommand({
-			id: "wewrite-open-material-view",
-			name: $t('main.wewrite-open-material-view'),
+			id: "open-material-view",
+			name: $t('main.open-material-view'),
 			callback: () => this.activateMaterialView(),
 		});
 

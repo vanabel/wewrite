@@ -154,6 +154,7 @@ export class WeWriteSettingTab extends PluginSettingTab {
 
 		new Setting(frame)
 			.setName($t('settings.custom-themes-folder'))
+			.setHeading()
 			.setDesc($t('settings.the-folder-where-your-custom-themes'))
 			.addSearch((cb) => {
 				new FolderSuggest(this.app, cb.inputEl);
@@ -209,6 +210,7 @@ export class WeWriteSettingTab extends PluginSettingTab {
 		//account Name
 		new Setting(cEl)
 			.setName($t('settings.account-name'))
+			.setHeading()
 			.setDesc($t('settings.account-name-for-your-wechat-official'))
 			.setClass('wewrite-setting-input')
 			.addText(text => text
@@ -222,6 +224,7 @@ export class WeWriteSettingTab extends PluginSettingTab {
 		//addId		
 		new Setting(cEl)
 			.setName('AppId')
+			.setHeading()
 			.setDesc($t('settings.appid-for-your-wechat-official-account'))
 			.setClass('wewrite-setting-input')
 			.addText(text => text
@@ -235,6 +238,7 @@ export class WeWriteSettingTab extends PluginSettingTab {
 		//addSecret
 		new Setting(cEl)
 			.setName($t('settings.app-secret'))
+			.setHeading()
 			.setDesc($t('settings.app-secret-for-your-wechat-official'))
 			.setClass('wewrite-setting-input')
 			.addText(text => text
@@ -246,6 +250,7 @@ export class WeWriteSettingTab extends PluginSettingTab {
 		// refresh token
 		new Setting(cEl)
 			.setName($t('settings.test-connection'))
+			.setHeading()
 			.setDesc($t('settings.check-if-your-account-setting-is-correct'))
 			.addExtraButton(async button => {
 				button.setTooltip($t('settings.click-to-connect-wechat-server')).setIcon('plug-zap');
@@ -262,6 +267,7 @@ export class WeWriteSettingTab extends PluginSettingTab {
 		// delete this account
 		new Setting(cEl)
 			.setName($t('settings.delete-account'))
+			.setHeading()
 			.setDesc($t('settings.be-carefull-delete-account'))
 			.setClass('danger-extra-button')
 			.addExtraButton(async button => {
@@ -316,6 +322,7 @@ export class WeWriteSettingTab extends PluginSettingTab {
 
 		new Setting(frame)
 			.setName('base_url')
+			.setHeading()
 			.setDesc($t('settings.llm-access-base-url'))
 			.setClass('wewrite-setting-input')
 			.addText(text => text
@@ -327,6 +334,7 @@ export class WeWriteSettingTab extends PluginSettingTab {
 
 		new Setting(frame)
 			.setName('api_key')
+			.setHeading()
 			.setDesc($t('settings.llm-access-api-key'))
 			.setClass('wewrite-setting-input')
 			.addText(text => text
@@ -338,6 +346,7 @@ export class WeWriteSettingTab extends PluginSettingTab {
 
 		new Setting(frame)
 			.setName('model')
+			.setHeading()
 			.setDesc($t('settings.llm-model-to-be-used'))
 			.setClass('wewrite-setting-input')
 			.addText(text => text
@@ -353,6 +362,7 @@ export class WeWriteSettingTab extends PluginSettingTab {
 
 		new Setting(frame)
 			.setName('base_url')
+			.setHeading()
 			.setDesc($t('settings.llm-access-base-url'))
 			.setClass('wewrite-setting-input')
 			.addText(text => text
@@ -364,6 +374,7 @@ export class WeWriteSettingTab extends PluginSettingTab {
 
 		new Setting(frame)
 			.setName('task_url')
+			.setHeading()
 			.setDesc($t('settings.image-llm-checking-task-progress-url'))
 			.setClass('wewrite-setting-input')
 			.addText(text => text
@@ -375,6 +386,7 @@ export class WeWriteSettingTab extends PluginSettingTab {
 
 		new Setting(frame)
 			.setName('api_key')
+			.setHeading()
 			.setDesc($t('settings.llm-access-api-key'))
 			.setClass('wewrite-setting-input')
 			.addText(text => text
@@ -386,6 +398,7 @@ export class WeWriteSettingTab extends PluginSettingTab {
 
 		new Setting(frame)
 			.setName('model')
+			.setHeading()
 			.setDesc($t('settings.llm-model-to-be-used'))
 			.setClass('wewrite-setting-input')
 			.addText(text => text
@@ -420,6 +433,7 @@ export class WeWriteSettingTab extends PluginSettingTab {
 
 		new Setting(mpFrame)
 			.setName($t('settings.use-center-token-server'))
+			.setHeading()
 			.setDesc($t('settings.if-your-device-cannot-get-static-pubic-i'))
 			.addToggle(toggle => {
 				toggle.setValue(this.plugin.settings.useCenterToken)
@@ -444,6 +458,7 @@ export class WeWriteSettingTab extends PluginSettingTab {
 
 		new Setting(mpFrame)
 			.setName($t('settings.select-account'))
+			.setHeading()
 			.setDesc($t('settings.choose-the-account-to-modify'))
 			.addDropdown(
 				(dropdown) => {
@@ -481,6 +496,7 @@ export class WeWriteSettingTab extends PluginSettingTab {
 
 		new Setting(mpFrame)
 			.setName($t('settings.draft-previewer-wechat-id'))
+			.setHeading()
 			.setDesc($t('settings.draft-only-visible-for-the-wechat-user-o'))
 			.addText(text => text
 				.setValue(this.plugin.settings.previewer_wxname || '')
@@ -494,6 +510,7 @@ export class WeWriteSettingTab extends PluginSettingTab {
 
 		new Setting(mpFrame)
 			.setName($t('settings.import-export-wewrite-account'))
+			.setHeading()
 			.setDesc($t('settings.import-or-export-your-account-info-for-b'))
 			.setClass('wewrite-import-export-config')
 			.addExtraButton(

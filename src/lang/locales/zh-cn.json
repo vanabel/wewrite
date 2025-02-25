@@ -202,7 +202,7 @@
 		"get-synonyms": "获取同义词...",
 		"generating-mermaid": "正在生成Mermaid...",
 		"generating-latex": "正在生成LaTeX...",
-		"wewrite-open-previewer": "文章渲染预览",
-		"wewrite-open-material-view": "素材管理"
+		"open-previewer": "文章渲染预览",
+		"open-material-view": "素材管理"
 	}
 }
