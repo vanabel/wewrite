@@ -150,7 +150,7 @@ export class WeWriteSettingTab extends PluginSettingTab {
 
 	creatCSSStyleSetting(container: HTMLElement) {
 		const frame = container.createDiv({ cls: 'wewrite-setting-frame' })
-		frame.createEl('h4', { text: $t('settings.custom-themes'), cls: 'wechat-setting-title' })
+		new Setting(frame).setName($t('settings.custom-themes'))
 
 		new Setting(frame)
 			.setName($t('settings.custom-themes-folder'))

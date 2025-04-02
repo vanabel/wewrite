@@ -87,7 +87,7 @@
     "public-ip-address": "Public IP address",
     "you-should-add-this-ip-to-ip-whitelist-o": "Add this IP to the WeChat MP platform's IP whitelist. Click the image to visit it.",
     "copy-ip-to-clipboard": "Copy IP to clipboard",
-    "use-center-token-server": "Use Center Token Server",
+    "use-center-token-server": "Use center token server",
     "if-your-device-cannot-get-static-pubic-i": "If your device cannot get a static public IP, use our center token server to get tokens. We will not misuse your App ID or secret.",
     "account-info": "Account info",
     "select-account": "Select account",
