@@ -1,4 +1,4 @@
-# WeWrite - Obsidian 微信公众号写作插件
+# WeWrite - 微信公众号写作Obsidian插件
 
 [English Version](README.md)
 
