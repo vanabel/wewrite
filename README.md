@@ -1,4 +1,4 @@
-# WeWrite - Obsidian WeChat Official Account Writing Plugin
+# WeWrite - WeChat Official Account Writing Plugin for Obsidian
 
 [中文版](README_CN.md)
 
