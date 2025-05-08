@@ -19,6 +19,10 @@
         {
             "name": "极简风格",
             "file": "simple-theme.md"
+        },
+        {
+            "name": "小马过河",
+            "file": "小马过河.md"
         }
 
     ]

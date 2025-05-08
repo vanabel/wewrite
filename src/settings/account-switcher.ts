@@ -17,7 +17,7 @@ export class WeChatMPAccountSwitcher extends Setting {
             this.plugin.settings.mpAccounts.forEach(account => {
                 dropdown.addOption(account.accountName, account.accountName)
             })
-            dropdown.setValue(this.plugin.settings.selectedAccount ?? $t('settings.select-wechat-mp-account'))
+            dropdown.setValue(this.plugin.settings.selectedMPAccount ?? $t('settings.select-wechat-mp-account'))
 						.onChange(async (value) => {
 							// this.plugin.onWeChantMPAccountChange(value)
                             this.plugin.messageService.sendMessage('wechat-account-changed', value)

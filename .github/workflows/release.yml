@@ -1,0 +1,101 @@
+name: Release Plugin
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - v*
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+      
+      - name: Update versions.json
+        run: |
+          VERSION=$VERSION
+          MANIFEST_VERSION=$(jq -r .version manifest.json)
+          if [ "$VERSION" != "v$MANIFEST_VERSION" ]; then
+            echo "Git tag ($VERSION) does not match manifest.json version (v$MANIFEST_VERSION)"
+            exit 1
+          fi
+
+          jq --arg v "$VERSION" --argjson m "$(cat manifest.json)" \
+            '. + {($v): $m}' versions.json > versions.tmp.json
+          mv versions.tmp.json versions.json
+
+        
+      - name: Build plugin
+        run: yarn build
+        
+      - name: Commit updated versions.json
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add versions.json
+          git commit -m "chore: update versions.json for $VERSION"
+          git push
+      
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Release ${{ env.VERSION }}
+          tag_name: ${{ env.VERSION }}
+          files: |
+            main.js
+            manifest.json
+            styles.css
+            versions.json
+        env: 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Upload Release Assets
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./main.js
+          asset_name: main.js
+          asset_content_type: application/javascript
+      
+      - name: Upload Manifest
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./manifest.json
+          asset_name: manifest.json
+          asset_content_type: application/json
+
+      - name: Upload Versions
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./versions.json
+          asset_name: versions.json
+          asset_content_type: application/json
+
+      - name: Upload Styles
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./styles.css
+          asset_name: styles.css
+          asset_content_type: text/css

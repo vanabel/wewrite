@@ -34,7 +34,10 @@ export type MSG_TYPE  =
   'delete-media-item' |
   'delete-draft-item' |
   'publish-draft-item' |
-  'custom-theme-folder-changed'
+  'custom-theme-folder-changed' |
+  'image-generated' |
+  'show-spinner' | 
+  'hide-spinner'
 
   
 

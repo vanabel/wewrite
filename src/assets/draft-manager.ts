@@ -38,13 +38,17 @@ export type LocalDraftItem = {
 
 }
 
+export const initDraftDB = () => {
+	const db = new PouchDB('wewrite-local-drafts');
+	return  db;
+}
 export class LocalDraftManager {
     private plugin: WeWritePlugin;
     private db: PouchDB.Database;
     private static instance: LocalDraftManager;
     private constructor(plugin: WeWritePlugin) {
         this.plugin = plugin;
-        this.db = new PouchDB('wewrite-local-drafts');
+        this.db = initDraftDB();
     }
     public static getInstance(plugin: WeWritePlugin): LocalDraftManager {
         if (!LocalDraftManager.instance) {
@@ -55,7 +59,7 @@ export class LocalDraftManager {
     public async getDrafOfActiveNote() {
         let draft: LocalDraftItem | undefined
 
-        const accountName = this.plugin.settings.selectedAccount;
+        const accountName = this.plugin.settings.selectedMPAccount;
         if (accountName !== undefined && accountName) {
             const f = this.plugin.app.workspace.getActiveFile()
 			

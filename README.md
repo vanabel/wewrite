@@ -1,68 +1,68 @@
-# WeWrite - WeChat Official Account Writing Plugin for Obsidian
+# WeWrite - 微信公众号写作Obsidian 插件
 
-[中文版](README_CN.md)
+[English Version](README_en.md)
 
-## Overview
+## 概述
 
-WeWrite is a plugin for Obsidian (https://obsidian.md). 
+WeWrite 是 Obsidian (https://obsidian.md) 的一款插件。
 
-It is designed to render notes and publish them to the WeChat Official Account platform, integrating AI writing assistance to make Obsidian a powerful writing tool for WeChat Official Account content.
+它旨在将笔记渲染并发布到微信公众号平台，同时集成 AI 写作辅助功能，使 Obsidian 成为微信公众号内容的强大写作工具。
 
-## Features
+## 功能
 
-### Obsidian Features Rendered to WeChat Format
-- **Markdown Rendering**: Supports standard Markdown content.
-- **Excalidraw**: Supports direct embedding of Excalidraw plugin diagrams.
-- **Mermaid**: Supports Mermaid diagrams.
-- **LaTeX**: Supports LaTeX formulas.
-- **Callout & Admonition**: Supports Obsidian's native callouts and admonitions.
-- **Code Highlighting**: Supports code blocks and inline code.
-- **Icons**: Supports Obsidian icons, the Iconize plugin, and Remix icons in Markdown content.
-- **Charts**: Supports content from Obsidian chart plugins.
-- **PDF++**: Supports notes and images from the Obsidian PDF++ plugin.
-- **Embeded Notes**: Supports note with embedded notes.
-- **Links & Footnotes**: Converts links and footnotes to WeChat format.
+### Obsidian 特色内容渲染为微信公众号格式
+- **Markdown 渲染**：支持标准 Markdown 内容。
+- **Excalidraw**：支持直接嵌入 Excalidraw 插件的图表。
+- **Mermaid**：支持 Mermaid 图表。
+- **LaTeX**：支持 LaTeX 公式。
+- **Callout & Admonition**：支持 Obsidian 原生的 Callout 和 Admonition。
+- **代码高亮**：支持代码块和行内代码。
+- **图标**：支持 Obsidian 图标、Iconize 插件以及 Remix 图标在 Markdown 内容中的使用。
+- **Charts**：支持 Obsidian Charts插件的内容。
+- **PDF++**：支持 Obsidian PDF++ 插件中的笔记和图片。
+- **嵌套笔记**：支持在笔记中嵌入其它笔记的渲染。
+- **链接与脚注**：将链接和脚注转换为微信公众号格式。
 
-### AI Writing Assistance
-- **Content Polishing**: Optimizes article content using AI.
-- **Bilingual Translation**: Supports bidirectional translation between Chinese and English.
-- **Mermaid Generation**: Automatically generates Mermaid diagrams.
-- **LaTeX Generation**: Automatically generates LaTeX formulas.
-- **Synonym Suggestions**: Provides synonym replacement suggestions for selected words.
+### AI 写作辅助
+- **内容润色**：使用 AI 优化文章内容。
+- **双语翻译**：支持中英文双向翻译。
+- **Mermaid 生成**：自动生成 Mermaid 图表。
+- **LaTeX 生成**：自动生成 LaTeX 公式。
+- **同义词建议**：为选中的词语提供同义词替换建议。
 
-### WeChat Official Account Integration
-- **Material Management**: Manages WeChat Official Account materials, including images, audio, and videos.
-- **Draft Management**: Creates, previews, and publishes WeChat Official Account articles.
-- **Account Management**: Supports switching between multiple WeChat Official Accounts.
+### 微信公众号集成
+- **素材管理**：管理微信公众号素材，包括图片、音频和视频。
+- **草稿管理**：创建、预览和发布微信公众号文章。
+- **账号管理**：支持切换多个微信公众号账号。
 
-### Other Features
-- **Theme Management**: Supports custom theme styles.
-- **Real-time Preview**: Provides real-time article previews.
+### 其他功能
+- **主题管理**：支持自定义主题样式。
+- **实时预览**：提供文章实时预览功能。
 
-## Installation Guide
+## 安装指南
 
-1. Open **Settings** in Obsidian.
-2. Go to the **Community Plugins** page.
-3. Search for "WeWrite."
-4. Click **Install** and enable the plugin.
+1. 在 Obsidian 中打开 **设置**。
+2. 进入 **社区插件** 页面。
+3. 搜索 "WeWrite"。
+4. 点击 **安装** 并启用插件。
 
-## Usage Instructions
+## 使用说明
 
-### Basic Usage
-1. Use the editor's context menu to access AI writing assistance (e.g., content polishing, translation, etc.).
-2. Access WeWrite features via the right-click menu or command palette.
-3. Set up draft properties in the previewer on the right side (e.g., title, digest, cover image, etc.).
-4. Generate a digest and cover image with one click using AI assistance.
-5. Send the draft to your WeChat Official Account.
-6. Custom themes can be managed as normal notes (`.md` files).
+### 基本用法
+1. 使用编辑器的右键菜单访问 AI 写作辅助功能（例如，内容润色、翻译等）。
+2. 通过右键菜单或命令面板访问 WeWrite 功能。
+3. 在右侧预览器中设置草稿属性（例如，标题、摘要、封面图片等）。
+4. 使用 AI 辅助一键生成摘要和封面图片。
+5. 将草稿发送到微信公众号。
+6. 自定义主题可以作为普通笔记（`.md` 文件）进行管理。
 
-### WeChat Official Account Integration
-1. Use **Material Management** to upload and manage materials.
-2. Use **Draft Management** to delete, preview, mass-publish, and publish drafts.
+### 微信公众号集成
+1. 使用 **素材管理** 上传和管理素材。
+2. 使用 **草稿管理** 删除、预览、批量发布和发布草稿。
 
-## Credits
+## 致谢
 
-The development of this plugin has been greatly inspired by the following projects:
+本插件的开发深受以下项目的启发：
 1. https://github.com/sunbooshi/note-to-mp
 2. https://github.com/ai-chen2050/obsidian-wechat-public-platform
 3. https://github.com/zhouhua/obsidian-export-image
@@ -71,9 +71,10 @@ The development of this plugin has been greatly inspired by the following projec
 6. https://highlightjs.org/
 7. https://www.mathjax.org/
 
-And many more. These are great projects, and I extend my respect and gratitude to their creators for their contributions to the open-source community.
+以及更多项目。这些都是非常棒的项目，我对它们的开发者表示敬意和感谢，感谢他们对开源社区的贡献。
 
-## License
+## 许可证
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+本项目采用 MIT 许可证。详情请参阅 [LICENSE](LICENSE) 文件。
+
 

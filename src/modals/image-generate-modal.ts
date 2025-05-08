@@ -10,6 +10,9 @@ import WeWritePlugin from 'src/main';
 export class ImageGenerateModal extends Modal {
     plugin: WeWritePlugin;
     callback: CallableFunction;
+	public prompt: string = '画面上有条河，小马在水边准备过河，河边有小马的妈妈一匹老马，还有老牛，河边还有一棵树，树上有松鼠，它们仿佛在对话中，小马很疑惑的表情';
+	public negative_prompt: string = '没有人，和其它动物';
+	public size: string = '1440*613';
     constructor(plugin: WeWritePlugin, callback: (url: string) => void) {
         super(plugin.app);
         this.plugin = plugin;
@@ -28,25 +31,25 @@ export class ImageGenerateModal extends Modal {
         sizebar.createEl('span', { text: $t('modals.image-generation.size'), cls: "image-generate-dialog-size-label" })
         const size = sizebar.createEl('input', {
             placeholder: 'width*height',
-            value: '1440*613',
+            value: this.size,
             cls: 'image-generate-dialog-size'
         });
 
         contentEl.createEl('h5', { text: $t('modals.image-generation.prompt'), cls: "image-generate-dialog-size-label" })
         const prompt = contentEl.createEl('textarea', {
             placeholder: $t('imageGenerateModal.promptPlaceholder'),
-            value: '画面上有条河，小马在水边准备过河，河边有小马的妈妈一匹老马，还有老牛，河边还有一棵树，树上有松鼠，它们仿佛在对话中，小马很疑惑的表情',
+            value: this.prompt,
             cls: 'rename-textarea'
         });
-        prompt.value = '画面上有条河，小马在水边准备过河，河边有小马的妈妈一匹老马，还有老牛，河边还有一棵树，树上有松鼠，它们仿佛在对话中，小马很疑惑的表情'
+        prompt.value = this.prompt
 
         contentEl.createEl('h5', { text: $t('modals.image-generation.negative-prompt'), cls: "image-generate-dialog-size-label" })
         const negativePrompt = contentEl.createEl('textarea', {
             placeholder: $t('imageGenerateModal.negativePromptPlaceholder'),
-            value: '没有人，和其它动物',
+            value: this.negative_prompt,
             cls: 'rename-textarea'
         });
-        negativePrompt.value = '没有人，和其它动物'
+        negativePrompt.value = this.negative_prompt;
         const toolbar = contentEl.createDiv({ cls: 'image-generate-dialog-tool-bar' })
         const confirmButton = toolbar.createEl('button', { text: $t('modals.image-generation.generate') });
         const cancelButton = toolbar.createEl('button', { text: $t('modals.cancel') });

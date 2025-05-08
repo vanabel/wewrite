@@ -1,6 +1,6 @@
 {
 	"name": "wewrite",
-	"version": "1.0.0",
+	"version": "1.0.5",
 	"description": "This is a plugin for Obsidian (https://obsidian.md), which can render note as a WeChat MP article, and send for draft or publish.",
 	"main": "main.js",
 	"scripts": {
@@ -36,6 +36,7 @@
 		"i18next": "^24.2.0",
 		"marked": "^15.0.0",
 		"marked-highlight": "^2.2.1",
+		"ollama": "^0.5.12",
 		"openai": "^4.77.3",
 		"postcss": "^8.4.49",
 		"pouchdb": "^9.0.0",

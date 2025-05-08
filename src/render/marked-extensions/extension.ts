@@ -39,4 +39,8 @@ export abstract class WeWriteMarkedExtension {
     async beforePublish() { }
     async cleanup() { return; }
     abstract markedExtension(): MarkedExtension
+	public isPluginInstlled(pluginId:string) {
+		const plugins = this.plugin.app.plugins.plugins;
+        return Object.prototype.hasOwnProperty.call(plugins, pluginId);
+	}
 }

@@ -5,6 +5,7 @@
 import { $t } from 'src/lang/i18n';
 import { fetchImageBlob } from 'src/utils/utils';
 import { WechatClient } from './../wechat-api/wechat-client';
+import WeWritePlugin from 'src/main';
 function imageFileName(mime:string){
     const type = mime.split('/')[1]
     return `image-${new Date().getTime()}.${type}`
@@ -75,7 +76,7 @@ export async function uploadSVGs(root: HTMLElement, wechatClient: WechatClient){
             return
         }
         await svgToPng(svgString).then(async blob => {
-            await wechatClient.uploadImage(blob, imageFileName(blob.type)).then(res => {
+            await wechatClient.uploadMaterial(blob, imageFileName(blob.type)).then(res => {
                 if (res){
                     svg.outerHTML = `<img src="${res.url}" />`
                 }else{
@@ -84,6 +85,7 @@ export async function uploadSVGs(root: HTMLElement, wechatClient: WechatClient){
             })
         })
     })
+	
     await Promise.all(uploadPromises)
 }
 export async function uploadCanvas(root:HTMLElement, wechatClient:WechatClient):Promise<void>{
@@ -95,7 +97,7 @@ export async function uploadCanvas(root:HTMLElement, wechatClient:WechatClient):
     
     const uploadPromises = canvases.map(async (canvas) => {
         const blob = getCanvasBlob(canvas);
-        await wechatClient.uploadImage(blob, imageFileName(blob.type)).then(res => {
+        await wechatClient.uploadMaterial(blob, imageFileName(blob.type)).then(res => {
             if (res){
                 canvas.outerHTML = `<img src="${res.url}" />`
             }else{
@@ -140,11 +142,51 @@ export async function uploadURLImage(root:HTMLElement, wechatClient:WechatClient
             
         }else{
 
-            await wechatClient.uploadImage(blob, imageFileName(blob.type)).then(res => {
+            await wechatClient.uploadMaterial(blob, imageFileName(blob.type)).then(res => {
                 if (res){
                     img.src = res.url
                 }else{
                     console.error(`upload image failed.`);
+                    
+                }
+            })
+        }
+    })
+    await Promise.all(uploadPromises)
+}
+export async function uploadURLVideo(root:HTMLElement, wechatClient:WechatClient):Promise<void>{
+    const videos: HTMLVideoElement[] = []
+    
+    root.querySelectorAll('video').forEach (video => {
+        videos.push(video)
+    })
+    
+    const uploadPromises = videos.map(async (video) => {
+        let blob:Blob|undefined 
+        if (video.src.includes('://mmbiz.qpic.cn/')){
+            return;
+        }
+        else if (video.src.startsWith('data:image/')){
+            blob = dataURLtoBlob(video.src);
+        }else{
+            blob = await fetchImageBlob(video.src)
+        }
+        
+        if (blob === undefined){
+            return
+            
+        }else{
+			console.log(`uploading video: ${video.src} =>`, blob.size, blob.type);
+			
+            await wechatClient.uploadMaterial(blob, imageFileName(blob.type), 'video').then(async res => {
+				console.log(`uploaded video: =>`, res);
+                if (res){
+					const video_info = await wechatClient.getMaterialById(res.media_id)
+                    console.log(`video info: =>`, video_info);
+					
+					video.src = video_info.url
+                }else{
+                    console.error(`upload video failed.`);
                     
                 }
             })

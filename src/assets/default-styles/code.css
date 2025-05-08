@@ -37,6 +37,7 @@
   position: relative;
   padding:0;
   margin: 0;
+  margin-right: 1rem;
   overflow: auto;
 }
 
@@ -44,6 +45,7 @@
 .wewrite .code-section code {
   display: block;
   padding: 10px 5px!important;
+  padding-left: .5em;
   font-family: Consolas, Monaco, Menlo, monospace;
   text-wrap: nowrap;
 }
@@ -73,114 +75,93 @@
   content: none;
 }
 
-/*
- * Visual Studio 2015 dark style
- * Author: Nicolas LLOBERA <nllobera@gmail.com>
- */
-.wewrite .hljs {
-  /* background: #1E1E1E; */
-  color: #DCDCDC
-}
-
-.wewrite .hljs-keyword,
-.wewrite .hljs-literal,
-.wewrite .hljs-symbol,
-.wewrite .hljs-name {
-  color: #569CD6
-}
-
-.wewrite .hljs-link {
-  color: #569CD6;
-  text-decoration: underline
-}
-
-.wewrite .hljs-built_in,
-.wewrite .hljs-type {
-  color: #4EC9B0
-}
-
-.wewrite .hljs-number,
-.wewrite .hljs-class {
-  color: #B8D7A3
-}
-
-.wewrite .hljs-string,
-.wewrite .hljs-meta .hljs-string {
-  color: #D69D85
-}
-
-.wewrite .hljs-regexp,
-.wewrite .hljs-template-tag {
-  color: #9A5334
-}
-
-.wewrite .hljs-subst,
-.wewrite .hljs-function,
-.wewrite .hljs-title,
-.wewrite .hljs-params,
-.wewrite .hljs-formula {
-  color: #DCDCDC
-}
-
-.wewrite .hljs-comment,
-.wewrite .hljs-quote {
-  color: #57A64A;
-  font-style: italic
-}
-
-.wewrite .hljs-doctag {
-  color: #608B4E
-}
-
-.wewrite .hljs-meta,
-.wewrite .hljs-meta .hljs-keyword,
-.wewrite .hljs-tag {
-  color: #9B9B9B
-}
-
-.wewrite .hljs-variable,
-.wewrite .hljs-template-variable {
-  color: #BD63C5
-}
-
-.wewrite .hljs-attr,
-.wewrite .hljs-attribute {
-  color: #9CDCFE
-}
-
-.wewrite .hljs-section {
-  color: gold
-}
-
-.wewrite .hljs-emphasis {
-  font-style: italic
-}
-
-.wewrite .hljs-strong {
-  font-weight: bold
-}
-
-.wewrite .hljs-code {
-  font-family: 'Monospace';
-}
-
-.wewrite .hljs-bullet,
-.wewrite .hljs-selector-tag,
-.wewrite .hljs-selector-id,
-.wewrite .hljs-selector-class,
-.wewrite .hljs-selector-attr,
-.wewrite .hljs-selector-pseudo {
-  color: #D7BA7D
-}
-
-.wewrite .hljs-addition {
-  background-color: #144212;
-  display: inline-block;
-  width: 100%
-}
-
-.wewrite .hljs-deletion {
-  background-color: #600;
-  display: inline-block;
-  width: 100%
-}
+.wewrite pre code .hljs {
+	display: block;
+	overflow-x: auto;
+	padding: 1em
+  }
+  .wewrite code .hljs {
+	padding: 3px 5px
+  }
+  /*
+  
+  Atom One Dark by Daniel Gamage
+  Original One Dark Syntax theme from https://github.com/atom/one-dark-syntax
+  
+  base:    #282c34
+  mono-1:  #abb2bf
+  mono-2:  #818896
+  mono-3:  #5c6370
+  hue-1:   #56b6c2
+  hue-2:   #61aeee
+  hue-3:   #c678dd
+  hue-4:   #98c379
+  hue-5:   #e06c75
+  hue-5-2: #be5046
+  hue-6:   #d19a66
+  hue-6-2: #e6c07b
+  
+  */
+  .wewrite .hljs {
+	color: #abb2bf;
+	background: #282c34
+  }
+  .wewrite .hljs-comment,
+  .wewrite .hljs-quote {
+	color: #5c6370;
+	font-style: italic
+  }
+  .wewrite .hljs-doctag,
+  .wewrite .hljs-keyword,
+  .wewrite .hljs-formula {
+	color: #c678dd
+  }
+  .wewrite .hljs-section,
+  .wewrite .hljs-name,
+  .wewrite .hljs-selector-tag,
+  .wewrite .hljs-deletion,
+  .wewrite .hljs-subst {
+	color: #e06c75
+  }
+  .wewrite .hljs-literal {
+	color: #56b6c2
+  }
+  .wewrite .hljs-string,
+  .wewrite .hljs-regexp,
+  .wewrite .hljs-addition,
+  .wewrite .hljs-attribute,
+  .wewrite .hljs-meta .wewrite .hljs-string {
+	color: #98c379
+  }
+  .wewrite .hljs-attr,
+  .wewrite .hljs-variable,
+  .wewrite .hljs-template-variable,
+  .wewrite .hljs-type,
+  .wewrite .hljs-selector-class,
+  .wewrite .hljs-selector-attr,
+  .wewrite .hljs-selector-pseudo,
+  .wewrite .hljs-number {
+	color: #d19a66
+  }
+  .wewrite .hljs-symbol,
+  .wewrite .hljs-bullet,
+  .wewrite .hljs-link,
+  .wewrite .hljs-meta,
+  .wewrite .hljs-selector-id,
+  .wewrite .hljs-title {
+	color: #61aeee
+  }
+  .wewrite .hljs-built_in,
+  .wewrite .hljs-title.class_,
+  .wewrite .hljs-class .wewrite .hljs-title {
+	color: #e6c07b
+  }
+  .wewrite .hljs-emphasis {
+	font-style: italic
+  }
+  .wewrite .hljs-strong {
+	font-weight: bold
+  }
+  .wewrite .hljs-link {
+	text-decoration: underline
+  }

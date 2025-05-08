@@ -5,7 +5,7 @@ manage the wechat account settings
 import PouchDB from 'pouchdb';
 import { areObjectsEqual } from 'src/utils/utils';
 
-export type WeWriteAccountInfo = {
+export type WeChatAccountInfo = {
     _id?: string;
     accountName: string;
     appId: string;
@@ -15,10 +15,30 @@ export type WeWriteAccountInfo = {
     lastRefreshTime?: number;
     isTokenValid?: boolean;
     doc_id?: string;
-
 }
+
+export type AIChatAccountInfo = {
+    _id?: string;
+    accountName: string;
+    baseUrl: string;
+    apiKey: string;
+    model: string;
+    doc_id?: string;
+}
+export type AITaskAccountInfo = {
+    _id?: string;
+    accountName: string;
+    baseUrl: string;
+    taskUrl: string;
+    apiKey: string;
+    model: string;
+    doc_id?: string;
+}
+
+// export type WeWriteAccountInfo = WeChatAccountInfo | AIChatAccountInfo | AITaskAccountInfo;
 export type WeWriteSetting = {
 	useCenterToken: boolean;
+    realTimeRender: boolean;
     previewer_wxname?: string;
     custom_theme?: string;
     codeLineNumber: boolean;
@@ -26,21 +46,36 @@ export type WeWriteSetting = {
     _id?: string; // = 'wewrite-setting';
     _rev?: string;
     ipAddress?: string;
-    selectedAccount?: string;
-    mpAccounts: Array<WeWriteAccountInfo>;
+    selectedMPAccount?: string;
+    selectedChatAccount?: string;
+    selectedDrawAccount?: string;
+    mpAccounts: Array<WeChatAccountInfo>;
+    chatAccounts: Array<AIChatAccountInfo>;
+    drawAccounts: Array<AITaskAccountInfo>;
     accountDataPath: string;
-    chatLLMBaseUrl?: string;
-    chatLLMApiKey?: string;
-    chatLLMModel?: string;
-    drawLLMBaseUrl?: string;
-    drawLLMTaskUrl?: string;
-    drawLLMApiKey?: string;
-    drawLLMModel?: string;
+	chatSetting: ChatSetting;
 
 }
 
+export type ChatSetting = {
+    _id?: string;
+    _rev?: string;
+	chatSelected?: string;
+	modelSelected?: string;
+	temperature?: number;
+	top_p?: number;
+	frequency_penalty?: number;
+	presence_penalty?: number;
+	max_tokens?: number;
+}
+
+export const initWeWriteDB = () => {
+	const db = new PouchDB('wewrite-settings');
+	return  db;
+}
 // Create a new database
-const db = new PouchDB('wewrite-settings');
+const db = initWeWriteDB();
+
 
 export const getWeWriteSetting = async (): Promise<WeWriteSetting | undefined> => {
     return new Promise((resolve, reject) => {
@@ -49,7 +84,7 @@ export const getWeWriteSetting = async (): Promise<WeWriteSetting | undefined> =
                 resolve(doc);
             })
             .catch((error: any) => {
-                console.error('Error getting WeWriteSetting:', error);
+                console.info('Error getting WeWriteSetting:', error);
                 resolve(undefined)
             });
     })

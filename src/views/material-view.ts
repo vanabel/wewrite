@@ -44,8 +44,8 @@ export class MaterialView extends ItemView {
 
   async onOpen() {
     this.redraw();
-    if (this.plugin.settings.selectedAccount !== undefined) {
-      this.plugin.assetsManager.loadMaterial(this.plugin.settings.selectedAccount)
+    if (this.plugin.settings.selectedMPAccount !== undefined) {
+      this.plugin.assetsManager.loadMaterial(this.plugin.settings.selectedMPAccount)
     }
   }
 

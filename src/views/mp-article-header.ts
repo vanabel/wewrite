@@ -77,7 +77,7 @@ export class MPArticleHeader {
 				}
 			}
 		);
-		this.updateLocalDraft();
+
 		this.imageGenerateModal = new ImageGenerateModal(
 			this.plugin,
 			(url: string) => {
@@ -92,6 +92,7 @@ export class MPArticleHeader {
 				}
 			}
 		);
+		this.updateLocalDraft();
 	}
 
 	onNoteRename(file: TFile) {
@@ -115,11 +116,10 @@ export class MPArticleHeader {
 			cls: "wewrite-article-header",
 		});
 		const details = container.createEl("details");
-		details.createEl("summary", { text: $t("views.article-header.title") });
+		details.createEl("summary", { text: $t("views.article-header.title"), cls: "wewrite-draft-header" });
 
 		new Setting(details)
 			.setName($t("views.article-header.article-title"))
-			.setHeading()
 			.addText((text) => {
 				this._title = text;
 				text.setPlaceholder(
@@ -137,7 +137,6 @@ export class MPArticleHeader {
 			});
 		new Setting(details)
 			.setName($t("views.article-header.author"))
-			.setHeading()
 			.addText((text) => {
 				this._author = text;
 				text.setPlaceholder(
@@ -152,7 +151,6 @@ export class MPArticleHeader {
 
 		new Setting(details)
 			.setName($t("views.article-header.digest"))
-			.setHeading()
 			.addExtraButton((button) => {
 				button
 					.setIcon("sparkles")
@@ -183,7 +181,6 @@ export class MPArticleHeader {
 
 		new Setting(details)
 			.setName($t("views.article-header.open-comments"))
-			.setHeading()
 			.setDesc($t("views.article-header.comments-description"))
 			.addToggle((toggle) => {
 				this._needOpenComment = toggle;
@@ -197,8 +194,7 @@ export class MPArticleHeader {
 			});
 		new Setting(details)
 			.setName($t("views.article-header.only-fans-can-comment"))
-			.setHeading()
-			.setDesc($t("views.article-header.fans-comment-description"))
+			.setDesc($t("views.article-header.only-fans-can-comment-description"))
 			.addToggle((toggle) => {
 				this._onlyFansCanComment = toggle;
 				toggle.setValue(false);
@@ -214,7 +210,7 @@ export class MPArticleHeader {
 	}
 	async generateDigest() {
 		if (!this.plugin.aiClient) {
-			new Notice($t("ai.no-api-setting"));
+			new Notice($t("ai.no-llm"));
 			return;
 		}
 		if (this.activeLocalDraft === undefined) {
@@ -240,7 +236,6 @@ export class MPArticleHeader {
 	private createCoverFrame(details: HTMLElement) {
 		new Setting(details)
 			.setName($t("views.article-header.cover-image"))
-			.setHeading()
 			.setDesc($t("views.article-header.cover-image-description"))
 			.addExtraButton((button) =>
 				button
@@ -249,7 +244,16 @@ export class MPArticleHeader {
 						$t("views.article-header.generate-cover-image-by-ai")
 					)
 					.onClick(async () => {
-						this.imageGenerateModal?.open();
+						if (this.imageGenerateModal === undefined) {
+							return;
+						}
+						if (this._digest.value !== undefined && this._digest.value) {
+							const prompt = this._digest.value.trim()
+							if (prompt){
+								this.imageGenerateModal.prompt = prompt;
+							}
+						}
+						this.imageGenerateModal.open();
 					})
 			);
 		const container = details.createDiv({ cls: "cover-container" });
@@ -313,7 +317,7 @@ export class MPArticleHeader {
 
 		return coverframe;
 	}
-
+	
 	setCoverImage(url: string | null) {
 		while (this.coverFrame.firstChild) {
 			this.coverFrame.firstChild.remove();
@@ -350,7 +354,16 @@ export class MPArticleHeader {
 		};
 	}
 	async updateCoverImage() {
-		this.imageGenerateModal?.open();
+		if (this.imageGenerateModal === undefined) {
+			return;
+		}
+		if (this._digest.value !== undefined && this._digest.value) {
+			const prompt = this._digest.value.trim()
+			if (prompt){
+				this.imageGenerateModal.prompt = prompt;
+			}
+		}
+		this.imageGenerateModal.open();
 	}
 	resetImage() {
 		this.setCoverImageXY(0, 0);
@@ -384,7 +397,7 @@ export class MPArticleHeader {
 				return;
 			}
 
-			const res = await WechatClient.getInstance(this.plugin).uploadImage(
+			const res = await WechatClient.getInstance(this.plugin).uploadMaterial(
 				blob,
 				"banner-cover.png",
 				"image"
@@ -438,6 +451,7 @@ export class MPArticleHeader {
 			const x = 0;
 			const y = 0;
 		}
+		
 		this.setCoverImageXY();
 		this.plugin.messageService.sendMessage(
 			"draft-title-updated",

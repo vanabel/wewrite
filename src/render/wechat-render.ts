@@ -45,11 +45,23 @@ export class WechatRender {
 	private static instance: WechatRender;
 	marked: Marked;
 	previewRender: PreviewRender;
-	debounceParse = async (path:string) => {
-		const md = await this.plugin.app.vault.adapter.read(path);
-		let html = await this.parse(md);
-		html = await this.postprocess(html);
-		return html;
+	delayParse = async (path:string) => {
+		// const md = await this.plugin.app.vault.adapter.read(path);
+		// let html = await this.parse(md);
+		// html = await this.postprocess(html);
+		// return html;
+		return new Promise<string>(async (resolve, reject) => {
+			setTimeout(async () => {
+				try {
+					const md = await this.plugin.app.vault.adapter.read(path);
+					let html = await this.parse(md);
+					html = await this.postprocess(html);
+					resolve(html);
+				} catch (error) {
+					reject(error);
+				}
+			}, 300);
+		});
 	}
 	private constructor(plugin: WeWritePlugin, previewRender: PreviewRender) {
 		this.plugin = plugin;
@@ -133,6 +145,6 @@ export class WechatRender {
 			container,
 			view
 		);
-		return this.debounceParse(path);
+		return this.delayParse(path);
 	}
 }

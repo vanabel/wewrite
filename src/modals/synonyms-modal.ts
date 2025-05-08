@@ -59,7 +59,7 @@ export class SynonymsModal extends Modal {
 			this.close();
 		});
 		
-		this.scope.register([],'Space', (evt) => {
+		this.scope.register([], 'Space', (evt) => {
 			evt.preventDefault();
 			this.resolve(this.synonyms[this.selectedIndex]);
 			this.close();

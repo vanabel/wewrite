@@ -42,6 +42,8 @@ type DeletableMaterialItem = MaterialItem & {
 
 PouchDB.plugin(PouchDBFind);
 
+
+
 type ASSETS = {
     images: Array<MaterialMeidaItem>,
     videos: Array<MaterialMeidaItem>
@@ -50,6 +52,10 @@ type ASSETS = {
     drafts: Array<DraftItem>
 }
 const MAX_COUNT = 20;
+export const initAssetsDB = () => {
+	const db = new PouchDB('wewrite-wechat-assets');
+	return  db;
+}
 export class AssetsManager {
     app: App;
     assets: Map<string, any[]>
@@ -66,7 +72,7 @@ export class AssetsManager {
         this.plugin = plugin
         this.assets = new Map()
         this.used = new Map()
-        this.db = new PouchDB('wewrite-wechat-assets');
+        this.db = initAssetsDB()
 
         this.plugin.messageService.registerListener('wechat-account-changed', (data: string) => {
             this.loadMaterial(data)
@@ -442,7 +448,7 @@ export class AssetsManager {
         return panels;
     }
     async removeMediaItemsFromDB(type: MediaType) {
-        const accountName = this.plugin.settings.selectedAccount;
+        const accountName = this.plugin.settings.selectedMPAccount;
         await this.db.find({
             selector: {
                 accountName: { $eq: accountName },

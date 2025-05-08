@@ -23,6 +23,7 @@ import {
 	uploadCanvas,
 	uploadSVGs,
 	uploadURLImage,
+	uploadURLVideo,
 } from "src/render/post-render";
 import { WechatRender } from "src/render/wechat-render";
 import { ResourceManager } from "../assets/resource-manager";
@@ -32,7 +33,7 @@ import { ThemeManager } from "./theme-manager";
 import { ThemeSelector } from "./theme-selector";
 import { WebViewModal } from "./webview";
 
-export const VIEW_TYPE_NP_PREVIEW = "wechat-np-article-preview";
+export const VIEW_TYPE_WEWRITE_PREVIEW = "wewrite-article-preview";
 export interface ElectronWindow extends Window {
 	WEBVIEW_SERVER_URL: string;
 }
@@ -47,10 +48,14 @@ export class PreviewPanel extends ItemView implements PreviewRender {
 	private plugin: WeWritePlugin;
 	private themeSelector: ThemeSelector;
 	private debouncedRender = debounce(async () => {
-		await this.renderDraft();
+		if (this.plugin.settings.realTimeRender) {
+			await this.renderDraft();
+		}
 	}, 2000);
 	private debouncedUpdate = debounce(async () => {
-		await this.renderDraft();
+		if (this.plugin.settings.realTimeRender) {
+			await this.renderDraft();
+		}
 	}, 1000);
 	private debouncedCustomThemeChange = debounce(async (theme: string) => {
 		this.getArticleProperties();
@@ -69,7 +74,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
 	containerDiv: HTMLElement;
 	mpModal: WebViewModal;
 	getViewType(): string {
-		return VIEW_TYPE_NP_PREVIEW;
+		return VIEW_TYPE_WEWRITE_PREVIEW;
 	}
 	getDisplayText(): string {
 		return $t("views.previewer.wewrite-previewer");
@@ -87,7 +92,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
 	async onOpen() {
 		this.buildUI();
 		this.startListen();
-		
+
 		this.plugin.messageService.registerListener(
 			"draft-title-updated",
 			(title: string) => {
@@ -101,6 +106,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
 				this.debouncedCustomThemeChange(theme);
 			}
 		);
+		this.plugin.messageService.sendMessage("active-file-changed", null);
 	}
 
 	getArticleProperties() {
@@ -130,33 +136,13 @@ export class PreviewPanel extends ItemView implements PreviewRender {
 					$t("views.previewer.file-not-found-path", [path])
 				);
 			}
-
-			
 			this.app.fileManager.processFrontMatter(file, (frontmatter) => {
 				this.articleProperties.forEach((value, key) => {
 					frontmatter[key] = value;
 				});
 			});
-
-			// const content = await this.app.vault.read(file);
-			// const frontmatterString = Array.from(
-			// 	this.articleProperties.entries()
-			// )
-			// 	.map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
-			// 	.join("\n");
-
-			// let updatedContent;
-			// if (content.startsWith("---")) {
-			// 	updatedContent = content.replace(
-			// 		/^---\n[\s\S]*?\n---/,
-			// 		`---\n${frontmatterString}\n---`
-			// 	);
-			// } else {
-			// 	updatedContent = `---\n${frontmatterString}\n---\n${content}`;
-			// }
-
-			// await this.app.vault.modify(file, updatedContent);
 		}
+		
 	}
 
 	public getCurrentMarkdownFile() {
@@ -183,7 +169,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
 			.addDropdown((dropdown: DropdownComponent) => {
 				this.themeSelector.dropdown(dropdown);
 			})
-			
+
 			.addExtraButton((button) => {
 				button
 					.setIcon("refresh-cw")
@@ -231,7 +217,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
 		this.renderDiv.id = "render-div";
 		let shadowDom = this.renderDiv.shawdowRoot;
 		if (shadowDom === undefined || shadowDom === null) {
-			shadowDom = this.renderDiv //.attachShadow({ mode: 'open' });
+			shadowDom = this.renderDiv; //.attachShadow({ mode: 'open' });
 		}
 
 		this.containerDiv = shadowDom.createDiv({ cls: "wewrite-article" });
@@ -244,6 +230,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
 		await uploadSVGs(this.articleDiv, this.plugin.wechatClient);
 		await uploadCanvas(this.articleDiv, this.plugin.wechatClient);
 		await uploadURLImage(this.articleDiv, this.plugin.wechatClient);
+		await uploadURLVideo(this.articleDiv, this.plugin.wechatClient);
 
 		const media_id = await this.wechatClient.sendArticleToDraftBox(
 			this.draftHeader.getActiveLocalDraft()!,
@@ -253,7 +240,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
 		if (media_id) {
 			this.draftHeader.updateDraftDraftId(media_id);
 			const news_item = await this.wechatClient.getDraftById(
-				this.plugin.settings.selectedAccount!,
+				this.plugin.settings.selectedMPAccount!,
 				media_id
 			);
 			if (news_item) {
@@ -309,12 +296,14 @@ export class PreviewPanel extends ItemView implements PreviewRender {
 			this
 		);
 
-		// return; //to see the render tree. 
-		const articleSection = createEl('section', {cls:"wewrite-article-content wewrite"})
+		// return; //to see the render tree.
+		const articleSection = createEl("section", {
+			cls: "wewrite-article-content wewrite",
+		});
 		const dom = sanitizeHTMLToDom(html);
-		articleSection.appendChild(dom)
-		this.articleDiv.empty()
-		this.articleDiv.appendChild(articleSection)
+		articleSection.appendChild(dom);
+		this.articleDiv.empty();
+		this.articleDiv.appendChild(articleSection);
 
 		this.elementMap.forEach(
 			async (node: HTMLElement | string, id: string) => {
@@ -336,8 +325,8 @@ export class PreviewPanel extends ItemView implements PreviewRender {
 								this.plugin,
 								this
 							).parseNote(file.path, this.articleDiv, this);
-							item.empty()
-							item.appendChild(sanitizeHTMLToDom(body))
+							item.empty();
+							item.appendChild(sanitizeHTMLToDom(body));
 						}
 					}
 				} else {
@@ -391,7 +380,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
 		const doc = sanitizeHTMLToDom(html);
 
 		item.empty();
-		item.appendChild(doc)
+		item.appendChild(doc);
 		// if (doc.childElementCount > 0) {
 		// 	for (const child of doc.children) {
 		// 		item.appendChild(child.cloneNode(true));

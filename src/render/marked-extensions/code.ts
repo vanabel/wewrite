@@ -156,6 +156,11 @@ export class CodeRenderer extends WeWriteMarkedExtension {
 
 	renderCharts(_token: Tokens.Generic) {
 		//the MarkdownRender doen't work well with it. use the preview instead.
+		if (!this.isPluginInstlled('obsidian-charts')){
+			console.log(`charts plugin not installed.`);
+			
+			return false;
+		}
 		const root = this.plugin.resourceManager.getMarkdownRenderedElement(this.chartsIndex, '.block-language-chart')
 
 		if (!root ) {

@@ -5,7 +5,9 @@
  */
 import {
 	debounce,
+	Editor,
 	EventRef,
+	MarkdownView,
 	MenuItem,
 	Notice,
 	Plugin,
@@ -15,21 +17,29 @@ import {
 import { getPublicIpAddress } from "src/utils/ip-address";
 import { AssetsManager } from "./assets/assets-manager";
 import { ResourceManager } from "./assets/resource-manager";
+import { $t } from "./lang/i18n";
+import { ConfirmModal } from "./modals/confirm-modal";
+import { ImageGenerateModal } from "./modals/image-generate-modal";
+import { PromptModal } from "./modals/prompt-modal";
+import { SynonymsModal } from "./modals/synonyms-modal";
 import { WeWriteSettingTab } from "./settings/setting-tab";
 import {
 	getWeWriteSetting,
 	saveWeWriteSetting,
 	WeWriteSetting,
+	initWeWriteDB
 } from "./settings/wewrite-setting";
-import { MessageService } from "./utils/message-service";
-import { $t } from "./lang/i18n";
-import { ConfirmModal } from "./modals/confirm-modal";
-import { PromptModal } from "./modals/prompt-modal";
-import { ProofService, showProofSuggestions } from "./modals/proof-suggestion";
-import { SynonymsModal } from "./modals/synonyms-modal";
+import { initAssetsDB } from "./assets/assets-manager";
+import { initDraftDB } from "./assets/draft-manager";
 import { AiClient } from "./utils/ai-client";
+import { MessageService } from "./utils/message-service";
+import {
+	proofreadPlugin,
+	proofreadStateField,
+	proofreadText,
+} from "./utils/proofread";
 import { MaterialView, VIEW_TYPE_MP_MATERIAL } from "./views/material-view";
-import { PreviewPanel, VIEW_TYPE_NP_PREVIEW } from "./views/previewer";
+import { PreviewPanel, VIEW_TYPE_WEWRITE_PREVIEW } from "./views/previewer";
 import { WechatClient } from "./wechat-api/wechat-client";
 
 const DEFAULT_SETTINGS: WeWriteSetting = {
@@ -38,9 +48,17 @@ const DEFAULT_SETTINGS: WeWriteSetting = {
 	css_styles_folder: "wewrite-css-styles",
 	codeLineNumber: true,
 	accountDataPath: "wewrite-accounts",
-	chatLLMBaseUrl: "",
-	chatLLMApiKey: "",
 	useCenterToken: false,
+	chatAccounts: [],
+	drawAccounts: [],
+	realTimeRender: true,
+	chatSetting: {
+		temperature: 0.7,
+		max_tokens: 2048,
+		top_p: 1,
+		frequency_penalty: 0,
+		presence_penalty: 0,
+	},
 };
 
 export default class WeWritePlugin extends Plugin {
@@ -49,6 +67,7 @@ export default class WeWritePlugin extends Plugin {
 	assetsManager: AssetsManager;
 	aiClient: AiClient | null = null;
 	private editorChangeListener: EventRef | null = null;
+	private imageGenerateModal: ImageGenerateModal | undefined;
 	matierialView: MaterialView;
 	messageService: MessageService;
 	resourceManager = ResourceManager.getInstance(this);
@@ -78,16 +97,48 @@ export default class WeWritePlugin extends Plugin {
 		await this.saveThemeFolder();
 	}, 3000);
 
-	proofService: ProofService;
+	// proofService: ProofService;
 
+	getCurrentEditor(): Editor | null {
+		const activeLeaf = this.app.workspace.activeLeaf;
+		if (!activeLeaf) {
+			return null;
+		}
+
+		const view = activeLeaf.view;
+		if (view?.getViewType() === "markdown") {
+			return (view as any).editor;
+		}
+
+		return null;
+	}
 	async addEditorMenu() {
+		this.messageService.registerListener(
+			"image-generated",
+			(url: string) => {
+				if (!url) {
+					return;
+				}
+				const editor = this.getCurrentEditor();
+				if (!editor) {
+					return;
+				}
+				if (url.startsWith("http")) {
+					editor.replaceSelection(`![](${url})`);
+				} else {
+					editor.replaceSelection(`![[${url}]]`);
+				}
+			}
+		);
 		this.registerEvent(
 			this.app.workspace.on("editor-menu", (menu, editor) => {
 				// @ts-ignore: Obsidian ts defined incomplete.
 				let file = editor.editorComponent.file;
-				file = file instanceof TFile ? file : this.app.workspace.getActiveFile();
+				file =
+					file instanceof TFile
+						? file
+						: this.app.workspace.getActiveFile();
 
-				
 				if (!file) {
 					return;
 				}
@@ -104,6 +155,7 @@ export default class WeWritePlugin extends Plugin {
 								.setIcon("sun")
 								.onClick(async () => {
 									const content = editor.getSelection();
+
 									const polished = await this.polishContent(
 										content
 									);
@@ -116,22 +168,53 @@ export default class WeWritePlugin extends Plugin {
 									}
 								});
 						});
-						// subMenu.addItem((subItem: MenuItem) => {
-						// 	subItem
-						// 		.setTitle($t('main.proof'))
-						// 		.setIcon('user-pen')
-						// 		.onClick(async () => {
-						// 			const content = editor.getSelection();
-						// 			const proofed = await this.proofContent(content);
 
-						// 			if (proofed) {
-						// 				this.proofService = showProofSuggestions(editor, proofed)
-						// 			}
-						// 		});
-						// });
 						subMenu.addItem((subItem: MenuItem) => {
 							subItem
-								.setTitle("synonyms")
+								.setTitle($t("main.proof"))
+								.setIcon("user-pen")
+								.onClick(async () => {
+									const content = editor.getSelection();
+									const cursorPos = editor.getCursor();
+									const cursorOffset =
+										editor.posToOffset(cursorPos);
+									console.log(
+										`cursorOffset: ${cursorOffset}`
+									);
+
+									const proofed = await this.proofContent(
+										content
+									);
+
+									if (proofed) {
+										console.log(`proofed:`, proofed);
+
+										const suggestions = proofed.map(
+											(proofItem) => {
+												return {
+													...proofItem,
+													start:
+														proofItem.start +
+														cursorOffset,
+													end:
+														proofItem.end +
+														cursorOffset,
+												};
+											}
+										);
+										proofreadText(
+											editor,
+											this.app.workspace.getActiveViewOfType(
+												MarkdownView
+											)!,
+											suggestions
+										);
+									}
+								});
+						});
+						subMenu.addItem((subItem: MenuItem) => {
+							subItem
+								.setTitle($t("main.synonyms"))
 								.setIcon("book-a")
 								.onClick(async () => {
 									const content = editor.getSelection();
@@ -219,6 +302,14 @@ export default class WeWritePlugin extends Plugin {
 									}
 								});
 						});
+						subMenu.addItem((subItem: MenuItem) => {
+							subItem
+								.setTitle($t("main.text-to-image"))
+								.setIcon("image-plus")
+								.onClick(async () => {
+									return this.generateImage(editor);
+								});
+						});
 					} else {
 						subMenu.addItem((subItem) => {
 							subItem
@@ -244,19 +335,27 @@ export default class WeWritePlugin extends Plugin {
 								.setTitle($t("main.proof"))
 								.setIcon("user-round-pen")
 								.onClick(async () => {
-									const content = await this.app.vault.read(
-										file
-									);
+									// const content = await this.app.vault.read(
+									// 	file
+									// );
+									const content = editor.getValue();
 									const proofed = await this.proofContent(
 										content
 									);
 
 									if (proofed) {
-										this.proofService =
-											showProofSuggestions(
-												editor,
-												proofed
-											);
+										proofreadText(
+											editor,
+											this.app.workspace.getActiveViewOfType(
+												MarkdownView
+											)!,
+											proofed
+										);
+										// this.proofService =
+										// 	showProofSuggestions(
+										// 		editor,
+										// 		proofed
+										// 	);
 									}
 								});
 						});
@@ -269,11 +368,11 @@ export default class WeWritePlugin extends Plugin {
 		this.activateMaterialView();
 	}
 	pullAllWeChatMPMaterial() {
-		if (this.settings.selectedAccount === undefined) {
+		if (this.settings.selectedMPAccount === undefined) {
 			new Notice($t("main.no-wechat-mp-account-selected"));
 			return;
 		}
-		this.assetsManager.pullAllMaterial(this.settings.selectedAccount);
+		this.assetsManager.pullAllMaterial(this.settings.selectedMPAccount);
 	}
 	assetsUpdated() {
 		this.messageService.sendMessage("material-updated", null);
@@ -282,7 +381,7 @@ export default class WeWritePlugin extends Plugin {
 		if (value === undefined || !value) {
 			return;
 		}
-		this.settings.selectedAccount = value;
+		this.settings.selectedMPAccount = value;
 		this.assetsManager.loadMaterial(value);
 	}
 
@@ -330,21 +429,26 @@ export default class WeWritePlugin extends Plugin {
 
 	async activateView() {
 		const { workspace } = this.app;
+		if (workspace.rightSplit.collapsed) {
+			workspace.rightSplit.expand();
 
-		let leaf: WorkspaceLeaf | null = null;
-		const leaves = workspace.getLeavesOfType(VIEW_TYPE_NP_PREVIEW);
+			let leaf: WorkspaceLeaf | null | undefined = workspace
+				.getLeavesOfType(VIEW_TYPE_WEWRITE_PREVIEW)
+				.find((leaf) => leaf.view instanceof PreviewPanel);
 
-		if (leaves.length > 0) {
-			leaf = leaves[0];
+			if (leaf === undefined || leaf === null) {
+				leaf = workspace.getRightLeaf(false);
+				leaf?.setViewState({
+					type: VIEW_TYPE_WEWRITE_PREVIEW,
+					active: true,
+				});
+			}
+			if (leaf) {
+				workspace.revealLeaf(leaf);
+			}
 		} else {
-			leaf = workspace.getRightLeaf(false);
-			await leaf?.setViewState({
-				type: VIEW_TYPE_NP_PREVIEW,
-				active: false,
-			});
+			workspace.rightSplit.collapse();
 		}
-
-		if (leaf) workspace.revealLeaf(leaf);
 	}
 	async activateMaterialView() {
 		const { workspace } = this.app;
@@ -462,8 +566,25 @@ export default class WeWritePlugin extends Plugin {
 			(account) => account.accountName === accountName
 		);
 	}
+	public getChatAIAccount(accountName: string | undefined = undefined) {
+		if (accountName === undefined) {
+			accountName = this.settings.selectedChatAccount;
+		}
+		return this.settings.chatAccounts.find(
+			(account) => account.accountName === accountName
+		);
+	}
+	public getDrawAIAccount(accountName: string | undefined = undefined) {
+		if (accountName === undefined) {
+			accountName = this.settings.selectedDrawAccount;
+		}
+		return this.settings.drawAccounts.find(
+			(account) =>
+				account.accountName === this.settings.selectedDrawAccount
+		);
+	}
 	getSelectedMPAccount() {
-		return this.getMPAccountByName(this.settings.selectedAccount);
+		return this.getMPAccountByName(this.settings.selectedMPAccount);
 	}
 	setAccessToken(
 		accountName: string,
@@ -546,6 +667,7 @@ export default class WeWritePlugin extends Plugin {
 		try {
 			this.showSpinner($t("main.get-synonyms"));
 			const result = await this.aiClient.synonym(content);
+			this.hideSpinner();
 			if (result) {
 				const synonyms = result.map((s) => s.replace(/^\d+\.\s*/, ""));
 				const selectedWord = await new Promise<string | null>(
@@ -629,7 +751,7 @@ export default class WeWritePlugin extends Plugin {
 			return null;
 		}
 		try {
-			this.showSpinner("Proofing...");
+			this.showSpinner($t("main.proofing"));
 			const result = await this.aiClient.proofContent(content);
 			if (result) {
 				return result.corrections;
@@ -647,22 +769,37 @@ export default class WeWritePlugin extends Plugin {
 			new Notice($t("main.chat-llm-has-not-been-configured"));
 			return null;
 		}
+		this.showSpinner($t("main.polishing"));
 		const result = await this.aiClient.polishContent(content);
+		this.hideSpinner();
 		if (result) {
 			return result.polished;
 		}
 		return null;
 	}
-	async generateCoverImage(content: string): Promise<string | null> {
+	async generateImage(editor: Editor) {
 		if (!this.aiClient) {
 			new Notice($t("main.chat-llm-has-not-been-configured"));
 			return null;
 		}
-		const result = await this.aiClient.generateCoverImage(content);
-		if (result) {
-			return result.coverImage;
+		if (this.imageGenerateModal === undefined) {
+			this.imageGenerateModal = new ImageGenerateModal(
+				this,
+				async (url: string) => {
+					//save it to local folder.
+					const fullPath = await ResourceManager.getInstance(
+						this
+					).saveImageFromUrl(url);
+					this.messageService.sendMessage(
+						"image-generated",
+						fullPath ? fullPath : url
+					);
+				}
+			);
 		}
-		return null;
+		this.imageGenerateModal.prompt = editor.getSelection();
+		this.imageGenerateModal.size = "1024*768";
+		this.imageGenerateModal.open();
 	}
 
 	async prompt(
@@ -686,7 +823,13 @@ export default class WeWritePlugin extends Plugin {
 			modal.open();
 		});
 	}
+	initDB() {
+		initWeWriteDB();
+		initAssetsDB();
+		initDraftDB();
+	}
 	async onload() {
+		this.initDB();
 		this.messageService = new MessageService();
 		await this.loadSettings();
 		this.wechatClient = WechatClient.getInstance(this);
@@ -694,7 +837,7 @@ export default class WeWritePlugin extends Plugin {
 		this.aiClient = AiClient.getInstance(this);
 
 		this.registerView(
-			VIEW_TYPE_NP_PREVIEW,
+			VIEW_TYPE_WEWRITE_PREVIEW,
 			(leaf) => new PreviewPanel(leaf, this)
 		);
 
@@ -705,12 +848,12 @@ export default class WeWritePlugin extends Plugin {
 
 		this.addCommand({
 			id: "open-previewer",
-			name: $t('main.open-previewer'),
+			name: $t("main.open-previewer"),
 			callback: () => this.activateView(),
 		});
 		this.addCommand({
 			id: "open-material-view",
-			name: $t('main.open-material-view'),
+			name: $t("main.open-material-view"),
 			callback: () => this.activateMaterialView(),
 		});
 
@@ -722,6 +865,23 @@ export default class WeWritePlugin extends Plugin {
 
 		this.addEditorMenu();
 		this.createSpinner();
+
+		// -- proofread
+		this.registerEditorExtension([proofreadStateField, proofreadPlugin]);
+
+		this.addCommand({
+			id: "proofread-text",
+			name: "校对文本",
+			editorCallback: async (editor: Editor, view: MarkdownView) => {
+				await proofreadText(editor, view);
+			},
+		});
+		this.messageService.registerListener('show-spinner', (msg:string) => {
+			this.showSpinner(msg);
+		})
+		this.messageService.registerListener('hide-spinner', () => {
+			this.hideSpinner();
+		})
 	}
 
 	onunload() {
@@ -729,8 +889,8 @@ export default class WeWritePlugin extends Plugin {
 			this.app.workspace.offref(this.editorChangeListener);
 		}
 		this.spinnerEl.remove();
-		if (this.proofService) {
-			this.proofService.destroy();
-		}
+		// if (this.proofService) {
+		// 	this.proofService.destroy();
+		// }
 	}
 }

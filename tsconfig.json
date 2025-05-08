@@ -4,7 +4,8 @@
     "inlineSourceMap": true,
     "inlineSources": true,
     "module": "ESNext",
-    "target": "es2018",
+    "target": "ES6",
+    "outDir": "./",
     "allowJs": true,
     "noImplicitAny": true,
     "moduleResolution": "node",
@@ -30,7 +31,7 @@
     "icons",
     "src/assets/css/build-template-css.js",
     "*.mjs",
+    "**/*.js",
     "src/render/dom-to-image-more.js"
-    
   ]
 }

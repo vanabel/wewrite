@@ -104,7 +104,7 @@ export class ResourceManager {
             .replace('T', '_');
 
         // Create new filename
-        const newFilename = `${noteBasename}_cover_${timestamp}.${ext || 'jpg'}`;
+        const newFilename = `${noteBasename}_generated_${timestamp}.${ext || 'jpg'}`;
         const fullPath = `${folderPath}/${newFilename}`;
 
         try {
