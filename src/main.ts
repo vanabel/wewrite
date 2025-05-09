@@ -169,49 +169,45 @@ export default class WeWritePlugin extends Plugin {
 								});
 						});
 
-						subMenu.addItem((subItem: MenuItem) => {
-							subItem
-								.setTitle($t("main.proof"))
-								.setIcon("user-pen")
-								.onClick(async () => {
-									const content = editor.getSelection();
-									const cursorPos = editor.getCursor();
-									const cursorOffset =
-										editor.posToOffset(cursorPos);
-									console.log(
-										`cursorOffset: ${cursorOffset}`
-									);
+						//  TODO: until stable.
+						// subMenu.addItem((subItem: MenuItem) => {
+						// 	subItem
+						// 		.setTitle($t("main.proof"))
+						// 		.setIcon("user-pen")
+						// 		.onClick(async () => {
+						// 			const content = editor.getSelection();
+						// 			const cursorPos = editor.getCursor();
+						// 			const cursorOffset =
+						// 				editor.posToOffset(cursorPos);
 
-									const proofed = await this.proofContent(
-										content
-									);
+						// 			const proofed = await this.proofContent(
+						// 				content
+						// 			);
 
-									if (proofed) {
-										console.log(`proofed:`, proofed);
-
-										const suggestions = proofed.map(
-											(proofItem) => {
-												return {
-													...proofItem,
-													start:
-														proofItem.start +
-														cursorOffset,
-													end:
-														proofItem.end +
-														cursorOffset,
-												};
-											}
-										);
-										proofreadText(
-											editor,
-											this.app.workspace.getActiveViewOfType(
-												MarkdownView
-											)!,
-											suggestions
-										);
-									}
-								});
-						});
+						// 			if (proofed) {
+						// 				const suggestions = proofed.map(
+						// 					(proofItem) => {
+						// 						return {
+						// 							...proofItem,
+						// 							start:
+						// 								proofItem.start +
+						// 								cursorOffset,
+						// 							end:
+						// 								proofItem.end +
+						// 								cursorOffset,
+						// 						};
+						// 					}
+						// 				);
+						// 				proofreadText(
+						// 					editor,
+						// 					this.app.workspace.getActiveViewOfType(
+						// 						MarkdownView
+						// 					)!,
+						// 					suggestions
+						// 				);
+						// 			}
+						// 		});
+						// });
 						subMenu.addItem((subItem: MenuItem) => {
 							subItem
 								.setTitle($t("main.synonyms"))

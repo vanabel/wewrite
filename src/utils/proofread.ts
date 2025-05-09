@@ -45,7 +45,6 @@ export const proofreadStateField = StateField.define<DecorationSet>({
 		// 添加新效果
 		for (const effect of transaction.effects) {
 			if (effect.is(addProofreadEffect)) {
-				console.log(`addProofreadEffect:`, effect);
 
 				const { start, end, suggestion, original } = effect.value;
 				// 映射位置到新文档
@@ -175,25 +174,19 @@ export async function proofreadText(
 	suggestions: Array<PROOFREAD_SUGGESTION> | undefined = undefined
 ) {
 	const text = editor.getValue();
-	console.log("当前文本长度:", text.length);
 
 	if (!suggestions) {
 		suggestions = await getProofreadSuggestions(text);
 	}
-	console.log("建议范围:", suggestions);
 
 	// 正确获取CodeMirror实例
 	const cmEditor = (view.editor as any).cm as EditorView;
-	console.log("EditorView实例:", cmEditor);
 
 	if (!cmEditor) {
 		new Notice("无法获取编辑器实例");
 		return;
 	}
 
-	// const effects = suggestions.map((suggestion) =>
-	// 	addProofreadEffect.of(suggestion)
-	// );
 	// 获取当前文档的 ChangeSet
 	const changes = cmEditor.state.changes();
 
@@ -201,10 +194,8 @@ export async function proofreadText(
 		const effects = suggestions.map((suggestion) =>
 			addProofreadEffect.of(suggestion)
 		);
-		console.log("发送的effects:", effects);
 
 		cmEditor.dispatch({ effects });
-		console.log("已发送更新");
 	} else {
 		const effects = suggestions.map((suggestion) => {
 			// 使用 mapPos 将字符串索引映射到当前文档的位置
@@ -216,10 +207,8 @@ export async function proofreadText(
 				end: to,
 			});
 		});
-		console.log("发送的effects:", effects);
 
 		cmEditor.dispatch({ effects });
-		console.log("已发送更新");
 	}
 }
 

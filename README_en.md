@@ -30,6 +30,9 @@ It is designed to render notes and publish them to the WeChat Official Account p
 - **LaTeX Generation**: Automatically generates LaTeX formulas.
 - **Synonym Suggestions**: Provides synonym replacement suggestions for selected words.
 
+<video controls src="ai-aided-writing.mp4" title="Title"></video>
+
+
 ### WeChat Official Account Integration
 - **Material Management**: Manages WeChat Official Account materials, including images, audio, and videos.
 - **Draft Management**: Creates, previews, and publishes WeChat Official Account articles.

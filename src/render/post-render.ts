@@ -176,14 +176,10 @@ export async function uploadURLVideo(root:HTMLElement, wechatClient:WechatClient
             return
             
         }else{
-			console.log(`uploading video: ${video.src} =>`, blob.size, blob.type);
 			
             await wechatClient.uploadMaterial(blob, imageFileName(blob.type), 'video').then(async res => {
-				console.log(`uploaded video: =>`, res);
                 if (res){
 					const video_info = await wechatClient.getMaterialById(res.media_id)
-                    console.log(`video info: =>`, video_info);
-					
 					video.src = video_info.url
                 }else{
                     console.error(`upload video failed.`);

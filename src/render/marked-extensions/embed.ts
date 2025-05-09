@@ -480,7 +480,6 @@ export class Embed extends WeWriteMarkedExtension {
 
 	async renderExcalidrawAsync(token: Tokens.Generic) {
 		if (!this.isPluginInstlled("obsidian-excalidraw-plugin")) {
-			console.log(`excalidraw plugin not installed.`);
 
 			return false;
 		}
@@ -519,8 +518,6 @@ export class Embed extends WeWriteMarkedExtension {
 
 	renderPdfCrop(href: string): string | false | undefined {
 		if (!this.isPluginInstlled("pdf-plus")) {
-			console.log(`pdf-plus plugin not installed.`);
-
 			return false;
 		}
 		const root = ObsidianMarkdownRenderer.getInstance(

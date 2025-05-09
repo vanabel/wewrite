@@ -63,8 +63,6 @@ export class OllamaClient {
 			stream: true,
 		});
 
-		console.log(`Ollama response:`, response);
-
 		// 将流式响应拼接成完整的字符串
 		let result = "";
 		for await (const chunk of response) {
@@ -111,14 +109,11 @@ export class OllamaClient {
 			stream: true,
 		});
 
-		console.log(`Ollama response:`, response);
-
 		// 将流式响应拼接成完整的字符串
 		let result = "";
 		for await (const chunk of response) {
 			result += chunk.response || "";
 		}
-		console.log(`proof result：`, result);
 
 		result = removeThinkTags(result).replace(
 			/[\n\s\S]+总结：[\n\s\S]+/g,
@@ -155,8 +150,6 @@ export class OllamaClient {
 			stream: true,
 		});
 
-		console.log(`Ollama response:`, response);
-
 		// 将流式响应拼接成完整的字符串
 		let result = "";
 		for await (const chunk of response) {
@@ -184,14 +177,11 @@ export class OllamaClient {
 # 任务：请为以下内容生成Mermaid图表代码：\n\n${content}`,
 			stream: true,
 		});
-		console.log(`Ollama response:`, response);
 		// 将流式响应拼接成完整的字符串
 		let result = "";
 		for await (const chunk of response) {
 			result += chunk.response || "";
 		}
-
-		console.log(`generateMermaid result：`, result);
 
 		result = removeThinkTags(result).replace(
 			/[\n\s\S]+总结：[\n\s\S]+/g,
@@ -212,14 +202,11 @@ export class OllamaClient {
 # 任务：请为以下内容生成LaTeX代码：\n\n${content}`,
 			stream: true,
 		});
-		console.log(`Ollama response:`, response);
 		// 将流式响应拼接成完整的字符串
 		let result = "";
 		for await (const chunk of response) {
 			result += chunk.response || "";
 		}
-
-		console.log(`generateMermaid result：`, result);
 
 		result = removeThinkTags(result).replace(
 			/[\n\s\S]+总结：[\n\s\S]+/g,
@@ -240,14 +227,11 @@ export class OllamaClient {
 # 任务：请为以下内容生成同义表达：\n\n${content}`,
 			stream: true,
 		});
-		console.log(`Ollama response:`, response);
 		// 将流式响应拼接成完整的字符串
 		let result = "";
 		for await (const chunk of response) {
 			result += chunk.response || "";
 		}
-
-		console.log(`generateMermaid result：`, result);
 
 		result = removeThinkTags(result).replace(
 			/[\n\s\S]+总结：[\n\s\S]+/g,
@@ -278,14 +262,11 @@ export class OllamaClient {
 # 任务：请将以下内容从${sourceLang}翻译成${targetLang}：\n\n${content}`,
 			stream: true,
 		});
-		console.log(`Ollama response:`, response);
 		// 将流式响应拼接成完整的字符串
 		let result = "";
 		for await (const chunk of response) {
 			result += chunk.response || "";
 		}
-
-		console.log(`generateMermaid result：`, result);
 
 		result = removeThinkTags(result).replace(
 			/[\n\s\S]+总结：[\n\s\S]+/g,

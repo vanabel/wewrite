@@ -260,7 +260,6 @@ export class WeWriteSettingTab extends PluginSettingTab {
 		});
 		this.plugin.settings.selectedMPAccount = newAccount.accountName;
 		this.mpAccountDropdown.setValue(newName);
-		console.log('new MP account:', newAccount,this.mpAccountContainer);
 		
 		this.updateMPAccountSettings(newName, this.mpAccountContainer);
 	}
@@ -356,7 +355,6 @@ export class WeWriteSettingTab extends PluginSettingTab {
 							(account) => account.accountName !== accountToDelete
 						);
 					const account = this.plugin.settings.mpAccounts[0];
-					console.log('delete MP account [0]:', account);
 					
 					if (account !== undefined) {
 						this.plugin.settings.selectedMPAccount =
@@ -515,7 +513,6 @@ export class WeWriteSettingTab extends PluginSettingTab {
 							(a) => a.accountName !== accountToDelete
 						);
 					const account = this.plugin.settings.chatAccounts[0];
-					console.log('AI chat delete  account [0]:', account);
 					await this.plugin.saveSettings();
 					if (account !== undefined) {
 						this.plugin.settings.selectedChatAccount =
@@ -860,8 +857,6 @@ export class WeWriteSettingTab extends PluginSettingTab {
 		this.mpAccountContainer = frame.createDiv({
 			cls: "wewrite-account-info-content",
 		});
-		console.log('create:', frame, mpFrame, this.mpAccountContainer);
-		
 		
 		selectAccountSetting
 			.addDropdown((dropdown) => {

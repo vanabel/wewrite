@@ -226,13 +226,11 @@ export class MaterialPanel {
 			itemDiv.addEventListener('click', () => {
 			})
 		} else if (this.type === 'video') {
-			console.log(item);
 			const video = itemDiv.createEl('video', { cls: 'draft-video-item' })
 			video.setAttribute('controls', 'controls')
 			video.setAttribute('poster', item.cover_url)
 			const wechatClient = this.plugin.wechatClient
 			wechatClient.getMaterialById(item.media_id).then(video_info => {
-				console.log(`video info: =>`, video_info);
 				const source = video.createEl('source', { type: 'video/mp4' })
 				source.setAttribute('src', video_info.down_url)
 				video.appendChild(source)

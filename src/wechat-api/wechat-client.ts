@@ -292,7 +292,6 @@ export class WechatClient {
 		}
 
 		bodyParts.push(`-----${randomBoundryString}--\r\n`);
-		console.log(`bodyParts=>`, bodyParts);
 
 		const encoder = new TextEncoder();
 
@@ -304,7 +303,6 @@ export class WechatClient {
 			}
 		});
 
-		console.log(`body=>`, body);
 
 		const bodyBuffer = await new Blob(body).arrayBuffer();
 		const options: RequestUrlParam = {
@@ -316,7 +314,6 @@ export class WechatClient {
 
 		const res = await requestUrl(options);
 
-		console.log(`upload image result:`, res);
 
 		const resData = await res.json;
 		if (resData.errcode === undefined || resData.errcode == 0) {
@@ -406,8 +403,6 @@ export class WechatClient {
 		// 添加结束边界
 		bodyParts.push(`--${boundary}--\r\n`);
 
-		console.log(`bodyParts=>`, bodyParts);
-
 		// 3. 将 bodyParts 转换为 ArrayBuffer
 		const encoder = new TextEncoder();
 		const body = bodyParts
@@ -434,14 +429,6 @@ export class WechatClient {
 				},
 				body: body.buffer as ArrayBuffer,
 			});
-
-			console.log(`upload material result:`, response);
-
-			// const result = response.json;
-
-			// if (result.errcode) {
-			// 	throw new Error(`上传失败: ${result.errmsg}`);
-			// }
 
 			// return result; // 返回上传结果
 			this.plugin.hideSpinner()

@@ -101,3 +101,18 @@ export class AiClient {
 		return await client.translateText(content, sourceLang, targetLang);
 	}
 }
+
+export interface Prompt {
+	role: string;
+	content: string[];
+}
+
+export  const buildPrompt = (msg: Prompt[]) => {
+	return msg.map((item) => {
+		return {
+			role: item.role,
+			content: item.content.join(""),
+		}
+	})
+};
+

@@ -30,6 +30,9 @@ WeWrite 是 Obsidian (https://obsidian.md) 的一款插件。
 - **LaTeX 生成**：自动生成 LaTeX 公式。
 - **同义词建议**：为选中的词语提供同义词替换建议。
 
+
+<video controls src="ai-aided-writing.mp4" title="Title"></video>
+
 ### 微信公众号集成
 - **素材管理**：管理微信公众号素材，包括图片、音频和视频。
 - **草稿管理**：创建、预览和发布微信公众号文章。
