@@ -82,6 +82,7 @@
 		"mermaid-failed": "<section>Mermaid渲染失败</section>",
 		"pdf-crop-failed": "<span>PDF裁剪失败</span>",
 		"render-failed": "渲染失败。",
+		"charts-plugin-not-installed": "图表插件未安装。",
 		"rendering": "渲染中..."
 	},
 	"settings": {

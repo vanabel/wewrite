@@ -15,6 +15,7 @@ import { $t } from "src/lang/i18n";
 import { replaceDivWithSection } from "src/utils/utils";
 import { ObsidianMarkdownRenderer } from "../markdown-render";
 import { WeWriteMarkedExtension } from "./extension";
+import { Notice } from "obsidian";
 export class CodeRenderer extends WeWriteMarkedExtension {
 	showLineNumber: boolean;
 	mermaidIndex: number = 0;
@@ -158,7 +159,7 @@ export class CodeRenderer extends WeWriteMarkedExtension {
 		//the MarkdownRender doen't work well with it. use the preview instead.
 		if (!this.isPluginInstlled('obsidian-charts')){
 			console.log(`charts plugin not installed.`);
-			
+			new Notice($t('rnder.charts-plugin-not-installed'))
 			return false;
 		}
 		const root = this.plugin.resourceManager.getMarkdownRenderedElement(this.chartsIndex, '.block-language-chart')

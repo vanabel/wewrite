@@ -4,7 +4,7 @@ export async function getPublicIpAddress():Promise<string> {
     return new Promise((resolve, reject) => {
 		requestUrl('https://httpbin.org/ip')
 		.then((response) => {
-			console.log("=> Public IP address:", response.json.origin);
+			// console.log("=> Public IP address:", response.json.origin);
 			
 			resolve(response.json.origin)
 		}).catch((error) => {

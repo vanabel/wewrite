@@ -414,8 +414,6 @@ export default class WeWritePlugin extends Plugin {
 	async updateIpAddress(): Promise<string> {
 		return new Promise((resolve, reject) => {
 			getPublicIpAddress().then(async (ip) => {
-				console.log("Public IP address:", ip);
-
 				if (ip !== undefined && ip) {
 					this.settings.ipAddress = ip;
 					await this.saveSettings();
@@ -438,7 +436,6 @@ export default class WeWritePlugin extends Plugin {
 				.find((leaf) => leaf.view instanceof PreviewPanel);
 
 			if (leaf === undefined || leaf === null) {
-				console.log("leaf is undefined or null");
 				leaf = workspace.getRightLeaf(false);
 				await leaf?.setViewState({
 					type: VIEW_TYPE_WEWRITE_PREVIEW,
