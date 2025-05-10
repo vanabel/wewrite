@@ -415,8 +415,8 @@ export default class WeWritePlugin extends Plugin {
 		return new Promise((resolve, reject) => {
 			getPublicIpAddress().then(async (ip) => {
 				console.log("Public IP address:", ip);
-				
-				if (ip !== undefined && ip ) {
+
+				if (ip !== undefined && ip) {
 					this.settings.ipAddress = ip;
 					await this.saveSettings();
 					resolve(ip);
@@ -438,8 +438,9 @@ export default class WeWritePlugin extends Plugin {
 				.find((leaf) => leaf.view instanceof PreviewPanel);
 
 			if (leaf === undefined || leaf === null) {
+				console.log("leaf is undefined or null");
 				leaf = workspace.getRightLeaf(false);
-				leaf?.setViewState({
+				await leaf?.setViewState({
 					type: VIEW_TYPE_WEWRITE_PREVIEW,
 					active: true,
 				});
@@ -794,7 +795,7 @@ export default class WeWritePlugin extends Plugin {
 					const fullPath = await ResourceManager.getInstance(
 						this
 					).saveImageFromUrl(url);
-					
+
 					this.messageService.sendMessage(
 						"image-generated",
 						fullPath ? fullPath : url
@@ -841,15 +842,7 @@ export default class WeWritePlugin extends Plugin {
 		this.assetsManager = await AssetsManager.getInstance(this.app, this);
 		this.aiClient = AiClient.getInstance(this);
 
-		this.registerView(
-			VIEW_TYPE_WEWRITE_PREVIEW,
-			(leaf) => new PreviewPanel(leaf, this)
-		);
-
-		this.registerView(
-			VIEW_TYPE_MP_MATERIAL,
-			(leaf) => (this.matierialView = new MaterialView(leaf, this))
-		);
+		this.registerViews();
 
 		this.addCommand({
 			id: "open-previewer",
@@ -881,12 +874,36 @@ export default class WeWritePlugin extends Plugin {
 				await proofreadText(editor, view);
 			},
 		});
-		this.messageService.registerListener('show-spinner', (msg:string) => {
+		this.messageService.registerListener('show-spinner', (msg: string) => {
 			this.showSpinner(msg);
 		})
 		this.messageService.registerListener('hide-spinner', () => {
 			this.hideSpinner();
 		})
+	}
+	registerViews() {
+		let leaf: WorkspaceLeaf | null | undefined = this.app.workspace
+			.getLeavesOfType(VIEW_TYPE_WEWRITE_PREVIEW)
+			.find((leaf) => leaf.view instanceof PreviewPanel);
+		if (leaf === undefined || leaf === null) {
+			this.registerView(
+				VIEW_TYPE_WEWRITE_PREVIEW,
+				(leaf) => new PreviewPanel(leaf, this)
+			);
+		} else {
+			console.info("WeWrite previewer view already registered.");
+
+		}
+		let leaf2: WorkspaceLeaf | null | undefined = this.app.workspace
+			.getLeavesOfType(VIEW_TYPE_MP_MATERIAL)
+			.find((leaf) => leaf.view instanceof MaterialView);
+		if (leaf2 === undefined || leaf2 === null) {
+			this.registerView(
+				VIEW_TYPE_MP_MATERIAL,
+				(leaf) => (this.matierialView = new MaterialView(leaf, this))
+			);
+		}
+
 	}
 
 	onunload() {
@@ -894,8 +911,15 @@ export default class WeWritePlugin extends Plugin {
 			this.app.workspace.offref(this.editorChangeListener);
 		}
 		this.spinnerEl.remove();
-		// if (this.proofService) {
-		// 	this.proofService.destroy();
-		// }
+		this.app.workspace.iterateAllLeaves((leaf) => {
+			if (leaf.view instanceof PreviewPanel) {
+				leaf.detach();
+			}
+			if (leaf.view instanceof MaterialView) {
+				leaf.detach();
+			}
+		});
+		this.app.workspace.detachLeavesOfType(VIEW_TYPE_WEWRITE_PREVIEW);
+		this.app.workspace.detachLeavesOfType(VIEW_TYPE_MP_MATERIAL);
 	}
 }
