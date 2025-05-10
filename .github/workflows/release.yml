@@ -42,25 +42,22 @@ jobs:
             echo "SKIP_RELEASE=false" >> $GITHUB_ENV
           fi
 
-      - name: Stop if tag exists
+      - name: Fail if tag exists
         if: env.SKIP_RELEASE == 'true'
         run: |
-          echo "Tag $VERSION already exists. Release will be skipped."
-          exit 0
+          echo "::error::Tag $VERSION already exists. Release aborted."
+          exit 1
 
       - name: Update versions.json
-        if: env.SKIP_RELEASE == 'false'
         run: |
           jq --arg v "$VERSION" --argjson m "$(cat manifest.json)" \
             '. + {($v): $m}' versions.json > versions.tmp.json
           mv versions.tmp.json versions.json
 
       - name: Build plugin
-        if: env.SKIP_RELEASE == 'false'
         run: yarn build
 
       - name: Commit updated versions.json
-        if: env.SKIP_RELEASE == 'false'
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
@@ -73,13 +70,11 @@ jobs:
           fi
 
       - name: Create and push Git tag
-        if: env.SKIP_RELEASE == 'false'
         run: |
           git tag "$VERSION"
           git push origin "$VERSION"
 
       - name: Create GitHub Release
-        if: env.SKIP_RELEASE == 'false'
         id: create_release
         uses: softprops/action-gh-release@v2
         with:
