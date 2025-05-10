@@ -44,7 +44,7 @@ jobs:
       - name: Stop if tag exists
         if: env.SKIP_RELEASE == 'true'
         run: exit 0
-				
+
       - name: Update versions.json
         run: |
           jq --arg v "$VERSION" --argjson m "$(cat manifest.json)" \
@@ -54,7 +54,7 @@ jobs:
 
       - name: Build plugin
         run: yarn build
-				
+
 
       - name: Commit updated versions.json
         run: |
