@@ -14,7 +14,8 @@ export type WeChatTheme = {
 }
 export class ThemeManager {
     async downloadThemes() {
-        const baseUrl = "https://gitee.com/northern_bank/wewrite/raw/master/themes/";
+        // const baseUrl = "https://gitee.com/northern_bank/wewrite/raw/master/themes/";
+		const  baseUrl = "https://github.com/learnerchen-forever/wewrite/blob/master/themes/";
         const saveDir = this.plugin.settings.css_styles_folder || "/wewrite-custom-css";
 
         try {
