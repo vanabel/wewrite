@@ -105,8 +105,7 @@ export class ResourceManager {
 
         // Create new filename
         const newFilename = `${noteBasename}_generated_${timestamp}.${ext || 'jpg'}`;
-        const fullPath = `${folderPath}/${newFilename}`;
-
+        const fullPath = folderPath === '/' ? `/${newFilename}`:`${folderPath}/${newFilename}`;
         try {
             // Fetch image using Obsidian's requestUrl
             const response = await requestUrl({url});

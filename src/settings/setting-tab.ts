@@ -383,31 +383,7 @@ export class WeWriteSettingTab extends PluginSettingTab {
 			this.plugin.settings.selectedMPAccount ?? ""
 		);
 	}
-	async detectIP(ip: Setting) {
-		let address = await getPublicIpAddress();
-		if (address === undefined) {
-			address = $t("settings.no-ip-address");
-		}
-		ip.addButton((button) => {
-			button.setButtonText(address);
-			button.onClick(async () => {
-				getPublicIpAddress().then((address) => {
-					button.setButtonText(address);
-				});
-			});
-		});
-		ip.addExtraButton((button) => {
-			button
-				.setIcon("clipboard-copy")
-				.setTooltip($t("settings.copy-ip-address-to-clipboard"))
-				.onClick(async () => {
-					await navigator.clipboard.writeText(
-						await getPublicIpAddress()
-					);
-					new Notice($t("settings.ip-copied-to-clipboard"));
-				});
-		});
-	}
+	
 	createAiChatSettings(container: HTMLElement) {
 		const frame = container.createDiv({ cls: "wewrite-setting-frame" });
 		
@@ -770,13 +746,17 @@ export class WeWriteSettingTab extends PluginSettingTab {
 			.setName(
 				$t("settings.public-ip-address") +
 					": " +
-					this.plugin.settings.ipAddress
+					// this.plugin.settings.ipAddress
+					$t('settings.fetching')
 			)
 			.setHeading()
 			.setDesc($t("settings.you-should-add-this-ip-to-ip-whitelist-o"));
 
 		this.plugin.updateIpAddress().then((ipAddress) => {
+			console.info("ipAddress: " + ipAddress);
 			ip.setName($t("settings.public-ip-address") + ": " + ipAddress);
+		}).catch((error) => {
+			ip.setName($t("settings.public-ip-address") + ": " + $t("settings.no-ip-address"));
 		});
 
 		ip.addExtraButton((button) => {

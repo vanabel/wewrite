@@ -412,14 +412,19 @@ export default class WeWritePlugin extends Plugin {
 		await this.loadThemeFolder();
 	}
 	async updateIpAddress(): Promise<string> {
-		return new Promise((resolve) => {
+		return new Promise((resolve, reject) => {
 			getPublicIpAddress().then(async (ip) => {
-				if (ip !== undefined && ip && ip !== this.settings.ipAddress) {
+				console.log("Public IP address:", ip);
+				
+				if (ip !== undefined && ip ) {
 					this.settings.ipAddress = ip;
 					await this.saveSettings();
 					resolve(ip);
 				}
-			});
+			}).catch((error) => {
+				console.error("Error fetching public IP address:", error);
+				reject("Failed to fetch public IP address: " + error);
+			})
 		});
 	}
 
@@ -783,9 +788,13 @@ export default class WeWritePlugin extends Plugin {
 				this,
 				async (url: string) => {
 					//save it to local folder.
+					if (url === undefined || url === null || url === "") {
+						new Notice($t("main.image-generation-failed"));
+					}
 					const fullPath = await ResourceManager.getInstance(
 						this
 					).saveImageFromUrl(url);
+					
 					this.messageService.sendMessage(
 						"image-generated",
 						fullPath ? fullPath : url

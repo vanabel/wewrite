@@ -1,44 +1,57 @@
-name: Release Plugin
+name: Smart Release
 
 on:
   push:
     branches:
       - master
-    tags:
-      - v*
 
 jobs:
-  release:
+  smart-release:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20.x
           cache: 'npm'
-      
+
       - name: Install dependencies
         run: yarn install --frozen-lockfile
-      
-      - name: Update versions.json
+
+      - name: Read version from manifest.json
+        id: read_version
         run: |
-          VERSION=$VERSION
-          MANIFEST_VERSION=$(jq -r .version manifest.json)
-          if [ "$VERSION" != "v$MANIFEST_VERSION" ]; then
-            echo "Git tag ($VERSION) does not match manifest.json version (v$MANIFEST_VERSION)"
-            exit 1
+          VERSION=$(jq -r .version manifest.json)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "tag=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Check if tag already exists
+        id: check_tag
+        run: |
+          if git rev-parse "$VERSION" >/dev/null 2>&1; then
+            echo "Tag $VERSION already exists. Skipping release."
+            echo "SKIP_RELEASE=true" >> $GITHUB_ENV
+          else
+            echo "SKIP_RELEASE=false" >> $GITHUB_ENV
           fi
 
+      - name: Stop if tag exists
+        if: env.SKIP_RELEASE == 'true'
+        run: exit 0
+
+      - name: Update versions.json
+        run: |
           jq --arg v "$VERSION" --argjson m "$(cat manifest.json)" \
             '. + {($v): $m}' versions.json > versions.tmp.json
           mv versions.tmp.json versions.json
 
-        
       - name: Build plugin
         run: yarn build
-        
+
       - name: Commit updated versions.json
         run: |
           git config user.name "github-actions"
@@ -46,8 +59,14 @@ jobs:
           git add versions.json
           git commit -m "chore: update versions.json for $VERSION"
           git push
-      
-      - name: Create Release
+
+      - name: Create and push Git tag
+        run: |
+          git tag "$VERSION"
+          git push origin "$VERSION"
+
+      - name: Create GitHub Release
+        id: create_release
         uses: softprops/action-gh-release@v2
         with:
           name: Release ${{ env.VERSION }}
@@ -57,45 +76,5 @@ jobs:
             manifest.json
             styles.css
             versions.json
-        env: 
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Upload Release Assets
-        uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./main.js
-          asset_name: main.js
-          asset_content_type: application/javascript
-      
-      - name: Upload Manifest
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./manifest.json
-          asset_name: manifest.json
-          asset_content_type: application/json
-
-      - name: Upload Versions
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./versions.json
-          asset_name: versions.json
-          asset_content_type: application/json
-
-      - name: Upload Styles
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./styles.css
-          asset_name: styles.css
-          asset_content_type: text/css
