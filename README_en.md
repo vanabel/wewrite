@@ -30,7 +30,7 @@ It is designed to render notes and publish them to the WeChat Official Account p
 - **LaTeX Generation**: Automatically generates LaTeX formulas.
 - **Synonym Suggestions**: Provides synonym replacement suggestions for selected words.
 
-<video controls src="ai-aided-writing.mp4" title="Title"></video>
+<video controls src="ai-aided-writing.mp4" title="AI Writing Assistance"></video>
 
 
 ### WeChat Official Account Integration
