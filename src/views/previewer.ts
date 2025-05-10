@@ -29,8 +29,8 @@ import { WechatRender } from "src/render/wechat-render";
 import { ResourceManager } from "../assets/resource-manager";
 import { WechatClient } from "../wechat-api/wechat-client";
 import { MPArticleHeader } from "./mp-article-header";
-import { ThemeManager } from "./theme-manager";
-import { ThemeSelector } from "./theme-selector";
+import { ThemeManager } from "../theme/theme-manager";
+import { ThemeSelector } from "../theme/theme-selector";
 import { WebViewModal } from "./webview";
 
 export const VIEW_TYPE_WEWRITE_PREVIEW = "wewrite-article-preview";

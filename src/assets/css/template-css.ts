@@ -124,8 +124,35 @@ export const combinedCss = `.admonition {
     height: 1.2em;
     width: 1.2em;
 }
-/* section */
+/* 总体页面  */
 .wewrite {
+	background-color: var(--wechat-bg-color, none);
+	padding: var(--wechat-padding, 1em);
+	margin: var(--wechat-margin, 0);
+	line-height: var(--wechat-line-height, 1.5);
+}
+/* 正文文字 */
+.wewrite {
+	color: var(--wechat-text-color, #333);
+	font-size: var(--wechat-text-font-size, 16px);
+	font-family: var(--wechat-text-font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji");
+	font-weight: var(--wechat-text-font-weight, 400);
+	word-break: var(--wechat-text-word-break, break-word);
+	letter-spacing: var(--wechat-text-letter-space, 0px);
+}
+
+/* 标题 */
+.wewrite h1,
+.wewrite h2,
+.wewrite h3,
+.wewrite h4,
+.wewrite h5,
+.wewrite h6 {
+	color: var(--wechat-heading-color, #333);
+	font-weight: var(--wechat-heading-font-weight, 600);
+	line-height: var(--wechat-heading-line-height, 1.5);
+}
+/* .wewrite {
 	min-width: 200px;
 	max-width: 760px;
 	padding: 1em 1em 1em 1em;
@@ -138,22 +165,12 @@ export const combinedCss = `.admonition {
 	color: #333;
 	margin: 0px;
 
-}
+} */
 
 /* headings 标题*/
-.wewrite h1,
-.wewrite h2,
-.wewrite h3,
-.wewrite h4,
-.wewrite h5,
-.wewrite h6 {
-	line-height: 1.5;
-	margin-top: 20px;
-	margin-bottom: 10px;
-	padding-bottom: 5px;
-}
 
-.wewrite h1:first-child,
+
+/* .wewrite h1:first-child,
 .wewrite h2:first-child,
 .wewrite h3:first-child,
 .wewrite h4:first-child,
@@ -173,7 +190,7 @@ export const combinedCss = `.admonition {
 	display: inline-block;
 	color: #3eaf7c;
 	padding-right: 0.23em;
-}
+} */
 
 .wewrite h1 {
 	position: relative;
@@ -243,7 +260,7 @@ export const combinedCss = `.admonition {
 }
 
 .wewrite hr {
-	border-top: 1px solid #3eaf7c;
+	border-top: 1px solid var(--wechat-border-color, #eaeaea);
 	border-bottom: none;
 	border-left: none;
 	border-right: none;
@@ -259,12 +276,12 @@ export const combinedCss = `.admonition {
 .wewrite a {
 	font-weight: 500;
 	text-decoration: none;
-	color: #3eaf7c;
+	color: var(--wechat-link-color, rgb(0, 102, 204));
 }
 
 .wewrite a:hover,
 .wewrite a:active {
-	border-bottom: 1.5px solid #3eaf7c;
+	border-bottom: 1.5px solid var(--wechat-link-color, rgb(0, 102, 204)); ;
 }
 
 .wewrite a:before {
@@ -274,12 +291,13 @@ export const combinedCss = `.admonition {
 
 /* blockquote */
 .wewrite blockquote {
-	color: #666;
-	padding: 1px 23px;
+	color: var(--wechat-quote-text-color, #333);
+	font-family: var(--wechat-quote-font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji");
+	padding: var(--wechat-quote-padding, 1em);
+	font-size: var(--wechat-quote-font-size, 16px);
 	margin: 22px 0;
-	border-left: 0.5em solid rgba(62, 175, 124, 0.6);
-	border-color: #42b983;
-	background-color: #f8f8f8;
+	border-left: var(--wechat-quote-border-left, 4px solid #eaeaea);
+	background-color: var(--wechat-quote-bg-color, #f5f5f5);
 }
 
 .wewrite blockquote::after {
@@ -296,27 +314,28 @@ export const combinedCss = `.admonition {
 	border: none;
 	outline: none;
 	/* border-left: 4px solid #3eaf7c; */
-	padding-left: 10px;
-	margin-left: 4px;
-	background-color: bisque;
+	padding-left: var(--wechat-collapse-padding, 1em);
+	margin-left: var(--wechat-collapse-margin, 0);
+	background-color: var(--wechat-collapse-bg-color, #f5f5f5);
 }
 
 .wewrite details summary {
 	cursor: pointer;
 	border: none;
 	outline: none;
-	/* background: white; */
 	margin: 0px -17px;
 }
 
 .wewrite details summary::-webkit-details-marker {
-	color: #3eaf7c;
+	color: var(--wechat-collapse-bg-color, #f5f5f5);
 }
 
 /* list */
 .wewrite ol,
 .wewrite ul {
-	padding-left: 28px;
+	padding-left: var(--wechat-list-pading-left, 2rem);
+	margin: var(--wechat-list-margin, 0);
+	list-style: none;
 }
 
 .wewrite ol li,
@@ -349,11 +368,11 @@ export const combinedCss = `.admonition {
 }
 
 .wewrite ol li::marker {
-	color: #3eaf7c;
+	color: var(--wechat-list-marker-color, #333);
 }
 
 .wewrite ul li::marker {
-	color: #3eaf7c;
+	color: var(--wechat-list-marker-color, #333);
 }
 
 
@@ -378,7 +397,7 @@ p .obsidian-icon {
 
 /* footnote */
 .wewrite .footnote-id {
-	color: gray;
+	color: var(--wechat-footnote-text-color, #999);
 	margin-right: 0.5em;
 
 }
@@ -838,6 +857,67 @@ p .obsidian-icon {
     width: fit-content;
     margin: auto;
 }
+:root {
+/* 	定义微信公众号文章的一些关键样式变量 */
+--wechat-text-color: #333; /* 文字颜色 */
+--wechat-text-font-size: 16px; /* 文字大小 */
+--wechat-text-letter-space: 0px; /* 字间距大小 */
+--wechat-line-height: 1.5; /* 行高 */
+--wechat-text-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"; /* 字体 */
+--wechat-text-font-weight: 400; /* 字体粗细 */
+--wechat-text-word-break: break-word; /* 单词换行 */
+
+--wechat-bg-color: #fff; /* 背景颜色 */
+--wecchat-border-color: #eaeaea; /* 边框颜色 */
+--wechat-link-color: rgb(0, 102, 204); /* 链接颜色 */
+--wechat-padding: 1em; /* 内边距 */
+--wechat-margin: 0; /* 外边距 */
+/*  标题样式 */
+--wechat-header-text-color: #333; /* 标题文字颜色 */
+/* 脚注样式 */
+--wechat-footer-text-color: #999; /* 脚注文字颜色 */
+/* 代码块背景颜色 */
+--wechat-code-bg-color: #f5f5f5; /* 代码块背景颜色 */
+--wechat-code-text-color: #333; /* 代码块文字颜色 */
+--wechat-code-font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace; /* 代码块字体 */
+--wechat-code-font-size: 14px; /* 代码块文字大小 */
+--wechat-code-line-height: 1.5; /* 代码块行高 */
+--wechat-code-padding: 0.2em 0.4em; /* 代码块内边距 */
+--wechat-code-border-radius: 3px; /* 代码块圆角 */
+/* 引用样式 */
+--wechat-quote-bg-color: #f5f5f5; /* 引用背景颜色 */
+--wechat-quote-text-color: #333; /* 引用文字颜色 */
+--wechat-quote-border-color: #eaeaea; /* 引用边框颜色 */
+--wechat-quote-border-left-width: 4px; /* 引用边框宽度 */
+--wechat-quote-padding: 1em; /* 引用内边距 */
+--wechat-quote-font-size: 16px; /* 引用文字大小 */
+--wechat-quote-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"; /* 引用字体 */
+--wechat-quote-border-left: 4px solid var(--wechat-quote-border-color); /* 引用左边框 */
+
+/* 折叠样式 */
+--wechat-collapse-bg-color: #f5f5f5; /* 折叠背景颜色 */
+--wechat-collapse-text-color: #333; /* 折叠文字颜色 */
+--wechat-collapse-border-color: #eaeaea; /* 折叠边框颜色 */
+--wechat-collapse-border-radius: 3px; /* 折叠圆角 */
+--wechat-collapse-padding: 1em; /* 折叠内边距 */
+--wechat-collapse-margin: 0; /* 折叠外边距 */
+--wechat-collapse-font-size: 16px; /* 折叠文字大小 */
+--wechat-collapse-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"; /* 折叠字体 */
+--wechat-collapse-border: 1px solid var(--wechat-collapse-border-color); /* 折叠边框 */
+
+/* list样式 */
+--wechat-list-text-color: var(--wechat-text-color, #333); /* 列表文字颜色 */
+--wechat-list-bg-color: var(--wechat-bg-color,  #fff); /* 列表背景颜色 */
+--wechat-list-pading-left: 2rem; /* 列表内边距 */
+--wechat-list-margin: 0; /* 列表外边距 */
+--wechat-list-margin-top: 0; /* 列表外边距 */
+--wechat-list-margin-bottom: 0; /* 列表外边距 */
+--wechat-list-marker-color: var(--wechat-text-color, #333); /* 列表标记颜色 */
+
+
+}
+
+
 /* table */
 .wewrite .table-container {
     display: flex;

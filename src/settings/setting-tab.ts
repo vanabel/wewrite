@@ -11,7 +11,7 @@ import {
 } from "obsidian";
 import WeWritePlugin from "src/main";
 import { getPublicIpAddress } from "src/utils/ip-address";
-import { ThemeManager } from "src/views/theme-manager";
+import { ThemeManager } from "src/theme/theme-manager";
 import { $t } from "src/lang/i18n";
 import { FolderSuggest } from "src/utils/folder-suggest";
 import { WECHAT_MP_WEB_PAGE } from "./mp-web-images";

@@ -1,17 +1,60 @@
 :root {
-   
-}
-:root{
-	--text-color: var(var(--color-dark));
-	--background-color: var(--color-light);
-	--link-color: var(--color-primary);
-	--header-color: var(--color-dark);
-	--footer-color: var(--color-dark);
-	--border-color: var(--color-gray);
-	--border-radius: 0.25rem;
-	--box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-	--font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-	--font-size-base: 1rem;
-	--font-size-lg: 1.25rem;
+/* 	定义微信公众号文章的一些关键样式变量 */
+--wechat-text-color: #333; /* 文字颜色 */
+--wechat-text-font-size: 16px; /* 文字大小 */
+--wechat-text-letter-space: 0px; /* 字间距大小 */
+--wechat-line-height: 1.5; /* 行高 */
+--wechat-text-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"; /* 字体 */
+--wechat-text-font-weight: 400; /* 字体粗细 */
+--wechat-text-word-break: break-word; /* 单词换行 */
+
+--wechat-bg-color: #fff; /* 背景颜色 */
+--wecchat-border-color: #eaeaea; /* 边框颜色 */
+--wechat-link-color: rgb(0, 102, 204); /* 链接颜色 */
+--wechat-padding: 1em; /* 内边距 */
+--wechat-margin: 0; /* 外边距 */
+/*  标题样式 */
+--wechat-header-text-color: #333; /* 标题文字颜色 */
+/* 脚注样式 */
+--wechat-footer-text-color: #999; /* 脚注文字颜色 */
+/* 代码块背景颜色 */
+--wechat-code-bg-color: #f5f5f5; /* 代码块背景颜色 */
+--wechat-code-text-color: #333; /* 代码块文字颜色 */
+--wechat-code-font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace; /* 代码块字体 */
+--wechat-code-font-size: 14px; /* 代码块文字大小 */
+--wechat-code-line-height: 1.5; /* 代码块行高 */
+--wechat-code-padding: 0.2em 0.4em; /* 代码块内边距 */
+--wechat-code-border-radius: 3px; /* 代码块圆角 */
+/* 引用样式 */
+--wechat-quote-bg-color: #f5f5f5; /* 引用背景颜色 */
+--wechat-quote-text-color: #333; /* 引用文字颜色 */
+--wechat-quote-border-color: #eaeaea; /* 引用边框颜色 */
+--wechat-quote-border-left-width: 4px; /* 引用边框宽度 */
+--wechat-quote-padding: 1em; /* 引用内边距 */
+--wechat-quote-font-size: 16px; /* 引用文字大小 */
+--wechat-quote-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"; /* 引用字体 */
+--wechat-quote-border-left: 4px solid var(--wechat-quote-border-color); /* 引用左边框 */
+
+/* 折叠样式 */
+--wechat-collapse-bg-color: #f5f5f5; /* 折叠背景颜色 */
+--wechat-collapse-text-color: #333; /* 折叠文字颜色 */
+--wechat-collapse-border-color: #eaeaea; /* 折叠边框颜色 */
+--wechat-collapse-border-radius: 3px; /* 折叠圆角 */
+--wechat-collapse-padding: 1em; /* 折叠内边距 */
+--wechat-collapse-margin: 0; /* 折叠外边距 */
+--wechat-collapse-font-size: 16px; /* 折叠文字大小 */
+--wechat-collapse-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"; /* 折叠字体 */
+--wechat-collapse-border: 1px solid var(--wechat-collapse-border-color); /* 折叠边框 */
+
+/* list样式 */
+--wechat-list-text-color: var(--wechat-text-color, #333); /* 列表文字颜色 */
+--wechat-list-bg-color: var(--wechat-bg-color,  #fff); /* 列表背景颜色 */
+--wechat-list-pading-left: 2rem; /* 列表内边距 */
+--wechat-list-margin: 0; /* 列表外边距 */
+--wechat-list-margin-top: 0; /* 列表外边距 */
+--wechat-list-margin-bottom: 0; /* 列表外边距 */
+--wechat-list-marker-color: var(--wechat-text-color, #333); /* 列表标记颜色 */
+
+
 }
 
