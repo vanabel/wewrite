@@ -46,14 +46,6 @@ jobs:
       - name: Build plugin
         run: yarn build
 
-      - name: Commit updated versions.json
-        run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-          git add versions.json
-          git commit -m "chore: update versions.json for $VERSION"
-          git push
-
       - name: Create and push Git tag
         run: |
           git tag "$VERSION"
