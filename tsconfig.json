@@ -3,7 +3,7 @@
     "baseUrl": ".",
     "inlineSourceMap": true,
     "inlineSources": true,
-    "module": "commonjs",
+    "module": "ESNext",	
     "target": "ES6",
     "outDir": "./",
     "allowJs": true,
@@ -23,7 +23,9 @@
     ],
   },
   "include": [
-    "**/*.ts"
+    "**/*.ts",
+	"src",
+	"types"
   ],
   "exclude": [
     "node_modules",
@@ -33,5 +35,6 @@
     "*.mjs",
     "**/*.js",
     "src/render/dom-to-image-more.js"
-  ]
+  ],
+  "typeRoots": ["./types", "./node_modules/@types"]
 }

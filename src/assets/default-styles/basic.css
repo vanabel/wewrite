@@ -241,13 +241,6 @@
 	padding-left: 6px;
 }
 
-.wewrite ol li::marker {
-	color: var(--wechat-list-marker-color, #333);
-}
-
-.wewrite ul li::marker {
-	color: var(--wechat-list-marker-color, #333);
-}
 
 
 /* icon */

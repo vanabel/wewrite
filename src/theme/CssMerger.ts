@@ -1,102 +1,139 @@
-import { parse } from 'css';
-import { stringify } from 'css';
+/**
+ * to build custom css for wewrite.
+ * author: Learner Chen <learner.chen@icloud.com>
+ * date: 2025-05-10
+ */
 
-type CSSVariableMap = Record<string, string>;
-type CSSRule = {
-  selector: string;
-  declarations: Record<string, string>;
-  specificity: number;
-};
+import postcss from 'postcss';
 
-// CSS处理工具类
-class CSSMerger {
-  private variables: CSSVariableMap = {};
-  private rules: CSSRule[] = [];
+type Rule = Map<string, postcss.Declaration>;
+type Rules = Map<string, Rule>;
 
-  // 解析并合并CSS
-  addCSS(css: string) {
-	const ast = parse(css);
-	
-	// 处理CSS变量
-	ast.stylesheet?.rules.forEach(rule => {
-	  if (rule.type === 'rule' && rule.selectors?.includes(':root')) {
-		rule.declarations?.forEach(decl => {
+const varRegex = /var\(\s*--([a-zA-Z0-9_-]+)(?:\s*,\s*[^)]+)?\s*\)/g;
+const regexVarFallback = /var\(\s*--([a-zA-Z0-9_-]+)(?:\s*,\s*([^)]+))?\s*\)/g
 
-		  if (decl.type === 'declaration' && decl.property !== undefined && decl.property.startsWith('--')) {
-			if (decl.value === undefined || decl.property === undefined) {
-			  //throw new Error(`Variable ${decl.property} has no value`);
-			}else {
-				this.variables[decl.property] = decl.value;
-			}
-		  }
-		});
-	  }
-	});
+export class CSSMerger {
+    baseAST: postcss.Root | undefined;
+    overrideAST: postcss.Root | undefined;
+    vars: Map<string, string> = new Map()
+    rules: Rules = new Map()
 
-	// 处理普通规则
-	ast.stylesheet?.rules.forEach(rule => {
-	  if (rule.type === 'rule' && !rule.selectors?.includes(':root')) {
-		rule.selectors?.forEach(selector => {
-		  const declarations: Record<string, string> = {};
-		  
-		  rule.declarations?.forEach(decl => {
-			if (decl.type === 'declaration') {
-			  // 替换CSS变量
-			  let value = decl.value!.replace(/var\((--[a-z-]+)\)/g, 
-				(_, varName) => this.variables[varName] || ''
-			  );
-			  
-			  // 特殊处理颜色值
-			  if (decl.property === 'background-color' && value.startsWith('#')) {
-				value = value.toLowerCase();
-			  }
-			  if (decl.property === undefined || value === undefined) {
-			  }else {
-			  declarations[decl.property] = value;
-			  }
-			}
-		  });
+    constructor(private baseCSS: string, private overrideCSS: string) { }
 
-		  this.rules.push({
-			selector,
-			declarations,
-			specificity: this.calculateSpecificity(selector)
-		  });
-		});
-	  }
-	});
-  }
+    async init() {
+        this.baseAST = (await postcss().process(this.baseCSS, { from: undefined })).root;
+        this.overrideAST = (await postcss().process(this.overrideCSS, { from: undefined })).root;
+    }
+    private mergeVariables(): void {
+        this.vars.clear();
+        this.pickVariables(this.baseAST!, this.vars);
+        this.pickVariables(this.overrideAST!, this.vars);
 
-  // 计算选择器优先级
-  private calculateSpecificity(selector: string): number {
-	const idCount = (selector.match(/#/g) || []).length;
-	const classCount = (selector.match(/\./g) || []).length;
-	const elementCount = (selector.match(/(^|[^.#])[a-zA-Z]+/g) || []).length;
-	return idCount * 100 + classCount * 10 + elementCount;
-  }
 
-  // 生成内联样式
-  getInlineStyle(className: string, tagName: string): string {
-	const matchedRules = this.rules.filter(rule => 
-	  rule.selector === `.${className}` || 
-	  rule.selector === tagName
-	);
+    }
+    private meregeRules(): void {
 
-	// 按优先级和出现顺序排序
-	const sortedRules = matchedRules.sort((a, b) => 
-	  b.specificity - a.specificity || 
-	  this.rules.indexOf(a) - this.rules.indexOf(b)
-	);
+        this.rules.clear();
+        this.pickRules(this.baseAST!, this.rules);
+        this.pickRules(this.overrideAST!, this.rules);
+    }
+    private resolveCssVars(value: string, vars: Map<string, string>, depth = 0): string {
+        const MAX_DEPTH = 10; // 防止无限循环
+        const varRegex = /var\(\s*--([a-zA-Z0-9_-]+)(?:\s*,\s*([^)]+))?\s*\)/g;
 
-	// 合并声明
-	const styleMap: Record<string, string> = {};
-	sortedRules.forEach(rule => {
-	  Object.assign(styleMap, rule.declarations);
-	});
+        let result = value;
+        let replaced;
 
-	// 转换为字符串
-	return Object.entries(styleMap)
-	  .map(([prop, value]) => `${prop}: ${value}`)
-	  .join('; ');
-  }
+        do {
+            replaced = false;
+            result = result.replace(varRegex, (_, varName, fallback) => {
+                const fullKey = `--${varName}`;
+                if (vars.has(fullKey)) {
+                    const replacement = vars.get(fullKey)!;
+                    replaced = true;
+                    return replacement;
+                } else if (fallback !== undefined) {
+                    replaced = true;
+                    return fallback;
+                } else {
+                    console.warn(`Variable ${fullKey} not found and no fallback provided`);
+                    return '';
+                }
+            });
+
+            depth++;
+        } while (replaced && depth < MAX_DEPTH);
+
+        return result;
+    }
+    private pickRules(root: postcss.Root, rules: Rules): void {
+        root.walkRules(rule => {
+            if (rule.selector !== ':root') {
+                // if the rule exists in the base CSS, processed already.
+                let selectedRule = rules.get(rule.selector);
+                if (!selectedRule) {
+                    selectedRule = new Map();
+                    rules.set(rule.selector, selectedRule);
+                }
+                rule.walkDecls(decl => {
+                    // for each declaration under the rule, check if the value contains var(), replace it.
+                    this.resolveCssVars(decl.value, this.vars)
+                    //push it to the selected rule. could replace original one if it exists.
+                    const baseDecl = selectedRule.get(decl.prop);
+
+                    if (baseDecl === undefined || !baseDecl.important || decl.important) {
+                        selectedRule.set(decl.prop, decl);
+                    } else {
+                        // console.log(`${rule.selector} skip ${decl.prop}`);
+                    }
+                })
+            }
+        })
+    }
+    private pickVariables(root: postcss.Root, vars: Map<string, string>): void {
+        root.walkRules(rule => {
+            if (rule.selector === ':root') {
+                rule.walkDecls(decl => {
+                    if (decl.prop.startsWith('--')) {
+                        //push to vars
+                        vars.set(decl.prop, decl.value);
+                    }
+                });
+            }
+        })
+    }
+
+    async prepare() {
+        await this.init();
+        this.mergeVariables();
+        this.meregeRules();
+    }
+    applyStyleToElement(currentNode: HTMLElement) {
+        this.rules.forEach((rule, selector) => {
+            try {
+                if (currentNode.matches(selector)) {
+                    rule.forEach((decl, prop) => {
+                        let value = this.resolveCssVars(decl.value, this.vars);
+                        currentNode.style.setProperty(prop, decl.important ? value + ' !important' : value);
+                    })
+                }
+            } catch (error) {
+                console.log('error selector=>', selector, ' | Error=>', error.message);
+            }
+        })
+        let element = currentNode.firstElementChild;
+        while (element) {
+            this.applyStyleToElement(element as HTMLElement);
+            element = element.nextElementSibling;
+        }
+        return currentNode;
+    }
+    removeClassName(root: HTMLElement) {
+        root.removeAttribute('class');
+        let element = root.firstElementChild;
+        while (element) {
+            this.removeClassName(element as HTMLElement);
+            element = element.nextElementSibling;
+        }
+    }
 }

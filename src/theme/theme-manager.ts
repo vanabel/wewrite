@@ -5,6 +5,7 @@ import postcss from "postcss";
 import { combinedCss } from "src/assets/css/template-css";
 import { $t } from "src/lang/i18n";
 import WeWritePlugin from "src/main";
+import { CSSMerger } from "./CssMerger";
 
 export type WeChatTheme = {
 	name: string;
@@ -15,7 +16,6 @@ export type WeChatTheme = {
 export class ThemeManager {
 	async downloadThemes() {
 		const baseUrlAlter = "https://gitee.com/northern_bank/wewrite/raw/master/themes/";
-		// const baseUrl = "https://github.com/learnerchen-forever/wewrite/blob/master/themes/";
 		const baseUrl = "https://raw.githubusercontent.com/learnerchen-forever/wewrite/refs/heads/master/themes/";
 		const saveDir = this.plugin.settings.css_styles_folder || "/wewrite-custom-css";
 
@@ -200,72 +200,90 @@ export class ThemeManager {
 			path: file.path,
 		};
 	}
+
+	// private async newApplyTheme(htmlRoot: HTMLElement) {
+	// 	const customCss = await this.getCSS()
+	// 	const cssMerger = new CSSMerger(combinedCss, customCss)
+	// 	await cssMerger.prepare()
+	// 	const node = cssMerger.applyStyleToElement(htmlRoot)
+	// 	cssMerger.removeClassName(node)
+	// }
 	public async applyTheme(htmlRoot: HTMLElement) {
 		const customCss = await this.getCSS()
-		const customCssRoot = postcss.parse(customCss)
-		const defaultCssRooot = postcss.parse(combinedCss)
-		const mergedRoot = this.mergeRoot(defaultCssRooot, customCssRoot)
+		const cssMerger = new CSSMerger(combinedCss, customCss)
+		await cssMerger.prepare()
+		const node = cssMerger.applyStyleToElement(htmlRoot)
+		cssMerger.removeClassName(node)
+		return node
+		// return this.newApplyTheme(htmlRoot)
+		// //--- this.newApplyTheme(htmlRoot)
+		// const customCss = await this.getCSS()
+		// const customCssRoot = postcss.parse(customCss)
+		// const defaultCssRooot = postcss.parse(combinedCss)
+		// const mergedRoot = this.mergeRoot(defaultCssRooot, customCssRoot)
 
-		this.applyStyle(htmlRoot, mergedRoot)
-		this.removeClassName(htmlRoot as HTMLElement);
+		// this.applyStyle(htmlRoot, mergedRoot)
+		// this.removeClassName(htmlRoot as HTMLElement);
+
+		// console.log('applyTheme=>', htmlRoot.outerHTML);
 
 	}
-	private removeVarablesInStyleText(root: HTMLElement) {
-		for (let i = 0; i < root.style.length; i++) {
-			const property = root.style[i];
-			if (property.startsWith('--')) {
-				const value = root.style.getPropertyValue(property);
-				root.style.removeProperty(property);
+	// private removeVarablesInStyleText(root: HTMLElement) {
+	// 	for (let i = 0; i < root.style.length; i++) {
+	// 		const property = root.style[i];
+	// 		if (property.startsWith('--')) {
+	// 			const value = root.style.getPropertyValue(property);
+	// 			root.style.removeProperty(property);
 
-			}
-		}
-	}
-	private applyStyle(root: HTMLElement, cssRoot: postcss.Root) {
-		const cssText = root.style.cssText;
-		cssRoot.walkRules(rule => {
-			if (root.matches(rule.selector)) {
-				this.removeVarablesInStyleText(root)
-				rule.walkDecls(decl => {
-					// always replace the property
-					root.style.setProperty(decl.prop, decl.value);
-				})
-			}
-		});
+	// 		}
+	// 	}
+	// }
+	// private applyStyle(root: HTMLElement, cssRoot: postcss.Root) {
+	// 	const cssText = root.style.cssText;
+	// 	cssRoot.walkRules(rule => {
+	// 		if (root.matches(rule.selector)) {
+	// 			this.removeVarablesInStyleText(root)
+	// 			rule.walkDecls(decl => {
+	// 				// always replace the property
+	// 				root.style.setProperty(decl.prop, decl.value);
+	// 			})
+	// 		}
+	// 	});
 
-		let element = root.firstElementChild;
-		while (element) {
-			this.applyStyle(element as HTMLElement, cssRoot);
-			element = element.nextElementSibling;
-		}
-	}
-	mergeRoot(root1: postcss.Root, root2: postcss.Root) {
-		const mergedRoot = postcss.root()
-		root1.walkAtRules(rule => {
-			rule.remove()
-		})
-		root2.walkAtRules(rule => {
-			rule.remove()
-		})
-		root1.walkRules(rule => {
-			mergedRoot.append(rule)
-		})
+	// 	let element = root.firstElementChild;
+	// 	while (element) {
+	// 		this.applyStyle(element as HTMLElement, cssRoot);
+	// 		element = element.nextElementSibling;
+	// 	}
+	// }
+	// mergeRoot(root1: postcss.Root, root2: postcss.Root) {
+	// 	const mergedRoot = postcss.root()
+	// 	root1.walkAtRules(rule => {
+	// 		rule.remove()
+	// 	})
+	// 	root2.walkAtRules(rule => {
+	// 		rule.remove()
+	// 	})
+	// 	root1.walkRules(rule => {
+	// 		mergedRoot.append(rule)
+	// 	})
 
-		root2.walkRules(rule => {
+	// 	root2.walkRules(rule => {
 
-			mergedRoot.append(rule)
-		})
-		mergedRoot.walkAtRules(rule => {
-			rule.remove()
-		})
+	// 		mergedRoot.append(rule)
+	// 	})
+	// 	mergedRoot.walkAtRules(rule => {
+	// 		rule.remove()
+	// 	})
 
-		return mergedRoot
-	}
-	removeClassName(root: HTMLElement) {
-		root.removeAttribute('class')
-		let element = root.firstElementChild;
-		while (element) {
-			this.removeClassName(element as HTMLElement);
-			element = element.nextElementSibling;
-		}
-	}
+	// 	return mergedRoot
+	// }
+	// removeClassName(root: HTMLElement) {
+	// 	root.removeAttribute('class')
+	// 	let element = root.firstElementChild;
+	// 	while (element) {
+	// 		this.removeClassName(element as HTMLElement);
+	// 		element = element.nextElementSibling;
+	// 	}
+	// }
 }
