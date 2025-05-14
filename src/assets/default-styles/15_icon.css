@@ -1,0 +1,18 @@
+/* icon */
+
+.obsidian-icon {
+	font-size: inherit;
+	display: inline-block;
+	width: 2em !important;
+	text-align: center;
+	/* margin-right: -0.5em !important; */
+}
+
+p .obsidian-icon {
+	width: 1.75em !important;
+}
+
+.obsidian-icon.react-icon>svg {
+	vertical-align: middle;
+	margin-bottom: 3px;
+}

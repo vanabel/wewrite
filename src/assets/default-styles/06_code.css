@@ -1,7 +1,7 @@
 /* code section */
 
 :root {
-	--code-containe-background-color: #1E1E1E;
+	--code-containe-background-color: #282c34; /*#1E1E1E;*/
 	--code-section-background-color: #282c34;
 	--code-color: #abb2bf;
 	--code-comment-color: #5c6370;
@@ -12,7 +12,7 @@
 	--code-variable-color: #d19a66;
 	--code-symbol-color: #61aeee;
 	--code-class-color: #e6c07b;
-	--code-line-height: 1.6rem;
+	--code-line-height: 1.6;
 	--code-line-color: rgb(253, 247, 247);
 	--code-font-size: 0.9rem;
 	--code-padding: 8px;
@@ -22,7 +22,7 @@
 .wewrite code {
 	display: inline;
 	color: var(--code-color, rgb(153, 153, 153));
-	line-height: var(--code-line-height, 1.6rem);
+	line-height: var(--code-line-height, 1.6);
 }
 
 .wewrite .code-container {
@@ -35,7 +35,6 @@
 
 
 .wewrite .code-section-banner {
-	/* background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" version="1.1" x="0px" y="0px" width="450px" height="130px"><ellipse cx="65" cy="65" rx="50" ry="52" stroke="rgb(220,60,54)" stroke-width="2" fill="rgb(237,108,96)"></ellipse> <ellipse cx="225" cy="65" rx="50" ry="52" stroke="rgb(218,151,33)" stroke-width="2" fill="rgb(247,193,81)">  </ellipse>  <ellipse cx="385" cy="65" rx="50" ry="52" stroke="rgb(27,161,37)" stroke-width="2" fill="rgb(100,200,86)">  </ellipse> </svg>'); */
 	background-image: url('https://mmbiz.qpic.cn/mmbiz_svg/QAm7hEbaujTQuIH8VVl7W7PicH14grAZxd7oUx579CB2wpytwlLSpiaq2DXBpNUz8R6ckkAuO8tBLr52XjAsvR67mh3oibs2dYK/640?wx_fmt=svg&from=appmsg&tp=webp&wxfrom=15&wx_lazy=1');
 	background-position: 10px 10px;
 	background-size: 40px auto;
@@ -43,25 +42,25 @@
 	display: inline-block;
 	height: 32px;
 	width: 100%;
+	border-bottom: solid 0.5px var(--code-color, rgb(153, 153, 153));
 }
-
-/* https://mmbiz.qpic.cn/mmbiz_svg/QAm7hEbaujTQuIH8VVl7W7PicH14grAZxd7oUx579CB2wpytwlLSpiaq2DXBpNUz8R6ckkAuO8tBLr52XjAsvR67mh3oibs2dYK/640?wx_fmt=svg&from=appmsg&tp=webp&wxfrom=15&wx_lazy=1 */
 
 .wewrite .code-section {
 	display: flex;
 	flex-grow: 1;
 	font-size: var(--code-font-size, 0.9rem);
-	line-height: var(--code-line-height, 1.6rem);
+	line-height: var(--code-line-height, 1.6);
 	border-radius: var(--code-border-radius, 4px);
 }
 
 .wewrite .code-section pre {
 	position: relative;
-	padding: 0;
+	padding: 2px;
 	margin: 0;
 	flex: 1;
 	overflow: auto;
-	border-radius: var(--code-border-radius, 4px);
+	border-bottom-left-radius: var(--code-border-radius, 4px);
+	border-bottom-right-radius: var(--code-border-radius, 4px);
 
 }
 
@@ -79,19 +78,20 @@
 	padding-bottom: var(--code-padding, 8px);
 	position: relative;
 	overflow: hidden;
-	background: var(--code-section-background-color, #282c34);
+	background: var(--code-section-background-color, #282c34)!important;
 	display: flex;
 	flex-direction: column;
 	flex-shrink: 0;
 	counter-reset: line;
 	margin: 0;
-	padding: 10px 3px 0 1rem;
+	padding: 10px 0 0 0;
 	white-space: normal;
 	width: fit-content;
 	user-select: none;
-	border-right: solid 0.5px var (--code-color, rgb(166, 166, 166));
+	border-right: solid 0.5px  rgb(166, 166, 166);
+	padding-right: 5px;
 	color: var(--code-line-color, green);
-	border-radius: var(--code-border-radius, 4px);
+	border-bottom-left-radius: var(--code-border-radius, 4px);
 }
 
 .wewrite .code-section ul>li {
@@ -100,11 +100,12 @@
 	display: list-item;
 	text-align: right;
 	text-wrap: nowrap;
-	line-height: var(--code-line-height, 1.6rem);
+	line-height: var(--code-line-height, 1.6);
 	font-size: var(--code-font-size, 0.9rem);
 	font-family: Menlo-Regular, Menlo, Monaco, Consolas, "Courier New", monospace;
 	list-style-type: none;
 	color: var(--code-line-color, red);
+	padding-left: 1rem;
 	
 }
 

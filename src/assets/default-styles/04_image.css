@@ -1,0 +1,53 @@
+
+:root{
+	--image-border-radius: 5px;
+	--image-border-width: 1px;
+	--image-border-color: var(--wewrite-border, rgb(204, 204, 204));
+}
+
+.wewrite img {
+	border-radius: var(--image-border-radius);
+	border: var(--image-border-width) solid var(--image-border-color);
+	box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+	margin: 0.5em 0;
+}
+
+.image-with-caption {
+  position: relative;
+  display: inline-block;
+  text-align: center; /* 默认居中，可通过类控制 */
+  font-family: "Arial", sans-serif;
+  margin: 1em;
+}
+
+/* 对齐方式控制 */
+.image-with-caption.align-left   { text-align: left; }
+.image-with-caption.align-center { text-align: center; }
+.image-with-caption.align-right  { text-align: right; }
+
+/* 伪元素作为图片标题 */
+.image-with-caption::after {
+  content: attr(data-caption); /* 读取自定义属性作为标题 */
+  display: block;
+  margin-top: 0.5em;
+  font-size: 14px;
+  color: var(--image-border-color,  #555);
+  position: relative;
+}
+
+/* 三角形指向图片 */
+.image-with-caption::before {
+  content: "";
+  display: block;
+  position: absolute;
+  top: 100%; /* 放在图片下方 */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border: 6px solid transparent;
+  border-top-color: var(--image-border-color,  #555); /* 小三角颜色 */
+  margin-top: -4px;
+}
+
+

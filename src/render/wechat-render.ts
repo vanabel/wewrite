@@ -31,6 +31,7 @@ import { Table } from "./marked-extensions/table";
 import { Footnote } from "./marked-extensions/footnote";
 import { Links } from "./marked-extensions/links";
 import { Summary } from "./marked-extensions/summary";
+import { Image } from "./marked-extensions/image";
 // import { ListItem } from './marked-extensions/list-item'
 
 const markedOptiones = {
@@ -46,10 +47,6 @@ export class WechatRender {
 	marked: Marked;
 	previewRender: PreviewRender;
 	delayParse = async (path:string) => {
-		// const md = await this.plugin.app.vault.adapter.read(path);
-		// let html = await this.parse(md);
-		// html = await this.postprocess(html);
-		// return html;
 		return new Promise<string>(async (resolve, reject) => {
 			setTimeout(async () => {
 				try {
@@ -88,9 +85,9 @@ export class WechatRender {
 		this.addExtension(
 			new IconizeRender(this.plugin, this.previewRender, this.marked)
 		);
-		this.addExtension(
-			new Heading(this.plugin, this.previewRender, this.marked)
-		);
+		// this.addExtension(
+		// 	new Heading(this.plugin, this.previewRender, this.marked)
+		// );
 		this.addExtension(
 			new Embed(this.plugin, this.previewRender, this.marked)
 		);
@@ -117,6 +114,9 @@ export class WechatRender {
 		);
 		this.addExtension(
 			new Summary(this.plugin, this.previewRender, this.marked)
+		);
+		this.addExtension(
+			new Image(this.plugin, this.previewRender, this.marked)
 		);
 		// this.addExtension(new ListItem(this.plugin, this.previewRender, this.marked))
 	}

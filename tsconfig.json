@@ -36,5 +36,11 @@
     "**/*.js",
     "src/render/dom-to-image-more.js"
   ],
-  "typeRoots": ["./types", "./node_modules/@types"]
+  "typeRoots": ["./types", "./node_modules/@types"],
+  "paths": {
+    "@/*": ["src/*"],
+    "@types/*": ["types/*"],
+	"@assets/*": ["src/assets/*"]
+
+  }
 }

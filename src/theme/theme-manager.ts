@@ -2,7 +2,7 @@
 import matter from "gray-matter";
 import { Notice, TFile, TFolder, requestUrl } from "obsidian";
 import postcss from "postcss";
-import { combinedCss } from "src/assets/css/template-css";
+// import { combinedCss } from "src/assets/css/template-css";
 import { $t } from "src/lang/i18n";
 import WeWritePlugin from "src/main";
 import { CSSMerger } from "./CssMerger";
@@ -99,7 +99,7 @@ export class ThemeManager {
 	private plugin: WeWritePlugin;
 	defaultCssRoot: postcss.Root;
 	themes: WeChatTheme[] = [];
-	static template_css: string = combinedCss;
+	// static template_css: string = combinedCss;
 
 	private constructor(plugin: WeWritePlugin) {
 		this.plugin = plugin;
@@ -138,7 +138,8 @@ export class ThemeManager {
 	public async getThemeContent(path: string) {
 		const file = this.plugin.app.vault.getFileByPath(path);
 		if (!file) {
-			return ThemeManager.template_css; //DEFAULT_STYLE;
+			// return ThemeManager.template_css; //DEFAULT_STYLE;
+			return ''
 		}
 		const fileContent = await this.plugin.app.vault.cachedRead(file);
 
@@ -201,89 +202,13 @@ export class ThemeManager {
 		};
 	}
 
-	// private async newApplyTheme(htmlRoot: HTMLElement) {
-	// 	const customCss = await this.getCSS()
-	// 	const cssMerger = new CSSMerger(combinedCss, customCss)
-	// 	await cssMerger.prepare()
-	// 	const node = cssMerger.applyStyleToElement(htmlRoot)
-	// 	cssMerger.removeClassName(node)
-	// }
 	public async applyTheme(htmlRoot: HTMLElement) {
 		const customCss = await this.getCSS()
-		const cssMerger = new CSSMerger(combinedCss, customCss)
-		await cssMerger.prepare()
+		const cssMerger = new CSSMerger()
+		await cssMerger.init(customCss)
 		const node = cssMerger.applyStyleToElement(htmlRoot)
 		cssMerger.removeClassName(node)
 		return node
-		// return this.newApplyTheme(htmlRoot)
-		// //--- this.newApplyTheme(htmlRoot)
-		// const customCss = await this.getCSS()
-		// const customCssRoot = postcss.parse(customCss)
-		// const defaultCssRooot = postcss.parse(combinedCss)
-		// const mergedRoot = this.mergeRoot(defaultCssRooot, customCssRoot)
-
-		// this.applyStyle(htmlRoot, mergedRoot)
-		// this.removeClassName(htmlRoot as HTMLElement);
-
-		// console.log('applyTheme=>', htmlRoot.outerHTML);
 
 	}
-	// private removeVarablesInStyleText(root: HTMLElement) {
-	// 	for (let i = 0; i < root.style.length; i++) {
-	// 		const property = root.style[i];
-	// 		if (property.startsWith('--')) {
-	// 			const value = root.style.getPropertyValue(property);
-	// 			root.style.removeProperty(property);
-
-	// 		}
-	// 	}
-	// }
-	// private applyStyle(root: HTMLElement, cssRoot: postcss.Root) {
-	// 	const cssText = root.style.cssText;
-	// 	cssRoot.walkRules(rule => {
-	// 		if (root.matches(rule.selector)) {
-	// 			this.removeVarablesInStyleText(root)
-	// 			rule.walkDecls(decl => {
-	// 				// always replace the property
-	// 				root.style.setProperty(decl.prop, decl.value);
-	// 			})
-	// 		}
-	// 	});
-
-	// 	let element = root.firstElementChild;
-	// 	while (element) {
-	// 		this.applyStyle(element as HTMLElement, cssRoot);
-	// 		element = element.nextElementSibling;
-	// 	}
-	// }
-	// mergeRoot(root1: postcss.Root, root2: postcss.Root) {
-	// 	const mergedRoot = postcss.root()
-	// 	root1.walkAtRules(rule => {
-	// 		rule.remove()
-	// 	})
-	// 	root2.walkAtRules(rule => {
-	// 		rule.remove()
-	// 	})
-	// 	root1.walkRules(rule => {
-	// 		mergedRoot.append(rule)
-	// 	})
-
-	// 	root2.walkRules(rule => {
-
-	// 		mergedRoot.append(rule)
-	// 	})
-	// 	mergedRoot.walkAtRules(rule => {
-	// 		rule.remove()
-	// 	})
-
-	// 	return mergedRoot
-	// }
-	// removeClassName(root: HTMLElement) {
-	// 	root.removeAttribute('class')
-	// 	let element = root.firstElementChild;
-	// 	while (element) {
-	// 		this.removeClassName(element as HTMLElement);
-	// 		element = element.nextElementSibling;
-	// 	}
-	// }
 }
