@@ -1,7 +1,7 @@
 {
 	"id": "wewrite",
 	"name": "WeWrite",
-	"version": "1.0.8",
+	"version": "1.0.9",
 	"minAppVersion": "0.16.0",
 	"description": "Make obsidian a powerful workspace for writing and publishing article to WeChat MP. Draft ahead  of release.",
 	"author": "Learner Chen",
