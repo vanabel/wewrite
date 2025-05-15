@@ -507,17 +507,9 @@
     "@types/pouchdb-mapreduce" "*"
     "@types/pouchdb-replication" "*"
 
-"@types/pouchdb-core@*":
+"@types/pouchdb-core@*", "@types/pouchdb-core@^7.0.15":
   version "7.0.15"
   resolved "https://registry.yarnpkg.com/@types/pouchdb-core/-/pouchdb-core-7.0.15.tgz#02bb1b480c37b6d84b2e3c8babee716f1a101814"
-  integrity sha512-gq1Qbqn9nCaAKRRv6fRHZ4/ER+QYEwSXBZlDQcxwdbPrtZO8EhIn2Bct0AlguaSEdFcABfbaxxyQwFINkNQ9dQ==
-  dependencies:
-    "@types/debug" "*"
-    "@types/pouchdb-find" "*"
-
-"@types/pouchdb-core@^7.0.15":
-  version "7.0.15"
-  resolved "https://registry.npmmirror.com/@types/pouchdb-core/-/pouchdb-core-7.0.15.tgz#02bb1b480c37b6d84b2e3c8babee716f1a101814"
   integrity sha512-gq1Qbqn9nCaAKRRv6fRHZ4/ER+QYEwSXBZlDQcxwdbPrtZO8EhIn2Bct0AlguaSEdFcABfbaxxyQwFINkNQ9dQ==
   dependencies:
     "@types/debug" "*"
@@ -2149,7 +2141,7 @@ nwsapi@^2.2.16:
   resolved "https://registry.npmmirror.com/nwsapi/-/nwsapi-2.2.20.tgz#22e53253c61e7b0e7e93cef42c891154bcca11ef"
   integrity sha512-/ieB+mDe4MrrKMT8z+mQL8klXydZWGR5Dowt4RAGKbJ3kIGEx3X4ljUo+6V73IXtUPWgfOlU5B9MlGxFO5T+cA==
 
-obsidian@latest:
+obsidian@^1.7.2:
   version "1.7.2"
   resolved "https://registry.yarnpkg.com/obsidian/-/obsidian-1.7.2.tgz#2d989288742ae7a65760fd87a953d1ff2a402808"
   integrity sha512-k9hN9brdknJC+afKr5FQzDRuEFGDKbDjfCazJwpgibwCAoZNYHYV8p/s3mM8I6AsnKrPKNXf8xGuMZ4enWelZQ==

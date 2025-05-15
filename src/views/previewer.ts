@@ -32,12 +32,26 @@ import { MPArticleHeader } from "./mp-article-header";
 import { ThemeManager } from "../theme/theme-manager";
 import { ThemeSelector } from "../theme/theme-selector";
 import { WebViewModal } from "./webview";
+import { log } from "console";
 
 export const VIEW_TYPE_WEWRITE_PREVIEW = "wewrite-article-preview";
 export interface ElectronWindow extends Window {
 	WEBVIEW_SERVER_URL: string;
 }
 
+/**
+ * PreviewPanel is a view component that renders and previews markdown content with WeChat integration.
+ * It provides real-time rendering, theme selection, and draft management capabilities for WeChat articles.
+ * 
+ * Features:
+ * - Real-time markdown rendering with debounced updates
+ * - Theme selection and application
+ * - Draft management (send to WeChat draft box, copy to clipboard)
+ * - Frontmatter property handling
+ * - Shadow DOM rendering container
+ * 
+ * The panel integrates with WeChatClient for draft operations and maintains article properties in sync with markdown frontmatter.
+ */
 export class PreviewPanel extends ItemView implements PreviewRender {
 	markdownView: MarkdownView | null = null;
 	private articleDiv: HTMLDivElement;
@@ -73,6 +87,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
 	articleTitle: Setting;
 	containerDiv: HTMLElement;
 	mpModal: WebViewModal;
+	isActive: boolean = false;
 	getViewType(): string {
 		return VIEW_TYPE_WEWRITE_PREVIEW;
 	}
@@ -142,7 +157,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
 				});
 			});
 		}
-		
+
 	}
 
 	public getCurrentMarkdownFile() {
@@ -337,17 +352,37 @@ export class PreviewPanel extends ItemView implements PreviewRender {
 		// return this.articleDiv.innerHTML;
 	}
 	async renderDraft() {
+		// console.log('isView  Active', this.isViewActive())
+		if (!this.isViewActive()) {
+			console.log('wewrite is not active, no rendering')
+			return;
+		}
+
 		await this.parseActiveMarkdown();
 		await ThemeManager.getInstance(this.plugin).applyTheme(
 			this.articleDiv.firstChild as HTMLElement
 		);
 	}
+	isViewActive(): boolean {
+		// console.log('righ side view:', !this.app.workspace.rightSplit.collapsed)
+		// console.log('is preview  active?', this.isActive)
+		return this.isActive && !this.app.workspace.rightSplit.collapsed
+	}
+
 	startListen() {
 		this.registerEvent(
 			this.plugin.app.vault.on("rename", (file: TFile) => {
 				this.draftHeader.onNoteRename(file);
 			})
 		);
+		this.registerEvent(
+			this.app.workspace.on('layout-change', () => {
+				const isOpen = this.app.workspace.getLeavesOfType(VIEW_TYPE_WEWRITE_PREVIEW).length > 0;
+				// console.log('View state changed:', isOpen ? 'Opened' : 'Closed');
+				this.isActive = isOpen;
+			})
+		);
+
 		const ec = this.app.workspace.on(
 			"editor-change",
 			(editor: Editor, info: MarkdownView) => {
@@ -357,12 +392,19 @@ export class PreviewPanel extends ItemView implements PreviewRender {
 		this.listeners.push(ec);
 
 		const el = this.app.workspace.on("active-leaf-change", async (leaf) => {
-			if (leaf && leaf.view.getViewType() === "markdown") {
-				this.plugin.messageService.sendMessage(
-					"active-file-changed",
-					null
-				);
-				this.debouncedUpdate();
+			if (leaf){
+				if(leaf.view.getViewType() === "markdown") {
+					this.plugin.messageService.sendMessage(
+						"active-file-changed",
+						null
+					);
+					this.debouncedUpdate();
+				}else {
+					// console.log('not markdown view:', leaf.view.getViewType(),  leaf.view === this);
+					
+					this.isActive = (leaf.view === this)
+				}
+
 			}
 		});
 		this.listeners.push(el);

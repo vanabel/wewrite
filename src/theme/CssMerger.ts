@@ -121,21 +121,21 @@ export class CSSMerger {
 			result = result.replace(varRegex, (_match, varName: string, fallback: string | undefined) => {
 
 				const fullKey = `--${varName}`;
-				if (fullKey === '--code-color') {
-					console.log(`css vars matching: ${value} => ${_match}`);
-				}
+				// if (fullKey === '--code-color') {
+				// 	console.log(`css vars matching: ${value} => ${_match}`);
+				// }
 				if (vars.has(fullKey)) {
 					const replacement = vars.get(fullKey)!;
 					replaced = true;
-					if (fullKey === '--code-color') {
-						console.log(`css vars full-key replacement: ${value} => ${replacement}`);
-					}
+					// if (fullKey === '--code-color') {
+					// 	console.log(`css vars full-key replacement: ${value} => ${replacement}`);
+					// }
 					return replacement;
 				} else if (fallback !== undefined) {
 					replaced = true;
-					if (fullKey === '--code-color') {
-						console.log(`css vars fallback replacement: ${value} => ${fallback}`);
-					}
+					// if (fullKey === '--code-color') {
+					// 	console.log(`css vars fallback replacement: ${value} => ${fallback}`);
+					// }
 					return fallback;
 				} else {
 					console.warn(`Variable ${fullKey} not found and no fallback provided`);
@@ -194,6 +194,9 @@ export class CSSMerger {
 					rule.forEach((decl, prop) => {
 						let value = this.resolveCssVars(decl.value, this.vars);
 						currentNode.style.setProperty(prop, decl.important ? value + ' !important' : value);
+						if (selector.includes('img::after')) {
+							console.log(`image caption[${selector}]: ${decl.value} => ${value}`);
+						}
 					})
 				}
 			} catch (error) {

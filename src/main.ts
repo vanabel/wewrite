@@ -71,6 +71,7 @@ export default class WeWritePlugin extends Plugin {
 	matierialView: MaterialView;
 	messageService: MessageService;
 	resourceManager = ResourceManager.getInstance(this);
+	active: boolean = false;
 
 	async saveThemeFolder() {
 		const config = {
@@ -428,25 +429,20 @@ export default class WeWritePlugin extends Plugin {
 
 	async activateView() {
 		const { workspace } = this.app;
-		if (workspace.rightSplit.collapsed) {
-			workspace.rightSplit.expand();
 
-			let leaf: WorkspaceLeaf | null | undefined = workspace
-				.getLeavesOfType(VIEW_TYPE_WEWRITE_PREVIEW)
-				.find((leaf) => leaf.view instanceof PreviewPanel);
+		let leaf: WorkspaceLeaf | null | undefined = workspace
+			.getLeavesOfType(VIEW_TYPE_WEWRITE_PREVIEW)
+			.find((leaf) => leaf.view instanceof PreviewPanel);
 
-			if (leaf === undefined || leaf === null) {
-				leaf = workspace.getRightLeaf(false);
-				await leaf?.setViewState({
-					type: VIEW_TYPE_WEWRITE_PREVIEW,
-					active: true,
-				});
-			}
-			if (leaf) {
-				workspace.revealLeaf(leaf);
-			}
-		} else {
-			workspace.rightSplit.collapse();
+		if (leaf === undefined || leaf === null) {
+			leaf = workspace.getRightLeaf(false);
+			await leaf?.setViewState({
+				type: VIEW_TYPE_WEWRITE_PREVIEW,
+				active: false,
+			});
+		}
+		if (leaf) {
+			workspace.revealLeaf(leaf);
 		}
 	}
 	async activateMaterialView() {
@@ -840,7 +836,7 @@ export default class WeWritePlugin extends Plugin {
 		this.aiClient = AiClient.getInstance(this);
 
 		this.registerViews();
-
+		
 		this.addCommand({
 			id: "open-previewer",
 			name: $t("main.open-previewer"),
@@ -899,6 +895,8 @@ export default class WeWritePlugin extends Plugin {
 				VIEW_TYPE_MP_MATERIAL,
 				(leaf) => (this.matierialView = new MaterialView(leaf, this))
 			);
+		} else {
+			console.info("WeWrite material view already registered.");
 		}
 
 	}
@@ -919,4 +917,8 @@ export default class WeWritePlugin extends Plugin {
 		this.app.workspace.detachLeavesOfType(VIEW_TYPE_WEWRITE_PREVIEW);
 		this.app.workspace.detachLeavesOfType(VIEW_TYPE_MP_MATERIAL);
 	}
+
+
+
+
 }

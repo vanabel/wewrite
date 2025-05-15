@@ -1,5 +1,4 @@
-
-:root{
+:root {
 	--image-border-radius: 5px;
 	--image-border-width: 1px;
 	--image-border-color: var(--wewrite-border, rgb(204, 204, 204));
@@ -13,41 +12,61 @@
 }
 
 .image-with-caption {
-  position: relative;
-  display: inline-block;
-  text-align: center; /* 默认居中，可通过类控制 */
-  font-family: "Arial", sans-serif;
-  margin: 1em;
+	position: relative;
+	display: inline-block;
+	text-align: center;
+	/* 默认居中，可通过类控制 */
+	font-family: "Arial", sans-serif;
+	margin: 1em 0;
 }
 
 /* 对齐方式控制 */
-.image-with-caption.align-left   { text-align: left; }
-.image-with-caption.align-center { text-align: center; }
-.image-with-caption.align-right  { text-align: right; }
+.image-with-caption.align-left {
+	text-align: left;
+}
+
+.image-with-caption.align-center {
+	text-align: center;
+}
+
+.image-with-caption.align-right {
+	text-align: right;
+}
 
 /* 伪元素作为图片标题 */
-.image-with-caption::after {
-  content: attr(data-caption); /* 读取自定义属性作为标题 */
-  display: block;
-  margin-top: 0.5em;
-  font-size: 14px;
-  color: var(--image-border-color,  #555);
-  position: relative;
+.image-caption {
+	font-size: 0.9rem;
+	color: gray;
+	position: relative;
+	margin-right: auto;
 }
 
-/* 三角形指向图片 */
-.image-with-caption::before {
-  content: "";
-  display: block;
-  position: absolute;
-  top: 100%; /* 放在图片下方 */
-  left: 50%;
-  transform: translateX(-50%);
-  width: 0;
-  height: 0;
-  border: 6px solid transparent;
-  border-top-color: var(--image-border-color,  #555); /* 小三角颜色 */
-  margin-top: -4px;
+.image-caption-row {
+	display: flex;
+	align-items: center;
+	gap: 0.5em;
+	/* 三角形和文字之间的间距 */
+	margin-bottom: 0.5em;
+	position: relative;
+	top: -0.3rem;
+
 }
 
+.image-with-caption .triangle {
+	width: 0;
+	height: 0;
+	border: 0.5rem solid transparent;
+	border-bottom-color: var(--image-border-color, #555);
+	position: relative;
+	top: -0.3rem;
+	margin-left: auto;
+}
 
+.wewrite .caption {
+	font-size: 0.9rem;
+	color: var(--image-border-color, #555);
+	position: relative;
+	width: 100%;
+	text-align: center;
+	top: -3rem;
+}

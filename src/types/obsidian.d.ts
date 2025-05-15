@@ -52,6 +52,9 @@ declare module "obsidian" {
             callback: () => unknown
         ): EventRef;
     }
+	interface WorkspaceLeaf {
+		working: boolean;
+    }
 
     interface EventRef {
         e: Events;
