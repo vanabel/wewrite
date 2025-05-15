@@ -2,9 +2,8 @@ name: Smart Release
 
 on:
   push:
-    branches:
-      - master
-      - main
+    paths:
+      - 'manifest.json'
     
 permissions:
   contents: write
