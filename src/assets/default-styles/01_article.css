@@ -29,7 +29,7 @@
 
 	/*  文本对齐方式 */
 	--article-text-align: left;
-	--article-text-indent: 2em;
+	--article-text-indent: 2rem;
 
 	/* 标题 */
 	--article-heading-color: var(--article-color);
@@ -265,8 +265,9 @@
 	
 	background-color: var(--article-background-color, #ffffff);
 	padding: var(--article-padding, 1em);
+	text-indent: 0;
 }
-.wewrite p {
+.wewrite > p {
 	text-indent: var(--article-text-indent, 2em);
 }
 

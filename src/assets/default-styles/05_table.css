@@ -2,21 +2,19 @@
 	--table-border-color: var(--wewrite-border-color, #e0e0e0);
 	--table-border-width: var(--wewrite-border-width, 1px);
 	--table-border-style: var(--wewrite-border-style, solid);
-	--table-border-radius: var(--wewrite-border-radius, 4px);
 	--table-padding: var(--wewrite-padding, 16px);
 	--table-margin: var(--wewrite-margin, 0);
-	--table-background-color: var(--wewrite-background, #fff);	
-	--table-background-color-alt: var(--wewrite-background-alt, #f0f0f0);	
-	--table-background-color-hover: var(--wewrite-background-alt, #f3f3f3);	
+	--table-background-color: var(--wewrite-background, #fff);
+	--table-background-color-alt: var(--wewrite-background-alt, #f0f0f0);
+	--table-background-color-hover: var(--wewrite-background-alt, #f3f3f3);
 	--table-font-size: var(--wewrite-font-size, 16px);
 	--table-font-weight: var(--wewrite-font-weight, 400);
-	--table-line-height: var(--wewrite-line-height, 1.5);
+	--table-line-height: var(--wewrite-line-height, 1.4);
 	--table-text-align: var(--wewrite-text-align, left);
 	--table-text-indent: var(--wewrite-text-indent, 0);
 	--table-text-color: var(--wewrite-text-color, #333);
 	--table-header-color: var(--wewrite-header-color, #333);
-	--table-header-background-color: var(--wewrite-header-background-color, #f0f0f0);
-
+	--table-header-background-color:rgb(62, 175, 124, 0.4);;
 	--table-header-font-weight: var(--wewrite-header-font-weight, 600);
 	--table-header-line-height: var(--wewrite-header-line-height, 1.5);
 	--table-header-text-align: var(--wewrite-header-text-align, left);
@@ -24,47 +22,57 @@
 }
 
 .wewrite .table-container {
-    display: flex;
-    width: 100%;
-    overflow: auto;
-    padding: 1px;
+	display: flex;
+	width: 100%;
+	overflow: auto;
+	padding: 1px;
 }
 
 .wewrite table {
-    border-collapse: collapse;
-    width: fit-content;
-    box-shadow: 0 4px 8px var(--wewrite-shadow, (0, 0, 0, 0.1));
-    border-radius: var(--table-border-radius)
+	border-collapse: collapse;
+	width: 100%;
+	box-shadow: 0 4px 8px var(--wewrite-shadow, (0, 0, 0, 0.1));
+	border-color: var(--table-border-color);
+	border-width: 2px;
+
 }
 
 .wewrite thead {
-    background: var(--table-header-background-color)!important;
-    color: var(--table-header-color);
-    text-align: var(--table-header-text-align, left);
+	background-color: var(--table-header-background-color);
+	color: var(--table-header-color);
+	text-align: var(--table-header-text-align, left);
 	line-height: var(--table-header-line-height, 1.5);
 	font-weight: var(--table-header-font-weight, 600);
 }
 
-.wewrite tr:nth-child(2n) {
-    background-color: var(--table-background-color,  rgb(62, 175, 124, 0.2));
+.wewrite tr:nth-child(even) {
+	background-color: rgb(62, 175, 124, 0.2);
 }
 
 .wewrite th {
-    background: var(--table-header-background-color)!important;
-    color:     var(--table-header-color);
+	background-color: var(--table-header-background-color);
+	color: var(--table-header-color);
+
 }
 
 .wewrite th,
 .wewrite td {
-    padding: var(--table-padding, 16px 24px);
-    line-height: var(--table-line-height, 1.5);
+	padding: var(--table-padding, 16px 24px);
+	line-height: var(--table-line-height, 1.5);
+	border-style: solid;
+	border-color: var(--table-border-color);
+	border-width: var(--table-border-width);
+	border-radius: var(--table-border-radius);
+	padding: var(--table-padding, 16px 24px);
+	line-height: var(--table-line-height, 1.5);
+	text-align: var(--table-text-align, left);
 }
 
 .wewrite td {
-    min-width: var(--table-min-width, 100px);
+	min-width: var(--table-min-width, 100px);
 }
 
 .wewrite tr:hover {
-    background-color: var(--table-background-color-alt, #f0f0f0);
-    /* 行悬停效果 */
+	background-color: var(--table-background-color-alt, #f0f0f0);
+	/* 行悬停效果 */
 }
