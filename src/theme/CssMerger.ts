@@ -43,15 +43,8 @@ const baseCSS = [
 ]
 
 
-
-
-
 type Rule = Map<string, postcss.Declaration>;
 type Rules = Map<string, Rule>;
-
-// const varRegex = /var\(\s*--([a-zA-Z0-9_-]+)(?:\s*,\s*[^)]+)?\s*\)/g;
-// const regexVarFallback = /var\(\s*--([a-zA-Z0-9_-]+)(?:\s*,\s*([^)]+))?\s*\)/g
-const regexVarFallback = /(^|\s|\(|,)var\(\s*--([a-zA-Z0-9_-]+)(?:\s*,\s*([^)]*))?\s*\)/g;
 
 export class CSSMerger {
 	baseAST: postcss.Root | undefined;
@@ -61,7 +54,6 @@ export class CSSMerger {
 
 
 	async init(customCSS: string) {
-		// this.baseAST = (await postcss().process(this.baseCSS, { from: undefined })).root;
 		await this.buildBaseCSS();
 		const ast = (await postcss().process(customCSS, { from: undefined })).root;
 		this.pickVariables(ast, this.vars);
@@ -77,40 +69,8 @@ export class CSSMerger {
 			this.pickRules(ast, this.rules);
 		}
 	}
-	// const varRegex = /var\(\s*--([a-zA-Z0-9_-]+)(?:\s*,\s*([^)]+))?\s*\)/g;
-	// const varRegex = /var\(\s*--([a-zA-Z0-9_-]+)(?:\s*,\s*([^)]*))?\s*\)/g;
-	// private resolveCssVars(value: string, vars: Map<string, string>, depth = 0): string {
-	//     const MAX_DEPTH = 10; // 防止无限循环
-	// 	const varRegex = /(^|\s|\(|,)var\(\s*--([a-zA-Z0-9_-]+)(?:\s*,\s*([^)]*))?\s*\)/g;
-
-	//     let result = value;
-	//     let replaced;
-
-	//     do {
-	//         replaced = false;
-	//         result = result.replace(varRegex, (_, varName, fallback) => {
-	//             const fullKey = `--${varName}`;
-	//             if (vars.has(fullKey)) {
-	//                 const replacement = vars.get(fullKey)!;
-	//                 replaced = true;
-	//                 return replacement;
-	//             } else if (fallback !== undefined) {
-	//                 replaced = true;
-	//                 return fallback;
-	//             } else {
-	//                 console.warn(`Variable ${fullKey} not found and no fallback provided`);
-	//                 return '';
-	//             }
-	//         });
-
-	//         depth++;
-	//     } while (replaced && depth < MAX_DEPTH);
-
-	//     return result;
-	// }
 	private resolveCssVars(value: string, vars: Map<string, string>, depth = 0): string {
 		const MAX_DEPTH = 10; // 防止无限循环
-		// const varRegex = /var\(\s*--([a-zA-Z0-9_-]+)(?:\s*,\s*([^)]*))?\s*\)/g;
 		const varRegex = /var\(\s*--([\w-]+)(?:\s*,\s*((?:\((?:[^()]|\([^()]*\))*\)|[^)\s]|[\s\S])*?))?\s*\)/g;
 		let result = value;
 		let replaced: boolean;
@@ -121,21 +81,12 @@ export class CSSMerger {
 			result = result.replace(varRegex, (_match, varName: string, fallback: string | undefined) => {
 
 				const fullKey = `--${varName}`;
-				// if (fullKey === '--code-color') {
-				// 	console.log(`css vars matching: ${value} => ${_match}`);
-				// }
 				if (vars.has(fullKey)) {
 					const replacement = vars.get(fullKey)!;
 					replaced = true;
-					// if (fullKey === '--code-color') {
-					// 	console.log(`css vars full-key replacement: ${value} => ${replacement}`);
-					// }
 					return replacement;
 				} else if (fallback !== undefined) {
 					replaced = true;
-					// if (fullKey === '--code-color') {
-					// 	console.log(`css vars fallback replacement: ${value} => ${fallback}`);
-					// }
 					return fallback;
 				} else {
 					console.warn(`Variable ${fullKey} not found and no fallback provided`);
@@ -145,7 +96,6 @@ export class CSSMerger {
 
 			depth++;
 		} while (replaced && depth < MAX_DEPTH);
-		// console.log(`css vars replacement: ${value} => ${result}`);
 
 		return result;
 	}
@@ -153,22 +103,17 @@ export class CSSMerger {
 	private pickRules(root: postcss.Root, rules: Rules): void {
 		root.walkRules(rule => {
 			if (rule.selector !== ':root') {
-				// if the rule exists in the base CSS, processed already.
 				let selectedRule = rules.get(rule.selector);
 				if (!selectedRule) {
 					selectedRule = new Map();
 					rules.set(rule.selector, selectedRule);
 				}
 				rule.walkDecls(decl => {
-					// for each declaration under the rule, check if the value contains var(), replace it.
-					// this.resolveCssVars(decl.value, this.vars)
-					//push it to the selected rule. could replace original one if it exists.
 					const baseDecl = selectedRule.get(decl.prop);
 
 					if (baseDecl === undefined || !baseDecl.important || decl.important) {
 						selectedRule.set(decl.prop, decl);
 					} else {
-						// console.log(`${rule.selector} skip ${decl.prop}`);
 					}
 				})
 			}
@@ -179,7 +124,6 @@ export class CSSMerger {
 			if (rule.selector === ':root') {
 				rule.walkDecls(decl => {
 					if (decl.prop.startsWith('--')) {
-						//push to vars
 						vars.set(decl.prop, decl.value);
 					}
 				});
@@ -194,9 +138,6 @@ export class CSSMerger {
 					rule.forEach((decl, prop) => {
 						let value = this.resolveCssVars(decl.value, this.vars);
 						currentNode.style.setProperty(prop, decl.important ? value + ' !important' : value);
-						if (selector.includes('img::after')) {
-							console.log(`image caption[${selector}]: ${decl.value} => ${value}`);
-						}
 					})
 				}
 			} catch (error) {

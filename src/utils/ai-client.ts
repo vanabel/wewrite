@@ -38,6 +38,7 @@ export class AiClient {
 		if (account.baseUrl === undefined || !account.baseUrl) {
 			throw new Error($t("utils.no-ai-server-url-given"));
 		}
+		
 		if (account.baseUrl.startsWith("https://")) {
 			return this.openaiClient
 		} else {

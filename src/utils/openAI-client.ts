@@ -7,6 +7,7 @@ import { DeepSeekResult } from "../types/types";
 import prompt from "./prompt.json";
 import { buildPrompt, Prompt } from "./ai-client";
 import { ChatCompletionMessage } from "openai/resources";
+import { obsidianFetch } from "./fetch";
 export class OpenAIClient {
 	private static instance: OpenAIClient;
 	private plugin: WeWritePlugin;
@@ -168,9 +169,13 @@ export class OpenAIClient {
 			return null;
 		}
 		const openai = new OpenAI({
+			fetch: async (url: RequestInfo, init?: RequestInit): Promise<Response> => {
+				const response = await obsidianFetch(url, init);
+				return response;
+			},
 			dangerouslyAllowBrowser: true,
-			baseURL: account.baseUrl, //'https://api.deepseek.com',
-			apiKey: account.apiKey, //'<DeepSeek API Key>'
+			baseURL: account.baseUrl, 
+			apiKey: account.apiKey, 
 		});
 		return openai;
 	}
@@ -248,6 +253,8 @@ export class OpenAIClient {
 		sourceLang: string = "English",
 		targetLang: string = "Chinese"
 	): Promise<string> {
+		console.log('translateText in openAI');
+		
 		const openai = this.getChatAI();
 		if (!openai) {
 			return "";

@@ -41,6 +41,7 @@ import {
 import { MaterialView, VIEW_TYPE_MP_MATERIAL } from "./views/material-view";
 import { PreviewPanel, VIEW_TYPE_WEWRITE_PREVIEW } from "./views/previewer";
 import { WechatClient } from "./wechat-api/wechat-client";
+import { Spinner } from "./views/spinner";
 
 const DEFAULT_SETTINGS: WeWriteSetting = {
 	mpAccounts: [],
@@ -72,6 +73,7 @@ export default class WeWritePlugin extends Plugin {
 	messageService: MessageService;
 	resourceManager = ResourceManager.getInstance(this);
 	active: boolean = false;
+	spinner: Spinner;
 
 	async saveThemeFolder() {
 		const config = {
@@ -86,11 +88,40 @@ export default class WeWritePlugin extends Plugin {
 			this.settings.css_styles_folder = config.custom_theme_folder;
 		}
 	}
-	private spinnerEl: HTMLElement;
-	spinnerText: HTMLDivElement;
+	// private spinnerEl: HTMLElement;
+	// spinnerText: HTMLDivElement;
+	trimSettings() {
+		this.settings.mpAccounts.forEach((account) => {
+			account.accountName = account.accountName.trim();
+			account.appId = account.appId.trim();
+			account.appSecret = account.appSecret.trim();
+		});
+		this.settings.chatAccounts.forEach((account) => {
+			account.accountName = account.accountName.trim();
+			account.baseUrl = account.baseUrl.trim();
+			account.apiKey = account.apiKey.trim();
+			account.model = account.model.trim();
+		});
+		this.settings.drawAccounts.forEach((account) => {
+			account.accountName = account.accountName.trim();
+			account.baseUrl = account.baseUrl.trim();
+			account.taskUrl = account.taskUrl.trim();
+			account.apiKey = account.apiKey.trim();
+			account.model = account.model.trim();
+		})
+		this.settings.ipAddress = this.settings.ipAddress?.trim();
+		this.settings.selectedMPAccount = this.settings.selectedMPAccount?.trim();
+		this.settings.selectedChatAccount = this.settings.selectedChatAccount?.trim();
+		this.settings.selectedDrawAccount = this.settings.selectedDrawAccount?.trim();
+		this.settings.accountDataPath = this.settings.accountDataPath?.trim();
+		this.settings.chatSetting.chatSelected = this.settings.chatSetting.chatSelected?.trim();
+		this.settings.chatSetting.modelSelected = this.settings.chatSetting.modelSelected?.trim();
+		this.settings.css_styles_folder = this.settings.css_styles_folder?.trim();
+	}
 	saveSettings: Function = debounce(async () => {
 		delete this.settings._id;
 		delete this.settings._rev;
+		this.trimSettings();
 		await saveWeWriteSetting(this.settings);
 		await this.saveThemeFolder();
 	}, 3000);
@@ -383,25 +414,32 @@ export default class WeWritePlugin extends Plugin {
 	}
 
 	createSpinner() {
-		this.spinnerEl = this.addStatusBarItem();
-		this.spinnerEl.addClass("wewrite-spin-container");
-		this.spinnerEl.createDiv({
-			cls: "wewrite-spinner",
-		});
-		this.spinnerText = this.spinnerEl.createDiv({
-			cls: "wewrite-spinner-text",
-		});
+		
+		this.spinner = new Spinner(this.addStatusBarItem());
+		console.log("createSpinner:", this.spinner);
+		// this.spinnerEl = this.addStatusBarItem();
+		// this.spinnerEl.addClass("wewrite-spin-container");
+		// this.spinnerEl.createDiv({
+		// 	cls: "wewrite-spinner",
+		// });
+		// this.spinnerText = this.spinnerEl.createDiv({
+		// 	cls: "wewrite-spinner-text",
+		// });
 	}
 	showSpinner(text: string = "") {
-		this.spinnerEl.style.display = "flex";
-		this.spinnerText.setText(text);
+		this.spinner.showSpinner(text);
+		// this.spinnerEl.style.display = "flex";
+		// this.spinnerText.setText(text);
+
 	}
 	isSpinning() {
-		return this.spinnerEl.style.display !== "none";
+		// return this.spinnerEl.style.display !== "none";
+		return this.spinner.isSpinning();
 	}
 
 	hideSpinner() {
-		this.spinnerEl.style.display = "none";
+		// this.spinnerEl.style.display = "none";
+		this.spinner.hideSpinner();
 	}
 
 	async loadSettings() {
@@ -438,7 +476,7 @@ export default class WeWritePlugin extends Plugin {
 			leaf = workspace.getRightLeaf(false);
 			await leaf?.setViewState({
 				type: VIEW_TYPE_WEWRITE_PREVIEW,
-				active: false,
+				active: true,
 			});
 		}
 		if (leaf) {
@@ -457,7 +495,7 @@ export default class WeWritePlugin extends Plugin {
 			leaf = workspace.getLeftLeaf(false);
 			await leaf?.setViewState({
 				type: VIEW_TYPE_MP_MATERIAL,
-				active: false,
+				active: true,
 			});
 		}
 
@@ -874,38 +912,22 @@ export default class WeWritePlugin extends Plugin {
 			this.hideSpinner();
 		})
 	}
+	registerViewOnce(viewType:string){
+		if (this.app.workspace.getLeavesOfType(viewType).length === 0) {
+			this.registerView(viewType, (leaf) =>  new PreviewPanel(leaf, this))
+		}
+	}
 	registerViews() {
-		let leaf: WorkspaceLeaf | null | undefined = this.app.workspace
-			.getLeavesOfType(VIEW_TYPE_WEWRITE_PREVIEW)
-			.find((leaf) => leaf.view instanceof PreviewPanel);
-		if (leaf === undefined || leaf === null) {
-			this.registerView(
-				VIEW_TYPE_WEWRITE_PREVIEW,
-				(leaf) => new PreviewPanel(leaf, this)
-			);
-		} else {
-			console.info("WeWrite previewer view already registered.");
-
-		}
-		let leaf2: WorkspaceLeaf | null | undefined = this.app.workspace
-			.getLeavesOfType(VIEW_TYPE_MP_MATERIAL)
-			.find((leaf) => leaf.view instanceof MaterialView);
-		if (leaf2 === undefined || leaf2 === null) {
-			this.registerView(
-				VIEW_TYPE_MP_MATERIAL,
-				(leaf) => (this.matierialView = new MaterialView(leaf, this))
-			);
-		} else {
-			console.info("WeWrite material view already registered.");
-		}
-
+		this.registerViewOnce(VIEW_TYPE_WEWRITE_PREVIEW);
+		this.registerViewOnce(VIEW_TYPE_MP_MATERIAL);
 	}
 
 	onunload() {
 		if (this.editorChangeListener) {
 			this.app.workspace.offref(this.editorChangeListener);
 		}
-		this.spinnerEl.remove();
+		// this.spinnerEl.remove();
+		this.spinner.unload();
 		this.app.workspace.iterateAllLeaves((leaf) => {
 			if (leaf.view instanceof PreviewPanel) {
 				leaf.detach();
@@ -914,8 +936,8 @@ export default class WeWritePlugin extends Plugin {
 				leaf.detach();
 			}
 		});
-		this.app.workspace.detachLeavesOfType(VIEW_TYPE_WEWRITE_PREVIEW);
-		this.app.workspace.detachLeavesOfType(VIEW_TYPE_MP_MATERIAL);
+		this.app.workspace.getLeavesOfType(VIEW_TYPE_WEWRITE_PREVIEW).forEach((leaf) => leaf.detach());
+		this.app.workspace.getLeavesOfType(VIEW_TYPE_MP_MATERIAL).forEach((leaf) => leaf.detach());
 	}
 
 

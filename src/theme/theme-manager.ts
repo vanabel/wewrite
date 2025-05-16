@@ -21,11 +21,9 @@ export class ThemeManager {
 
 		// Create save directory if it doesn't exist
 		if (!this.plugin.app.vault.getAbstractFileByPath(saveDir)) {
-			console.log(`To Created directory: ${saveDir}`);
 			await this.plugin.app.vault.createFolder(saveDir);
 			
 		}else {
-			console.log(`Directory already exists: ${saveDir}`);
 		}
 
 		// Check if github is reachable, if not, use gitee
@@ -54,8 +52,6 @@ export class ThemeManager {
 				throw new Error($t('views.theme-manager.failed-to-fetch-themes-json-themesrespon', [themesResponse.text]));
 			}
 
-			console.log(`Downloaded themes.json:`, themesResponse, `${url}themes.json`);
-			
 			const themesData = themesResponse.json;
 			const themes = themesData.themes;
 

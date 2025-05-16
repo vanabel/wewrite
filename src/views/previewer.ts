@@ -352,9 +352,7 @@ export class PreviewPanel extends ItemView implements PreviewRender {
 		// return this.articleDiv.innerHTML;
 	}
 	async renderDraft() {
-		// console.log('isView  Active', this.isViewActive())
 		if (!this.isViewActive()) {
-			console.log('wewrite is not active, no rendering')
 			return;
 		}
 
@@ -364,8 +362,6 @@ export class PreviewPanel extends ItemView implements PreviewRender {
 		);
 	}
 	isViewActive(): boolean {
-		// console.log('righ side view:', !this.app.workspace.rightSplit.collapsed)
-		// console.log('is preview  active?', this.isActive)
 		return this.isActive && !this.app.workspace.rightSplit.collapsed
 	}
 
@@ -378,7 +374,6 @@ export class PreviewPanel extends ItemView implements PreviewRender {
 		this.registerEvent(
 			this.app.workspace.on('layout-change', () => {
 				const isOpen = this.app.workspace.getLeavesOfType(VIEW_TYPE_WEWRITE_PREVIEW).length > 0;
-				// console.log('View state changed:', isOpen ? 'Opened' : 'Closed');
 				this.isActive = isOpen;
 			})
 		);
@@ -400,7 +395,6 @@ export class PreviewPanel extends ItemView implements PreviewRender {
 					);
 					this.debouncedUpdate();
 				}else {
-					// console.log('not markdown view:', leaf.view.getViewType(),  leaf.view === this);
 					
 					this.isActive = (leaf.view === this)
 				}
