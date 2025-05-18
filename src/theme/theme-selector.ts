@@ -24,7 +24,7 @@ export class ThemeSelector {
 
         themDropdown.onChange(async (value) => {
             this.plugin.settings.custom_theme = value
-            
+            this.plugin.saveSettings()
             this.plugin.messageService.sendMessage('custom-theme-changed', value)
         })
     }
@@ -33,12 +33,12 @@ export class ThemeSelector {
 
         //clear all options
         this._themeDropdown.selectEl.length = 0
-        this._themeDropdown.addOption('', $t('views.theme-manager.default-theme'))
+        this._themeDropdown.addOption('--default--', $t('views.theme-manager.default-theme'))
         themes.forEach(theme => {
             this._themeDropdown.addOption(theme.path, theme.name)
         })
         if (this.plugin.settings.custom_theme === undefined || !this.plugin.settings.custom_theme) {
-            this._themeDropdown.setValue('')
+            this._themeDropdown.setValue('--default--')
         } else {
             this._themeDropdown.setValue(this.plugin.settings.custom_theme)
         }

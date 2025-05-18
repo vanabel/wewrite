@@ -23,9 +23,9 @@
     "proof": "Proof",
     "proofing": "Proofing...",
     "synonyms": "synonyms",
-	"generating-latex": "Generate LaTeX",
+    "generating-latex": "Generate LaTeX",
     "generating-mermaid": "Generate Mermaid",
-	"summarizing": "Summarizing...",
+    "summarizing": "Summarizing...",
     "text-to-image": "Text to image",
     "to-chinese": "Translate to Chinese",
     "to-english": "Translate to English",
@@ -34,7 +34,8 @@
     "wewrite-ai": "WeWrite AI",
     "open-material-view": "Material management",
     "open-previewer": "Article render previewer",
-	"image-generation-failed": "Image generation failed."
+    "image-generation-failed": "Image generation failed.",
+    "fetch-wechat-profile": "Fetching WeChat profile"
   },
   "modals": {
     "be-careful": "Caution!",
@@ -82,8 +83,9 @@
     "mermaid-failed": "<section>Mermaid rendering failed</section>",
     "pdf-crop-failed": "<span>Pdf cropping failed</span>",
     "render-failed": "Rendering failed.",
-	"charts-plugin-not-installed": "Charts plugin not installed.", 
-    "rendering": "Rendering..."
+    "charts-plugin-not-installed": "Charts plugin not installed.",
+    "rendering": "Rendering...",
+    "failed-to-parse-custom-css": "Custom CSS parsing failed: {0}"
   },
   "settings": {
     "account-info": "Account info",
@@ -96,9 +98,9 @@
     "be-carefull-delete-account": "Caution! This will delete all settings and data for the account.",
     "check-if-your-account-setting-is-correct": "Check if your account settings are correct.",
     "click-to-connect-wechat-server": "Click to connect to WeChat server",
-	"successfully-connected-to-wechat-server": "Successfully connected to WeChat server.",
-	"fetching":"Fetching...",
-	"failed-to-connect-to-wechat-server": "Failed to connect to WeChat server.",
+    "successfully-connected-to-wechat-server": "Successfully connected to WeChat server.",
+    "fetching": "Fetching...",
+    "failed-to-connect-to-wechat-server": "Failed to connect to WeChat server.",
     "copy-ip-address-to-clipboard": "Copy IP address to clipboard",
     "copy-ip-to-clipboard": "Copy IP to clipboard",
     "create-new-account": "Create new account",

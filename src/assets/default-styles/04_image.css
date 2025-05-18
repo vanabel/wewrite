@@ -2,9 +2,12 @@
 	--image-border-radius: 5px;
 	--image-border-width: 1px;
 	--image-border-color: var(--wewrite-border, rgb(204, 204, 204));
+	--image-caption-triangle: hidden;
+	--image-caption-triangle-width: 0rem;
+	--image-caption-margin-top:  -2rem;
 }
 
-.wewrite img {
+.wewrite img:not(.wewrite-profile-card img) {
 	border-radius: var(--image-border-radius);
 	border: var(--image-border-width) solid var(--image-border-color);
 	box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
@@ -55,7 +58,7 @@
 .image-with-caption .triangle {
 	width: 0;
 	height: 0;
-	border: 0.5rem solid transparent;
+	border: var(--image-caption-triangle-width, 0.3rem) solid transparent;
 	border-bottom-color: var(--image-border-color, #555);
 	position: relative;
 	top: -0.3rem;
@@ -68,5 +71,13 @@
 	position: relative;
 	width: 100%;
 	text-align: center;
-	top: -3rem;
+	top: var(--image-caption-margin-top, -2rem);
+}
+.wewrite .wewrite-image-caption {
+	font-size: 0.9rem;
+	color: var(--image-border-color, #555);
+	position: relative;
+	width: 100%;
+	text-align: center;
+	top: var(--image-caption-margin-top, -2rem);
 }

@@ -42,6 +42,7 @@ import { MaterialView, VIEW_TYPE_MP_MATERIAL } from "./views/material-view";
 import { PreviewPanel, VIEW_TYPE_WEWRITE_PREVIEW } from "./views/previewer";
 import { WechatClient } from "./wechat-api/wechat-client";
 import { Spinner } from "./views/spinner";
+import { WechatArticleUrlInputModal, extractWeChatInfoByRequestUrl } from "./modals/profile-fetching";
 
 const DEFAULT_SETTINGS: WeWriteSetting = {
 	mpAccounts: [],
@@ -387,6 +388,14 @@ export default class WeWritePlugin extends Plugin {
 									}
 								});
 						});
+						subMenu.addItem((subItem) => {
+							subItem
+								.setTitle($t("main.fetch-wechat-profile"))
+								.setIcon("id-card")
+								.onClick(async () => {
+									this.fetchWeChatProfile();
+								});
+						});
 					}
 				});
 			})
@@ -414,31 +423,18 @@ export default class WeWritePlugin extends Plugin {
 	}
 
 	createSpinner() {
-		
+
 		this.spinner = new Spinner(this.addStatusBarItem());
-		console.log("createSpinner:", this.spinner);
-		// this.spinnerEl = this.addStatusBarItem();
-		// this.spinnerEl.addClass("wewrite-spin-container");
-		// this.spinnerEl.createDiv({
-		// 	cls: "wewrite-spinner",
-		// });
-		// this.spinnerText = this.spinnerEl.createDiv({
-		// 	cls: "wewrite-spinner-text",
-		// });
 	}
 	showSpinner(text: string = "") {
 		this.spinner.showSpinner(text);
-		// this.spinnerEl.style.display = "flex";
-		// this.spinnerText.setText(text);
 
 	}
 	isSpinning() {
-		// return this.spinnerEl.style.display !== "none";
 		return this.spinner.isSpinning();
 	}
 
 	hideSpinner() {
-		// this.spinnerEl.style.display = "none";
 		this.spinner.hideSpinner();
 	}
 
@@ -874,7 +870,7 @@ export default class WeWritePlugin extends Plugin {
 		this.aiClient = AiClient.getInstance(this);
 
 		this.registerViews();
-		
+
 		this.addCommand({
 			id: "open-previewer",
 			name: $t("main.open-previewer"),
@@ -885,6 +881,13 @@ export default class WeWritePlugin extends Plugin {
 			name: $t("main.open-material-view"),
 			callback: () => this.activateMaterialView(),
 		});
+		this.addCommand({
+			id: "extract-wechat-info",
+			name: "$t('main.fetch-wechat-profile')",
+			callback: () => {
+				this.fetchWeChatProfile();
+			}
+		})
 
 		this.addRibbonIcon("pen-tool", "WeWrite", () => {
 			this.activateView();
@@ -912,9 +915,14 @@ export default class WeWritePlugin extends Plugin {
 			this.hideSpinner();
 		})
 	}
-	registerViewOnce(viewType:string){
+	registerViewOnce(viewType: string) {
 		if (this.app.workspace.getLeavesOfType(viewType).length === 0) {
-			this.registerView(viewType, (leaf) =>  new PreviewPanel(leaf, this))
+			if (viewType === VIEW_TYPE_WEWRITE_PREVIEW) {
+				
+				this.registerView(viewType, (leaf) => new PreviewPanel(leaf, this))
+			}else if (viewType === VIEW_TYPE_MP_MATERIAL) {
+				this.registerView(viewType, (leaf) => new MaterialView(leaf, this))
+			}
 		}
 	}
 	registerViews() {
@@ -922,6 +930,18 @@ export default class WeWritePlugin extends Plugin {
 		this.registerViewOnce(VIEW_TYPE_MP_MATERIAL);
 	}
 
+	fetchWeChatProfile() {
+		new WechatArticleUrlInputModal(this.app, async (url: string) => {
+			try {
+				const info = await extractWeChatInfoByRequestUrl(url);
+				new Notice(
+					`名称：${info.nickname}\n简介：${info.description}\n原创数：${info.originalCount}`
+				);
+			} catch (err) {
+				new Notice("提取失败，请检查链接或网络。");
+			}
+		}).open();
+	}
 	onunload() {
 		if (this.editorChangeListener) {
 			this.app.workspace.offref(this.editorChangeListener);

@@ -869,6 +869,8 @@ proofreed
   color: green;
   text-align: center;
   animation: fadeInOut 2s ease-in-out infinite;
+  padding: 1rem;
+  background-color: white;
 }
 
 @keyframes fadeInOut {

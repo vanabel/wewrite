@@ -17,6 +17,7 @@ import { WechatClient } from "../wechat-api/wechat-client";
 import { ObsidianMarkdownRenderer } from "./markdown-render";
 import { BlockquoteRenderer } from "./marked-extensions/blockquote";
 import { CodeRenderer } from "./marked-extensions/code";
+import { CodespanRenderer } from "./marked-extensions/codespan";
 import { CodeHighlight } from "./marked-extensions/code-highlight";
 import { Embed } from "./marked-extensions/embed";
 import {
@@ -85,14 +86,17 @@ export class WechatRender {
 		this.addExtension(
 			new IconizeRender(this.plugin, this.previewRender, this.marked)
 		);
-		// this.addExtension(
-		// 	new Heading(this.plugin, this.previewRender, this.marked)
-		// );
+		this.addExtension(
+			new Heading(this.plugin, this.previewRender, this.marked)
+		);
 		this.addExtension(
 			new Embed(this.plugin, this.previewRender, this.marked)
 		);
 		this.addExtension(
 			new CodeRenderer(this.plugin, this.previewRender, this.marked)
+		);
+		this.addExtension(
+			new CodespanRenderer(this.plugin, this.previewRender, this.marked)
 		);
 		this.addExtension(
 			new CodeHighlight(this.plugin, this.previewRender, this.marked)

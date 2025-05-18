@@ -277,9 +277,9 @@ export class PreviewPanel extends ItemView implements PreviewRender {
 	public getArticleContent() {
 		return this.articleDiv.innerHTML;
 	}
-	async getCSS() {
-		return await ThemeManager.getInstance(this.plugin).getCSS();
-	}
+	// async getCSS() {
+	// 	return await ThemeManager.getInstance(this.plugin).getCSS();
+	// }
 
 	async onClose() {
 		// Clean up our view

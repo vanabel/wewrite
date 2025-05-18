@@ -13,6 +13,7 @@ import footnoteCSS from '../assets/default-styles/03_footnote.css';
 import imageCSS from '../assets/default-styles/04_image.css';
 import tableCSS from '../assets/default-styles/05_table.css';
 import codeCSS from '../assets/default-styles/06_code.css';
+import codespanCSS from '../assets/default-styles/17_codespan.css';
 import blockquoteCSS from '../assets/default-styles/07_blockquote.css';
 import calloutCSS from '../assets/default-styles/08_callout.css';
 import admonitionCSS from '../assets/default-styles/09_admonition.css';
@@ -22,6 +23,9 @@ import chartCSS from '../assets/default-styles/12_chart.css';
 import listCSS from '../assets/default-styles/13_list.css';
 import summaryCSS from '../assets/default-styles/14_summary.css';
 import iconizeCSS from '../assets/default-styles/15_icon.css';
+import profileCSS from '../assets/default-styles/16_profile.css';
+import { Notice } from 'obsidian';
+import { $t } from 'src/lang/i18n';
 
 const baseCSS = [
 	wewriteCSS,
@@ -31,6 +35,7 @@ const baseCSS = [
 	imageCSS,
 	tableCSS,
 	codeCSS,
+	codespanCSS,
 	blockquoteCSS,
 	calloutCSS,
 	admonitionCSS,
@@ -39,9 +44,21 @@ const baseCSS = [
 	chartCSS,
 	listCSS,
 	summaryCSS,
-	iconizeCSS
+	iconizeCSS,
+	profileCSS
 ]
 
+const RESERVED_CLASS_PREFIX = [
+	'appmsg_',
+	'wx_',
+	'wx-',
+	'common-webchat',
+	'weui-'
+]
+
+const isClassReserved = (className: string) => {
+	return RESERVED_CLASS_PREFIX.some(prefix => className.startsWith(prefix));
+}	
 
 type Rule = Map<string, postcss.Declaration>;
 type Rules = Map<string, Rule>;
@@ -55,9 +72,14 @@ export class CSSMerger {
 
 	async init(customCSS: string) {
 		await this.buildBaseCSS();
-		const ast = (await postcss().process(customCSS, { from: undefined })).root;
-		this.pickVariables(ast, this.vars);
-		this.pickRules(ast, this.rules);
+		try {
+			const ast = (await postcss().process(customCSS, { from: undefined })).root;
+			this.pickVariables(ast, this.vars);
+			this.pickRules(ast, this.rules);
+		}catch(e) {
+			new Notice($t('render.failed-to-parse-custom-css', [e]));
+			console.error(e);
+		}
 
 	}
 	async buildBaseCSS() {
@@ -152,6 +174,16 @@ export class CSSMerger {
 		return currentNode;
 	}
 	removeClassName(root: HTMLElement) {
+		const className = root.getAttribute('class');
+		if (className) {
+			const classes = className.split(' ');
+			for (const c of classes) {
+				if (isClassReserved(c)) {
+					continue;
+				}
+				root.classList.remove(c);
+			}
+		}
 		root.removeAttribute('class');
 		let element = root.firstElementChild;
 		while (element) {

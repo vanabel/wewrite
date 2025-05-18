@@ -19,6 +19,7 @@ export class CodeHighlight extends WeWriteMarkedExtension {
         if (lang && lang.trim().toLocaleLowerCase() == 'mermaid') return code;
         if (lang && lang.trim().toLocaleLowerCase() == 'charts') return code;
         if (lang && lang.trim().toLocaleLowerCase() == 'dataview') return code;
+        if (lang && lang.trim().toLocaleLowerCase() == 'wewrite-profile') return code;
 
         if (lang && hljs.getLanguage(lang)) {
           try {

@@ -18,8 +18,17 @@ export class Image extends WeWriteMarkedExtension {
 		
 		for (let i = 0; i < imgEls.length; i++) {
 			const currentImg = imgEls[i]
+			
+			const classNames = currentImg.getAttribute('class')?.split(' ')
+			
+			
+			if (classNames?.includes('wewrite-avatar-image')) {
+				continue
+			}else{
+			}
+
 			const title = currentImg.getAttribute('title')
-			const alt = currentImg.getAttribute('alt')
+			const alt = currentImg.getAttribute('alt-text')
 			const caption = title || alt || ''
 			const figureEl = createEl('figure',{cls:'image-with-caption'})
 			currentImg.parentNode?.insertBefore(figureEl, currentImg)

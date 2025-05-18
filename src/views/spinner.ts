@@ -2,8 +2,6 @@ export  class Spinner {
 	private spinnerEl: HTMLElement;
 	private spinnerText: HTMLDivElement;
 	constructor(spinnerEl: HTMLElement) {
-		console.log('creating spinner');
-		
 		this.spinnerEl = spinnerEl;
 		this.spinnerEl.addClass("spinner-container");
 		const dots = this.spinnerEl.createDiv({

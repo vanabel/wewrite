@@ -1,12 +1,12 @@
 :root {
-	--table-border-color: var(--wewrite-border-color, #e0e0e0);
+	--table-border-color: var(--wewrite-border-color, #454545);
 	--table-border-width: var(--wewrite-border-width, 1px);
 	--table-border-style: var(--wewrite-border-style, solid);
 	--table-padding: var(--wewrite-padding, 16px);
 	--table-margin: var(--wewrite-margin, 0);
 	--table-background-color: var(--wewrite-background, #fff);
-	--table-background-color-alt: var(--wewrite-background-alt, #f0f0f0);
-	--table-background-color-hover: var(--wewrite-background-alt, #f3f3f3);
+	--table-background-color-alt: var(--wewrite-background-alt, #619106);
+	--table-background-color-hover: var(--wewrite-background-alt, #0d5c7e);
 	--table-font-size: var(--wewrite-font-size, 16px);
 	--table-font-weight: var(--wewrite-font-weight, 400);
 	--table-line-height: var(--wewrite-line-height, 1.4);
@@ -14,7 +14,7 @@
 	--table-text-indent: var(--wewrite-text-indent, 0);
 	--table-text-color: var(--wewrite-text-color, #333);
 	--table-header-color: var(--wewrite-header-color, #333);
-	--table-header-background-color:rgb(62, 175, 124, 0.4);;
+	--table-header-background-color: #b9b9b9;
 	--table-header-font-weight: var(--wewrite-header-font-weight, 600);
 	--table-header-line-height: var(--wewrite-header-line-height, 1.5);
 	--table-header-text-align: var(--wewrite-header-text-align, left);
@@ -32,47 +32,34 @@
 	border-collapse: collapse;
 	width: 100%;
 	box-shadow: 0 4px 8px var(--wewrite-shadow, (0, 0, 0, 0.1));
-	border-color: var(--table-border-color);
-	border-width: 2px;
+	border-color: var(--table-border-color, #454545);
 
 }
 
-.wewrite thead {
+.wewrite thead tr {
 	background-color: var(--table-header-background-color);
 	color: var(--table-header-color);
-	text-align: var(--table-header-text-align, left);
+	text-align: var(--table-header-text-align, center);
 	line-height: var(--table-header-line-height, 1.5);
 	font-weight: var(--table-header-font-weight, 600);
 }
 
-.wewrite tr:nth-child(even) {
-	background-color: rgb(62, 175, 124, 0.2);
-}
-
-.wewrite th {
-	background-color: var(--table-header-background-color);
-	color: var(--table-header-color);
-
-}
-
-.wewrite th,
-.wewrite td {
-	padding: var(--table-padding, 16px 24px);
-	line-height: var(--table-line-height, 1.5);
-	border-style: solid;
-	border-color: var(--table-border-color);
-	border-width: var(--table-border-width);
-	border-radius: var(--table-border-radius);
-	padding: var(--table-padding, 16px 24px);
+/* table body text */
+.wewrite tbody tr{
 	line-height: var(--table-line-height, 1.5);
 	text-align: var(--table-text-align, left);
 }
-
+/* border */
+.wewrite th,
+.wewrite tr,
 .wewrite td {
-	min-width: var(--table-min-width, 100px);
+	border-color: var(--table-border-color);
+	border-width: var(--table-border-width);
+	border-style: solid;
+
 }
 
-.wewrite tr:hover {
-	background-color: var(--table-background-color-alt, #f0f0f0);
-	/* 行悬停效果 */
+.wewrite tr:nth-child(even) {
+	background-color: var(--table-background-color-alt,rgb(62, 175, 124, 0.2));
+	/* 偶数行背景色 */;
 }

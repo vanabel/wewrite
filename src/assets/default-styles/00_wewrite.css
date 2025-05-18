@@ -26,12 +26,14 @@
 
     /* 背景色 */
   --wewrite-background: var(--wewrite-bg,#ffffff);
-  --wewrite-background-alt: #f8f9fa;
+  --wewrite-background-alt: #ececec;
 
   /* 边框色 */
-  --wewrite-border: #dee2e6;
+  --wewrite-border: #acacad;
   --wewrite-border-alt: #ced4da;
   --wewrite-border-radius: 4px;
+  --wewrite-header-color: #333;
+  --wewrite-header-background-color: #fff;
   /* 阴影色 */
   --wewrite-shadow: rgba(0, 0, 0, 0.15);
   /* 字体 */
