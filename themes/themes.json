@@ -1,48 +1,36 @@
 {
   "themes": [
     {
-      "name": "simple CSS",
-      "file": "CSS模板.md"
+      "name": "三联",
+      "file": "三联.md"
     },
     {
-      "name": "空风格",
-      "file": "empty.md"
+      "name": "人民日报",
+      "file": "人民日报.md"
     },
     {
-      "name": "极简风格",
-      "file": "simple-theme.md"
+      "name": "传统报刊",
+      "file": "传统报刊.md"
     },
     {
-      "name": "wewrite default theme",
-      "file": "wewrite-default-theme.md"
+      "name": "北京日报",
+      "file": "北京日报.md"
     },
     {
-      "name": "代码风格【Atom One Light】",
-      "file": "代码风格【Atom One Light】.md"
+      "name": "工业风",
+      "file": "工业风.md"
     },
     {
-      "name": "代码风格【atom-one-dark-reasonable】",
-      "file": "代码风格【atom-one-dark-reasonable】.md"
+      "name": "民国文艺",
+      "file": "民国文艺.md"
     },
     {
-      "name": "代码风格【atom-one-dark】",
-      "file": "代码风格【atom-one-dark】.md"
+      "name": "维克笔记",
+      "file": "维克笔记.md"
     },
     {
-      "name": "代码风格【Monokai Sublime 】",
-      "file": "代码风格【Monokai Sublime 】.md"
-    },
-    {
-      "name": "代码风格【monokai-sublime-orgin】",
-      "file": "代码风格【monokai-sublime-orgin】.md"
-    },
-    {
-      "name": "小马过河",
-      "file": "小马过河.md"
-    },
-    {
-      "name": "荔枝风格",
-      "file": "荔枝风格.md"
+      "name": "黑马",
+      "file": "黑马.md"
     }
   ]
 }

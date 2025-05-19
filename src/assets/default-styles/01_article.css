@@ -131,12 +131,33 @@
 }
 .wewrite .wewrite-heading-outbox {
 	display: block;
+	    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizelegibility;
+    display: inline-block;
+    font-weight: bold;
+    background: rgb(33, 166, 117);
+    color: rgb(255, 255, 255);
+    padding: 3px 10px 1px;
+    border-top-right-radius: 3px;
+    border-top-left-radius: 3px;
+    margin-right: 3px;
+    visibility: visible;
 }
 .wewrite .wewrite-heading-leaf {
 	display: block;
 }
 .wewrite .wewrite-heading-tail {
 	display: none;
+	box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizelegibility;
+    display: inline-block;
+    content: " ";
+    vertical-align: bottom;
+    border-bottom: 36px solid rgb(239, 235, 233);
+    border-right: 20px solid transparent;
+    visibility: visible;
 }
 
 .wewrite h1 {
