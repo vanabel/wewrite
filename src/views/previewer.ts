@@ -232,7 +232,10 @@ export class PreviewPanel extends ItemView implements PreviewRender {
 		this.renderDiv.id = "render-div";
 		let shadowDom = this.renderDiv.shawdowRoot;
 		if (shadowDom === undefined || shadowDom === null) {
-			shadowDom = this.renderDiv; //.attachShadow({ mode: 'open' });
+			shadowDom = this.renderDiv.attachShadow({ mode: 'open' });
+			shadowDom.adoptedStyleSheets = [
+				ThemeManager.getInstance(this.plugin).getShadowStleSheet()
+			];
 		}
 
 		this.containerDiv = shadowDom.createDiv({ cls: "wewrite-article" });

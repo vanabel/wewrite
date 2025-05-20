@@ -4,9 +4,9 @@
 	--table-border-style: var(--wewrite-border-style, solid);
 	--table-padding: var(--wewrite-padding, 16px);
 	--table-margin: var(--wewrite-margin, 0);
-	--table-background-color: var(--wewrite-background, #fff);
-	--table-background-color-alt: var(--wewrite-background-alt, #619106);
-	--table-background-color-hover: var(--wewrite-background-alt, #0d5c7e);
+	--table-background-color: var(--wewrite-bg, #fff);
+	--table-background-color-alt: #eaeaea;
+	--table-background-color-hover: var(--wewrite-bg-alt, #0d5c7e);
 	--table-font-size: var(--wewrite-font-size, 16px);
 	--table-font-weight: var(--wewrite-font-weight, 400);
 	--table-line-height: var(--wewrite-line-height, 1.4);

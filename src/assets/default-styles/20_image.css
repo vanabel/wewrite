@@ -1,10 +1,10 @@
 :root {
-	--image-border-radius: 5px;
+	--image-border-radius: var(--wewrite-border-radius);
 	--image-border-width: 1px;
 	--image-border-color: var(--wewrite-border, rgb(204, 204, 204));
 	--image-caption-triangle: hidden;
 	--image-caption-triangle-width: 0rem;
-	--image-caption-margin-top:  -2rem;
+	--image-caption-margin-top: -2rem;
 }
 
 .wewrite img:not(.wewrite-profile-card img) {
@@ -21,6 +21,12 @@
 	/* 默认居中，可通过类控制 */
 	font-family: "Arial", sans-serif;
 	margin: 1em 0;
+}
+
+.image-with-caption img {
+	max-width: 100%;
+	height: auto;
+	display: block;
 }
 
 /* 对齐方式控制 */
@@ -73,6 +79,7 @@
 	text-align: center;
 	top: var(--image-caption-margin-top, -2rem);
 }
+
 .wewrite .wewrite-image-caption {
 	font-size: 0.9rem;
 	color: var(--image-border-color, #555);

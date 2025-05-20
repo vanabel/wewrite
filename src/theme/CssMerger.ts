@@ -6,46 +6,73 @@
 
 import postcss from 'postcss';
 
-import wewriteCSS from '../assets/default-styles/00_wewrite.css';
-import articleCSS from '../assets/default-styles/01_article.css';
-import linksCSS from '../assets/default-styles/02_links.css';
-import footnoteCSS from '../assets/default-styles/03_footnote.css';
-import imageCSS from '../assets/default-styles/04_image.css';
-import tableCSS from '../assets/default-styles/05_table.css';
-import codeCSS from '../assets/default-styles/06_code.css';
-import codespanCSS from '../assets/default-styles/17_codespan.css';
-import blockquoteCSS from '../assets/default-styles/07_blockquote.css';
-import calloutCSS from '../assets/default-styles/08_callout.css';
-import admonitionCSS from '../assets/default-styles/09_admonition.css';
-import mathCSS from '../assets/default-styles/10_math.css';
-import mermaidCSS from '../assets/default-styles/11_mermaid.css';
-import chartCSS from '../assets/default-styles/12_chart.css';
-import listCSS from '../assets/default-styles/13_list.css';
-import summaryCSS from '../assets/default-styles/14_summary.css';
-import iconizeCSS from '../assets/default-styles/15_icon.css';
-import profileCSS from '../assets/default-styles/16_profile.css';
+import $00 from '../assets/default-styles/00_wewrite.css';
+import $01 from '../assets/default-styles/01_layout.css';
+import $03 from '../assets/default-styles/03_typography.css';
+import $04 from '../assets/default-styles/04_paragragh.css';
+import $05 from '../assets/default-styles/05_strong.css';
+import $06 from '../assets/default-styles/06_em.css';
+import $07 from '../assets/default-styles/07_u.css';
+import $08 from '../assets/default-styles/08_del.css';
+import $09 from '../assets/default-styles/09_codespan.css';
+import $10 from '../assets/default-styles/10_heading.css';
+import $11  from '../assets/default-styles/11_h1.css';
+import $12 from '../assets/default-styles/12_h2.css';
+import $13 from '../assets/default-styles/13_h3.css';
+import $14 from '../assets/default-styles/14_h4.css';
+import $15 from '../assets/default-styles/15_h5.css';
+import $16 from '../assets/default-styles/16_h6.css';
+import $20 from '../assets/default-styles/20_image.css';
+import $21 from '../assets/default-styles/21_list.css';
+import $23 from '../assets/default-styles/23_footnote.css';
+import $24 from '../assets/default-styles/24_table.css';
+import $25 from '../assets/default-styles/25_code.css';
+import $26 from '../assets/default-styles/26_blockquote.css';
+import $27 from '../assets/default-styles/27_links.css';
+import $30 from '../assets/default-styles/30_callout.css';
+import $31 from '../assets/default-styles/31_admonition.css';
+import $32 from '../assets/default-styles/32_math.css';
+import $33 from '../assets/default-styles/33_mermaid.css';
+import $34 from '../assets/default-styles/34_chart.css';
+import $35 from '../assets/default-styles/35_icon.css';
+import $40 from '../assets/default-styles/40_summary.css';
+import $50 from '../assets/default-styles/50_profile.css';
 import { Notice } from 'obsidian';
 import { $t } from 'src/lang/i18n';
 
 const baseCSS = [
-	wewriteCSS,
-	articleCSS,
-	linksCSS,
-	footnoteCSS,
-	imageCSS,
-	tableCSS,
-	codeCSS,
-	codespanCSS,
-	blockquoteCSS,
-	calloutCSS,
-	admonitionCSS,
-	mathCSS,
-	mermaidCSS,
-	chartCSS,
-	listCSS,
-	summaryCSS,
-	iconizeCSS,
-	profileCSS
+	$00,
+	$01,
+	$03,
+	$04,
+	$05,
+	$06,
+	$07,
+	$08,
+	$09,
+	$10,
+	$11,
+	$12,
+	$13,
+	$14,
+	$15,
+	$16,
+	$20,
+	$21,
+	$23,
+	$24,
+	$25,
+	$26,
+	$27,
+	$30,
+	$31,
+	$32,
+	$33,
+	$34,
+	$35,
+	$09,
+	$40,
+	$50
 ]
 
 const RESERVED_CLASS_PREFIX = [

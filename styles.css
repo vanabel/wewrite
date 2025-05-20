@@ -382,72 +382,6 @@ material view
 	color: azure !important;
 }
 
-/* @keyframes spin {
-  0% {
-    transform: translate(-50%, -50%) rotate(0deg);
-  }
-
-  100% {
-    transform: translate(-50%, -50%) rotate(360deg);
-  }
-}
-
-.wewrite-spinner {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 40px;
-  height: 40px;
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #3498db;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-} */
-/* .wewrite-spin-container {
-  display: none;
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  justify-content: center;
-  align-items: center;
-}
-
-.wewrite-spinner {
-  width: 150px;
-  height: 150px;
-  border-radius: 50%;
-  background: conic-gradient(from 0deg, #e3edf5, #00f2fe, #4facfe);
-  animation: spin 1s linear infinite;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.wewrite-spinner::before {
-  content: '';
-  position: absolute;
-  width: 130px;
-  height: 130px;
-  border-radius: 50%;
-  background: white;
-}
-
-.wewrite-spinner-text {
-  position: absolute;
-  font-size: 0.6rem;
-  color: #333;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 120px;
-  text-align: center;
-  z-index: 1;
-  padding: 3px;
-} */
-
-/*  */
 
 /* image generation modal */
 
@@ -864,13 +798,12 @@ proofreed
 }
 
 .spinner-text {
-  margin-top: -60px;
-  font-size: 0.8rem;
+  margin-top: -70px;
+  font-size: 14px;
   color: green;
   text-align: center;
   animation: fadeInOut 2s ease-in-out infinite;
-  padding: 1rem;
-  background-color: white;
+  /* background-color: white; */
 }
 
 @keyframes fadeInOut {
@@ -880,4 +813,26 @@ proofreed
   50% {
     opacity: 1;
   }
+}
+
+/* 滚动条样式 we use shadow dom, make the preview looks better.*/
+.wewrite-article::-webkit-scrollbar {
+	width: 10px;
+	height: 10px;
+	background-color: var(--scrollbar-bg);
+}
+
+.wewrite-article::-webkit-scrollbar-thumb {
+	background-color: var(--scrollbar-thumb-bg);
+    -webkit-border-radius: var(--radius-l);
+    background-clip: padding-box;
+    border: 2px solid transparent;
+    border-width: 3px 3px 3px 2px;
+    min-height: 45px;
+}
+.wewrite-article::-webkit-scrollbar-thumb:hover {
+	background-color: var(--scrollbar-thumb-hover-bg);
+}
+.wewrite-article::-webkit-scrollbar-corner{
+	background: transparent;
 }

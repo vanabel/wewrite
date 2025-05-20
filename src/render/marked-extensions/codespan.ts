@@ -20,10 +20,8 @@ export class CodespanRenderer extends WeWriteMarkedExtension {
 		const regex = /^wwcap:\s*(.*)$/gim;
 		const captions: string[] = [];
 		let match: RegExpExecArray | null;
-		console.log('input', input);
 		
 		while ((match = regex.exec(input)) !== null) {
-			console.log('match', match);
 			captions.push(match[1].trim());
 		}
 
@@ -31,7 +29,6 @@ export class CodespanRenderer extends WeWriteMarkedExtension {
 	}
 
 	codespanRenderer(code: string): string {
-		console.log('code=>', code);
 		code = code.trim();
 		const captions = this.extractWeWriteCaptions(code);
 		if (captions.length > 0) {

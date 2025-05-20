@@ -10,7 +10,7 @@
 	--article-margin: 0px;
 
 	/* page  background */
-	--article-background-color: var(--wewrite-background,  #ffffff);
+	--article-background-color: var(--wewrite-bg,  #ffffff);
 	--article-background-image: none;
 	--article-color: var(--wewrite-text-main, #333);
 
@@ -271,18 +271,18 @@
 	color: var(--article-text-color, #333);
 	font-size: var(--article-text-font-size, 16px);
 	font-family: var(--article-font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji");
+	background-color: var(--article-background-color, #ffffff);
+	padding: var(--article-padding, 1em);
+	margin: var(--article-margin, 0px);
+	text-indent: 0;
+}
+.wewrite > p {
+	text-indent: var(--article-text-indent);
 	font-weight: var(--article-font-weight, 400);
 	word-break: var(--article-word-break, break-word);
 	letter-spacing: var(--article-letter-space, 0px);
 	line-height: var(--article-line-height, 1.5);
 	text-align: var(--article-text-align, left);
-	
-	background-color: var(--article-background-color, #ffffff);
-	padding: var(--article-padding, 1em);
-	text-indent: 0;
-}
-.wewrite > p {
-	text-indent: var(--article-text-indent);
 }
 
 .wewrite strong {
@@ -312,3 +312,7 @@
 	margin-bottom: var(--article-paragraph-margin-bottom, 1em);
 }
 
+.wewrite hr {
+	width: 100%;
+	border-bottom: solid var(--wewrite-border-width, 1px) var(--article-hr-border-color, #eee);
+}

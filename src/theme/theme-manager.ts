@@ -22,8 +22,8 @@ export class ThemeManager {
 		// Create save directory if it doesn't exist
 		if (!this.plugin.app.vault.getAbstractFileByPath(saveDir)) {
 			await this.plugin.app.vault.createFolder(saveDir);
-			
-		}else {
+
+		} else {
 		}
 
 		// Check if github is reachable, if not, use gitee
@@ -159,6 +159,35 @@ export class ThemeManager {
 		}
 
 		return custom_css
+
+	}
+	public getShadowStleSheet() {
+		const sheet = new CSSStyleSheet();
+		sheet.replaceSync(`
+  /* 滚动条样式 we use shadow dom, make the preview looks better.*/
+.wewrite-article pre::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+	background-color: var(--scrollbar-bg);
+}
+
+.wewrite-article pre::-webkit-scrollbar-thumb {
+	background-color: var(--scrollbar-thumb-bg);
+    -webkit-border-radius: var(--radius-l);
+    background-clip: padding-box;
+    border: 2px solid transparent;
+    border-width: 3px 3px 3px 2px;
+    min-height: 45px;
+}
+.wewrite-article pre::-webkit-scrollbar-thumb:hover {
+	background-color: var(--scrollbar-thumb-hover-bg);
+}
+.wewrite-article::-webkit-scrollbar-corner{
+	background: transparent;
+}
+`);
+
+		return sheet
 
 	}
 	private async getAllThemesInFolder(folder: TFolder): Promise<WeChatTheme[]> {
