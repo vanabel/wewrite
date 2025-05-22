@@ -10,7 +10,7 @@
   --wewrite-primary-light: #d0e4ff;
   
   /* 中性色 */
-  --wewrite-bg: tranparent;
+  --wewrite-bg: transparent;
   --wewrite-bg-alt: var(--wewrite-primary);
   --wewrite-text: #333333;
   --wewrite-text-alt: #ffffff;
@@ -22,7 +22,8 @@
   --wewrite-warning: #ff9800;
   --wewrite-error: #e74c3c;
   --wewrite-danger:  #dc3545;
-}
+  --wewrite-blue: #1e3a8a;
+}	
 
 :root {
 	--wewrite-font-size: 16px;

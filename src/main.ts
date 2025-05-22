@@ -42,7 +42,6 @@ import { MaterialView, VIEW_TYPE_MP_MATERIAL } from "./views/material-view";
 import { PreviewPanel, VIEW_TYPE_WEWRITE_PREVIEW } from "./views/previewer";
 import { WechatClient } from "./wechat-api/wechat-client";
 import { Spinner } from "./views/spinner";
-import { WechatArticleUrlInputModal, extractWeChatInfoByRequestUrl } from "./modals/profile-fetching";
 
 const DEFAULT_SETTINGS: WeWriteSetting = {
 	mpAccounts: [],
@@ -386,14 +385,6 @@ export default class WeWritePlugin extends Plugin {
 										// 		proofed
 										// 	);
 									}
-								});
-						});
-						subMenu.addItem((subItem) => {
-							subItem
-								.setTitle($t("main.fetch-wechat-profile"))
-								.setIcon("id-card")
-								.onClick(async () => {
-									this.fetchWeChatProfile();
 								});
 						});
 					}
@@ -881,13 +872,6 @@ export default class WeWritePlugin extends Plugin {
 			name: $t("main.open-material-view"),
 			callback: () => this.activateMaterialView(),
 		});
-		this.addCommand({
-			id: "extract-wechat-info",
-			name: "$t('main.fetch-wechat-profile')",
-			callback: () => {
-				this.fetchWeChatProfile();
-			}
-		})
 
 		this.addRibbonIcon("pen-tool", "WeWrite", () => {
 			this.activateView();
@@ -930,18 +914,6 @@ export default class WeWritePlugin extends Plugin {
 		this.registerViewOnce(VIEW_TYPE_MP_MATERIAL);
 	}
 
-	fetchWeChatProfile() {
-		new WechatArticleUrlInputModal(this.app, async (url: string) => {
-			try {
-				const info = await extractWeChatInfoByRequestUrl(url);
-				new Notice(
-					`名称：${info.nickname}\n简介：${info.description}\n原创数：${info.originalCount}`
-				);
-			} catch (err) {
-				new Notice("提取失败，请检查链接或网络。");
-			}
-		}).open();
-	}
 	onunload() {
 		if (this.editorChangeListener) {
 			this.app.workspace.offref(this.editorChangeListener);

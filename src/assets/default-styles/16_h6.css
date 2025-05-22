@@ -28,7 +28,7 @@ h6  标题
 	--h6-text-align: var(--h6-text-align);
 	/*  标题主体 */
 	--h6-outbox-display: block;
-	--h6-outbox-raduis: var(--wewrite-border-radius);
+	--h6-outbox-radius: var(--wewrite-border-radius);
 	--h6-outbox-padding: var(--heading-padding);
 	/*  标题叶子 */
 	--h6-leaf-display: block;
@@ -39,7 +39,14 @@ h6  标题
 	--h6-tail-display: none;
 	--h6-tail-content: " ";
 	--h6-tail-vertical-align: bottom;
+	--h6-tail-display: var(--heading-tail-display);
+	--h6-tail-content: var(--heading-tail-content);
+	--h6-tail-shadow-color: var(--heading-tail-shadow-color);
+	--h6-tail-shadow-height: var(--heading-tail-shadow-height);
+	--h6-tail-shadow-width: var(--heading-tail-shadow-width);
+	--h6-display: flex;
 }
+
 .wewrite h6 {
 	font-family: var(--h6-font-family);
 	font-weight: var(--h6-font-weight);
@@ -56,6 +63,7 @@ h6  标题
 	border-bottom-width: var(--h6-border-bottom-width);
 	border-bottom-style: var(--h6-border-bottom-style);
 	border-bottom-color: var(--h6-border-bottom-color);
+	display: var(--h6-display);
 }
 
 
@@ -66,25 +74,30 @@ h6  标题
 	text-align: var(--h6-text-align);
 
 }
+
 .wewrite h6 .wewrite-heading-outbox {
-	border-top-right-radius: var(--h6-outbox-raduis);
-	border-top-left-radius: var(--h6-outbox-raduis);
+	border-top-right-radius: var(--h6-outbox-radius);
+	border-top-left-radius: var(--h6-outbox-radius);
 	background-color: var(--h6-bg);
 	padding: var(--h6-outbox-padding);
 	display: block;
 }
+
 .wewrite h6 .wewrite-heading-leaf {
 	padding-left: var(--h6-leaf-padding);
 	padding-right: var(--h6-leaf-padding);
-	font-weight:  var(--h6-font-weight);
+	font-weight: var(--h6-font-weight);
 	display: var(--h6-leaf-display);
 	color: var(--h6-leaf-color)
 }
+
 .wewrite h6 .wewrite-heading-tail {
 	box-sizing: border-box;
-    -webkit-font-smoothing: antialiased;
-    text-rendering: optimizelegibility;
-    display: var(--h6-tail-display);
-    content: var(--h6-tail-content);
-    vertical-align: var(--h6-tail-vertical-align);
+	-webkit-font-smoothing: antialiased;
+	text-rendering: optimizelegibility;
+	display: var(--h6-tail-display);
+	content: var(--h6-tail-content);
+	vertical-align: var(--h6-tail-vertical-align);
+	border-bottom: var(--h6-tail-shadow-height) solid var(--h6-tail-shadow-color);
+	border-right: var(--h6-tail-shadow-width) solid transparent;
 }

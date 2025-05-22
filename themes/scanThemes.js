@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var fs = require("fs");
 var path = require("path");
 var matter = require("gray-matter");
-var THEMES_DIR = path.resolve(__dirname, '');
+var THEMES_DIR = path.resolve(__dirname, 'themes');
 var OUTPUT_FILE = path.resolve(__dirname, 'themes.json');
 // 获取时间戳
 function getTimestamp() {
@@ -25,9 +25,6 @@ function extractThemeData(filePath) {
             file: path.basename(filePath)
         };
     }
-    else {
-        console.log(`no theme_name in ${filePath}`)
-    }
     return null;
 }
 // 写入 JSON 文件
@@ -41,11 +38,7 @@ function writeThemesJson(themes, outputPath) {
 }
 // 主函数
 function main() {
-	console.log("开始扫描主题:", THEMES_DIR);
-	
     var files = getMarkdownFiles(THEMES_DIR);
-	console.log(files);
-	
     var themes = files
         .map(function (file) { return extractThemeData(path.join(THEMES_DIR, file)); })
         .filter(function (item) { return item !== null; });

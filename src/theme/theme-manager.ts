@@ -165,6 +165,28 @@ export class ThemeManager {
 		const sheet = new CSSStyleSheet();
 		sheet.replaceSync(`
   /* 滚动条样式 we use shadow dom, make the preview looks better.*/
+.table-container::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+	background-color: var(--scrollbar-bg);
+}
+
+.table-container::-webkit-scrollbar-thumb {
+	background-color: var(--scrollbar-thumb-bg);
+    -webkit-border-radius: var(--radius-l);
+    background-clip: padding-box;
+    border: 2px solid transparent;
+    border-width: 3px 3px 3px 2px;
+    min-height: 45px;
+}
+.table-container::-webkit-scrollbar-thumb:hover {
+	background-color: var(--scrollbar-thumb-hover-bg);
+}
+
+.wewrite-article::-webkit-scrollbar-corner{
+	background: transparent;
+}
+
 .wewrite-article pre::-webkit-scrollbar {
 	width: 8px;
 	height: 8px;
@@ -179,9 +201,11 @@ export class ThemeManager {
     border-width: 3px 3px 3px 2px;
     min-height: 45px;
 }
+
 .wewrite-article pre::-webkit-scrollbar-thumb:hover {
 	background-color: var(--scrollbar-thumb-hover-bg);
 }
+
 .wewrite-article::-webkit-scrollbar-corner{
 	background: transparent;
 }

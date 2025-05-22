@@ -3,6 +3,7 @@ h1  标题
 */
 
 :root {
+
 	--h1-font-family: var(--heading-font-family);
 	--h1-font-weight: var(--heading-font-weight);
 	--h1-color: var(--heading-color);
@@ -28,7 +29,7 @@ h1  标题
 	--h1-text-align: var(--h1-text-align);
 	/*  标题主体 */
 	--h1-outbox-display: block;
-	--h1-outbox-raduis: var(--wewrite-border-radius);
+	--h1-outbox-radius: var(--wewrite-border-radius);
 	--h1-outbox-padding: var(--heading-padding);
 	/*  标题叶子 */
 	--h1-leaf-display: block;
@@ -39,7 +40,14 @@ h1  标题
 	--h1-tail-display: none;
 	--h1-tail-content: " ";
 	--h1-tail-vertical-align: bottom;
+	--h1-tail-display: var(--heading-tail-display);
+	--h1-tail-content: var(--heading-tail-content);
+	--h1-tail-shadow-color: var(--heading-tail-shadow-color);
+	--h1-tail-shadow-height: var(--heading-tail-shadow-height);
+	--h1-tail-shadow-width: var(--heading-tail-shadow-width);
+	--h1-display: flex;
 }
+
 .wewrite h1 {
 	font-family: var(--h1-font-family);
 	font-weight: var(--h1-font-weight);
@@ -56,6 +64,7 @@ h1  标题
 	border-bottom-width: var(--h1-border-bottom-width);
 	border-bottom-style: var(--h1-border-bottom-style);
 	border-bottom-color: var(--h1-border-bottom-color);
+	display: var(--h1-display);
 }
 
 
@@ -66,25 +75,31 @@ h1  标题
 	text-align: var(--h1-text-align);
 
 }
+
 .wewrite h1 .wewrite-heading-outbox {
-	border-top-right-radius: var(--h1-outbox-raduis);
-	border-top-left-radius: var(--h1-outbox-raduis);
+	border-top-right-radius: var(--h1-outbox-radius);
+	border-top-left-radius: var(--h1-outbox-radius);
 	background-color: var(--h1-bg);
 	padding: var(--h1-outbox-padding);
 	display: block;
 }
+
 .wewrite h1 .wewrite-heading-leaf {
 	padding-left: var(--h1-leaf-padding);
 	padding-right: var(--h1-leaf-padding);
-	font-weight:  var(--h1-font-weight);
+	font-weight: var(--h1-font-weight);
 	display: var(--h1-leaf-display);
 	color: var(--h1-leaf-color)
 }
+
 .wewrite h1 .wewrite-heading-tail {
 	box-sizing: border-box;
-    -webkit-font-smoothing: antialiased;
-    text-rendering: optimizelegibility;
-    display: var(--h1-tail-display);
-    content: var(--h1-tail-content);
-    vertical-align: var(--h1-tail-vertical-align);
+	-webkit-font-smoothing: antialiased;
+	text-rendering: optimizelegibility;
+	display: var(--h1-tail-display);
+	content: var(--h1-tail-content);
+	vertical-align: var(--h1-tail-vertical-align);
+	border-bottom: var(--h1-tail-shadow-height) solid var(--h1-tail-shadow-color);
+	border-right: var(--h1-tail-shadow-width) solid transparent;
+
 }

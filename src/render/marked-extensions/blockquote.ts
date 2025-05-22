@@ -24,7 +24,7 @@ export class BlockquoteRenderer extends WeWriteMarkedExtension {
 
   rendererBlockquote(token: Tokens.Blockquote) {
     const text = token.text.replace(/\n/gm, '<br>').trim()
-    return `<blockquote dir="auto" ><p>${text}</p></blockquote>`
+    return `<blockquote dir="auto" ><span class="icon-pin"></span><div class="blockquote-inner" >${text}</div></blockquote>`
   }
   async rendererCallout(_token: Tokens.Blockquote) {
     const renderer = ObsidianMarkdownRenderer.getInstance(this.plugin.app);

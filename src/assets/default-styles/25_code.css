@@ -1,7 +1,7 @@
 /* code section */
 
 :root {
-	--code-containe-background-color: #282c34; /*#1E1E1E;*/
+	--code-container-background-color: #282c34; /*#1E1E1E;*/
 	--code-section-background-color: #282c34;
 	--code-color: #abb2bf;
 	--code-comment-color: #5c6370;
@@ -17,6 +17,9 @@
 	--code-font-size: 0.9rem;
 	--code-padding: 8px;
 	--code-border-radius: 6px;
+	--code-banner-display: inline-block;
+	--code-border-color: rgb(166, 166, 166);
+	--code-border-width: 0.5px;
 }
 
 .wewrite code {
@@ -29,8 +32,11 @@
 	display: flex;
 	flex-direction: column;
 	border-radius: var(--code-border-radius, 4px);
-	background: var(--code-containe-background-color, #1E1E1E);
+	background: var(--code-container-background-color, #1E1E1E);
 	box-shadow: rgba(0, 0, 0, 0.55) 0px 10px 10px -10px;
+	border-width: var(--code-border-width);
+	border-style: solid;
+	border-color: var(--code-border-color);
 }
 
 
@@ -39,7 +45,7 @@
 	background-position: 10px 10px;
 	background-size: 40px auto;
 	background-repeat: no-repeat;
-	display: inline-block;
+	display: var(--code-banner-display, inline-block);
 	height: 32px;
 	width: 100%;
 	border-bottom: solid 0.5px var(--code-color, rgb(153, 153, 153));

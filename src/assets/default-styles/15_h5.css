@@ -28,7 +28,7 @@ h5  标题
 	--h5-text-align: var(--h5-text-align);
 	/*  标题主体 */
 	--h5-outbox-display: block;
-	--h5-outbox-raduis: var(--wewrite-border-radius);
+	--h5-outbox-radius: var(--wewrite-border-radius);
 	--h5-outbox-padding: var(--heading-padding);
 	/*  标题叶子 */
 	--h5-leaf-display: block;
@@ -39,7 +39,14 @@ h5  标题
 	--h5-tail-display: none;
 	--h5-tail-content: " ";
 	--h5-tail-vertical-align: bottom;
+	--h5-tail-display: var(--heading-tail-display);
+	--h5-tail-content: var(--heading-tail-content);
+	--h5-tail-shadow-color: var(--heading-tail-shadow-color);
+	--h5-tail-shadow-height: var(--heading-tail-shadow-height);
+	--h5-tail-shadow-width: var(--heading-tail-shadow-width);
+	--h5-display: flex;
 }
+
 .wewrite h5 {
 	font-family: var(--h5-font-family);
 	font-weight: var(--h5-font-weight);
@@ -56,6 +63,7 @@ h5  标题
 	border-bottom-width: var(--h5-border-bottom-width);
 	border-bottom-style: var(--h5-border-bottom-style);
 	border-bottom-color: var(--h5-border-bottom-color);
+	display: var(--h5-display);
 }
 
 
@@ -66,25 +74,30 @@ h5  标题
 	text-align: var(--h5-text-align);
 
 }
+
 .wewrite h5 .wewrite-heading-outbox {
-	border-top-right-radius: var(--h5-outbox-raduis);
-	border-top-left-radius: var(--h5-outbox-raduis);
+	border-top-right-radius: var(--h5-outbox-radius);
+	border-top-left-radius: var(--h5-outbox-radius);
 	background-color: var(--h5-bg);
 	padding: var(--h5-outbox-padding);
 	display: block;
 }
+
 .wewrite h5 .wewrite-heading-leaf {
 	padding-left: var(--h5-leaf-padding);
 	padding-right: var(--h5-leaf-padding);
-	font-weight:  var(--h5-font-weight);
+	font-weight: var(--h5-font-weight);
 	display: var(--h5-leaf-display);
 	color: var(--h5-leaf-color)
 }
+
 .wewrite h5 .wewrite-heading-tail {
 	box-sizing: border-box;
-    -webkit-font-smoothing: antialiased;
-    text-rendering: optimizelegibility;
-    display: var(--h5-tail-display);
-    content: var(--h5-tail-content);
-    vertical-align: var(--h5-tail-vertical-align);
+	-webkit-font-smoothing: antialiased;
+	text-rendering: optimizelegibility;
+	display: var(--h5-tail-display);
+	content: var(--h5-tail-content);
+	vertical-align: var(--h5-tail-vertical-align);
+	border-bottom: var(--h5-tail-shadow-height) solid var(--h5-tail-shadow-color);
+	border-right: var(--h5-tail-shadow-width) solid transparent;
 }

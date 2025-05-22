@@ -18,6 +18,7 @@
 	--u-text-decoration-thickness: 1px;
 	--u-text-decoration-style: solid;
 	--u-text-decoration-color: var(--article-text-color);
+	--u-underline-offset: 0.2em;
 }
 
 .wewrite u {
@@ -34,4 +35,5 @@
 	text-decoration-thickness: var(--u-text-decoration-thickness);
 	text-decoration-style: var(--u-text-decoration-style);
 	text-decoration-color: var(--u-text-decoration-color);
+	text-underline-offset: var(--u-underline-offset)
 }

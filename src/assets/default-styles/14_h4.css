@@ -28,7 +28,7 @@ h4  标题
 	--h4-text-align: var(--h4-text-align);
 	/*  标题主体 */
 	--h4-outbox-display: block;
-	--h4-outbox-raduis: var(--wewrite-border-radius);
+	--h4-outbox-radius: var(--wewrite-border-radius);
 	--h4-outbox-padding: var(--heading-padding);
 	/*  标题叶子 */
 	--h4-leaf-display: block;
@@ -39,7 +39,15 @@ h4  标题
 	--h4-tail-display: none;
 	--h4-tail-content: " ";
 	--h4-tail-vertical-align: bottom;
+	--h4-tail-display: var(--heading-tail-display);
+	--h4-tail-content: var(--heading-tail-content);
+	--h4-tail-shadow-color: var(--heading-tail-shadow-color);
+	--h4-tail-shadow-height: var(--heading-tail-shadow-height);
+	--h4-tail-shadow-width: var(--heading-tail-shadow-width);
+	--h4-display: flex;
 }
+
+
 .wewrite h4 {
 	font-family: var(--h4-font-family);
 	font-weight: var(--h4-font-weight);
@@ -56,6 +64,7 @@ h4  标题
 	border-bottom-width: var(--h4-border-bottom-width);
 	border-bottom-style: var(--h4-border-bottom-style);
 	border-bottom-color: var(--h4-border-bottom-color);
+	display: var(--h4-display);
 }
 
 
@@ -66,25 +75,30 @@ h4  标题
 	text-align: var(--h4-text-align);
 
 }
+
 .wewrite h4 .wewrite-heading-outbox {
-	border-top-right-radius: var(--h4-outbox-raduis);
-	border-top-left-radius: var(--h4-outbox-raduis);
+	border-top-right-radius: var(--h4-outbox-radius);
+	border-top-left-radius: var(--h4-outbox-radius);
 	background-color: var(--h4-bg);
 	padding: var(--h4-outbox-padding);
 	display: block;
 }
+
 .wewrite h4 .wewrite-heading-leaf {
 	padding-left: var(--h4-leaf-padding);
 	padding-right: var(--h4-leaf-padding);
-	font-weight:  var(--h4-font-weight);
+	font-weight: var(--h4-font-weight);
 	display: var(--h4-leaf-display);
 	color: var(--h4-leaf-color)
 }
+
 .wewrite h4 .wewrite-heading-tail {
 	box-sizing: border-box;
-    -webkit-font-smoothing: antialiased;
-    text-rendering: optimizelegibility;
-    display: var(--h4-tail-display);
-    content: var(--h4-tail-content);
-    vertical-align: var(--h4-tail-vertical-align);
+	-webkit-font-smoothing: antialiased;
+	text-rendering: optimizelegibility;
+	display: var(--h4-tail-display);
+	content: var(--h4-tail-content);
+	vertical-align: var(--h4-tail-vertical-align);
+	border-bottom: var(--h4-tail-shadow-height) solid var(--h4-tail-shadow-color);
+	border-right: var(--h4-tail-shadow-width) solid transparent;
 }

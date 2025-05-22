@@ -10,6 +10,10 @@
 	--article-margin: 0px;
 	--article-background-color: var(--wewrite-bg);
 	--article-background-image: none;
+	--article-background-repeat: repeat;
+	--article-background-size: auto;
+	--article-background-position: left top;
+
 
 	
 }
@@ -21,4 +25,8 @@
 	margin: var(--article-margin);
 	background-color: var(--article-background-color);
 	background-image: var(--article-background-image);
+	background-repeat: var(--article-background-repeat);
+	background-size: var(--article-background-size);
+	background-position: var(--article-background-position);
+	
 }

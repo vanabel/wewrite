@@ -10,15 +10,21 @@
 	--heading-letter-spacing: var(--article-letter-space);
 	--heading-text-align: var(--article-text-align);
 	--heading-font-style: normal;
-	--heading-margin: 0;
+	--heading-margin: 1rem;
 	--heading-text-decoration-style: none;
 	--heading-text-decoration-thickness: 0;
 	--heading-text-decoration-color: transparent; 
-	--heading-raduis: var(--wewrite-raduis);
+	--heading-radius: var(--wewrite-radius);
 	--heading-border-bottom-width: 0;
 	--heading-border-bottom-style: none;
 	--heading-border-bottom-color: transparent;
 	--heading-padding: 0;
+	--heading-display: flex;
+	--heading-tail-display: none;
+	--heading-tail-content: " ";
+	--heading-tail-shadow-color: rgb(239, 235, 233);
+	--heading-tail-shadow-height: 0;
+	--heading-tail-shadow-width: 0;
 	
 }
 
@@ -40,6 +46,7 @@
 	text-decoration-style: var(--heading-text-decoration-style);
 	text-decoration-thickness: var(--heading-text-decoration-thickness);
 	text-decoration-color: var(--heading-text-decoration-color);
+	display: var(--heading-display);
 }
 
 .wewrite .wewrite-heading-prefix {
@@ -53,5 +60,4 @@
 }
 .wewrite .wewrite-heading-tail {
 	display: none;
-	
 }

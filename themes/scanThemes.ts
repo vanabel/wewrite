@@ -1,8 +1,8 @@
-import * as fs from 'fs';
-import * as path from 'path';
-import * as matter from 'gray-matter';
+import fs from 'fs';
+import path from 'path';
+import matter from 'gray-matter';
 
-const THEMES_DIR = path.resolve(__dirname, 'themes');
+const THEMES_DIR = path.resolve(__dirname, '');
 const OUTPUT_FILE = path.resolve(__dirname, 'themes.json');
 
 // 获取时间戳
@@ -41,6 +41,7 @@ function writeThemesJson(themes: { name: string, file: string }[], outputPath: s
 
 // 主函数
 function main() {
+	console.log(`Scanning themes in ${THEMES_DIR}... `);
   const files = getMarkdownFiles(THEMES_DIR);
   const themes = files
     .map(file => extractThemeData(path.join(THEMES_DIR, file)))

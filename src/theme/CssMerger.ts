@@ -8,6 +8,7 @@ import postcss from 'postcss';
 
 import $00 from '../assets/default-styles/00_wewrite.css';
 import $01 from '../assets/default-styles/01_layout.css';
+import $02 from '../assets/default-styles/02_icons.css';
 import $03 from '../assets/default-styles/03_typography.css';
 import $04 from '../assets/default-styles/04_paragragh.css';
 import $05 from '../assets/default-styles/05_strong.css';
@@ -43,6 +44,7 @@ import { $t } from 'src/lang/i18n';
 const baseCSS = [
 	$00,
 	$01,
+	$02,
 	$03,
 	$04,
 	$05,

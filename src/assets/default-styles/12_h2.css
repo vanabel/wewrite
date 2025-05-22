@@ -28,7 +28,7 @@ h2  标题
 	--h2-text-align: var(--h2-text-align);
 	/*  标题主体 */
 	--h2-outbox-display: block;
-	--h2-outbox-raduis: var(--wewrite-border-radius);
+	--h2-outbox-radius: var(--wewrite-border-radius);
 	--h2-outbox-padding: var(--heading-padding);
 	/*  标题叶子 */
 	--h2-leaf-display: block;
@@ -39,6 +39,12 @@ h2  标题
 	--h2-tail-display: none;
 	--h2-tail-content: " ";
 	--h2-tail-vertical-align: bottom;
+	--h2-tail-display: var(--heading-tail-display);
+	--h2-tail-content: var(--heading-tail-content);
+	--h2-tail-shadow-color: var(--heading-tail-shadow-color);
+	--h2-tail-shadow-height: var(--heading-tail-shadow-height);
+	--h2-tail-shadow-width: var(--heading-tail-shadow-width);
+	--h2-display: flex;
 }
 .wewrite h2 {
 	font-family: var(--h2-font-family);
@@ -56,6 +62,7 @@ h2  标题
 	border-bottom-width: var(--h2-border-bottom-width);
 	border-bottom-style: var(--h2-border-bottom-style);
 	border-bottom-color: var(--h2-border-bottom-color);
+	display: var(--h2-display);
 }
 
 
@@ -67,8 +74,8 @@ h2  标题
 
 }
 .wewrite h2 .wewrite-heading-outbox {
-	border-top-right-radius: var(--h2-outbox-raduis);
-	border-top-left-radius: var(--h2-outbox-raduis);
+	border-top-right-radius: var(--h2-outbox-radius);
+	border-top-left-radius: var(--h2-outbox-radius);
 	background-color: var(--h2-bg);
 	padding: var(--h2-outbox-padding);
 	display: block;
@@ -87,4 +94,6 @@ h2  标题
     display: var(--h2-tail-display);
     content: var(--h2-tail-content);
     vertical-align: var(--h2-tail-vertical-align);
+	border-bottom: var(--h2-tail-shadow-height) solid var(--h2-tail-shadow-color);
+	border-right: var(--h2-tail-shadow-width) solid transparent;
 }

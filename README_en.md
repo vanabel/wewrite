@@ -51,6 +51,12 @@ It is designed to render notes and publish them to the WeChat Official Account p
 
 ## Usage Instructions
 
+### Seetings
+
+We will release some tutorials in our WeChat Official Account in the future.
+
+[basic-settings](settings.md)
+
 ### Basic Usage
 1. Use the editor's context menu to access AI writing assistance (e.g., content polishing, translation, etc.).
 2. Access WeWrite features via the right-click menu or command palette.
