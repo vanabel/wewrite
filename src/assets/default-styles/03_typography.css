@@ -10,7 +10,7 @@
 	--article-letter-space: 0px;
 	--article-text-font-size: 16px;
 	--article-text-color: var(--wewrite-text);
-	--article-line-height: 1.5;
+	--article-line-height: var(--wewrite-line-height);
 	--article-text-align: left;
 	--article-text-indent: 0;
 	--article-font-style: normal;

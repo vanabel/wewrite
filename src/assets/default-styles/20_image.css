@@ -1,17 +1,21 @@
 :root {
 	--image-border-radius: var(--wewrite-border-radius);
-	--image-border-width: 1px;
-	--image-border-color: var(--wewrite-border, rgb(204, 204, 204));
+	--image-border-width: 0px;
+	--image-border-color: transparent;
+	--image-border-style: solid;
+	--image-frame-padding: 0px;
 	--image-caption-triangle: hidden;
 	--image-caption-triangle-width: 0rem;
-	--image-caption-margin-top: -2rem;
+	--image-caption-margin-top: -1rem;
 }
 
 .wewrite img:not(.wewrite-profile-card img) {
 	border-radius: var(--image-border-radius);
-	border: var(--image-border-width) solid var(--image-border-color);
+	border-width: var(--image-border-width); 
+	border-style: var(--image-border-style);
+	border-color: var(--image-border-color);
 	box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-	margin: 0.5em 0;
+	margin: 0.0 0;
 }
 
 .image-with-caption {
@@ -20,7 +24,13 @@
 	text-align: center;
 	/* 默认居中，可通过类控制 */
 	font-family: "Arial", sans-serif;
-	margin: 1em 0;
+	border-radius: var(--image-border-radius);
+	border-width: var(--image-border-width); 
+	border-style: var(--image-border-style);
+	border-color: var(--image-border-color);
+	box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+	padding: var(--image-frame-padding);
+	margin: 0;
 }
 
 .image-with-caption img {
@@ -58,7 +68,6 @@
 	margin-bottom: 0.5em;
 	position: relative;
 	top: -0.3rem;
-
 }
 
 .image-with-caption .triangle {

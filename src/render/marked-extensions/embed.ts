@@ -43,6 +43,9 @@ function getEmbedType(link: string) {
 	if (reg_pdf_crop.test(ext)) {
 		return "pdf-crop";
 	}
+	if (link.startsWith("https://mmbiz.qpic.cn/sz_mmbiz_jpg") ) {
+		return "image";
+	}
 	switch (ext.toLocaleLowerCase()) {
 		case "md":
 			return "note";
@@ -396,21 +399,37 @@ export class Embed extends WeWriteMarkedExtension {
 	}
 
 	markedExtension(): MarkedExtension {
+		const regexImage = /!\[([^\]]*)\]\(([^)]+)\)/g;
 		return {
 			extensions: [
 				{
 					name: "Embed",
 					level: "inline",
 					start: (src: string) => {
-						const index = src.indexOf("![[");
+						let index = src.indexOf("![[");
 
-						if (index === -1) return;
+						if (index === -1) {
+							const match = regexImage.exec(src);
+							if (match) {
+								return match.index;
+							}
+						}
 						return index;
 					},
 					tokenizer: (src: string) => {
 						const matches = src.match(EmbedRegex);
-						if (matches == null) return;
-
+						if (matches == null) {
+							const match = regexImage.exec(src);
+							if (match) {
+								return {
+									type: "Embed",
+									raw: match[0],
+									text: match[1],
+									href: match[2],
+								};
+							}
+							return;
+						}
 						const token: Token = {
 							type: "Embed",
 							raw: matches[0],

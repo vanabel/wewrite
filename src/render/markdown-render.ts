@@ -11,12 +11,12 @@ async function delay(milliseconds: number): Promise<void> {
 export class ObsidianMarkdownRenderer {
     private static instance: ObsidianMarkdownRenderer;
     private path: string
-    private el: HTMLElement
+    previewEl: HTMLElement
     private rendering: boolean = false
     private container: HTMLElement
     private view: Component
     mdv: MarkdownRenderChild;
-    el1: HTMLDivElement;
+    markdownBody: HTMLDivElement;
     private constructor(private app: App) {
         this.app = app;
     }
@@ -31,38 +31,54 @@ export class ObsidianMarkdownRenderer {
         if (path === undefined || !path || !path.toLowerCase().endsWith('.md')) {
             return;
         }
+	
         this.container = container
         this.container.addClass('wewrite-markdown-render-container')
         this.view = view
         this.path = path
 
-        if (this.el !== undefined && this.el) {
-            this.el.remove()
-        }
+        // if (this.previewEl !== undefined && this.previewEl) {
+        //     this.previewEl.parentNode?.removeChild(this.previewEl)
+        // }
+		this.container.empty();
+		this.container.show();
         this.rendering = true
-        await this.loadComponents(view)
-        this.el = createDiv()
-        this.el1 = this.el.createDiv()
-        this.mdv = new MarkdownRenderChild(this.el)
+        // await this.loadComponents(view)
+        this.previewEl = createDiv()
+        this.markdownBody = this.previewEl.createDiv()
+        this.mdv = new MarkdownRenderChild(this.markdownBody)
         this.path = path
         const markdown = await this.app.vault.adapter.read(path)
-        await MarkdownRenderer.render(this.app, markdown, this.el1, path, this.app.workspace.getActiveViewOfType(MarkdownView)!
+        await MarkdownRenderer.render(this.app, markdown, this.markdownBody, path, 
+			this.app.workspace.getActiveViewOfType(MarkdownView)!
             || this.app.workspace.activeLeaf?.view
-            || new MarkdownRenderChild(this.el)
+            || this.mdv //new MarkdownRenderChild(this.el)
         )
 
-        this.container.appendChild(this.el)
-        await delay(100);
+        this.container.appendChild(this.previewEl)
+        try {
+			await Promise.all([
+				this.waitForSelector(this.previewEl, ".callout-title svg", 500),
+				this.waitForSelector(this.previewEl, ".mermaid", 1000),
+				this.waitForSelector(this.previewEl, "svg", 1000),
+			]);
+		} catch (err) {
+			console.warn("部分插件渲染超时（非致命）", err);
+		}
         this.rendering = false
+		// this.container.hide() 
     }
     public queryElement(index: number, query: string) {
-        if (this.el === undefined || !this.el) {
+        if (this.previewEl === undefined || !this.previewEl) {
             return null
         }
         if (this.rendering) {
+			return null
+		}
+		if (this.previewEl === undefined || !this.previewEl) {
             return null
         }
-        const nodes = this.el.querySelectorAll<HTMLElement>(query)
+        const nodes = this.previewEl.querySelectorAll<HTMLElement>(query)
         if (nodes.length < index) {
             return null
         }
@@ -72,42 +88,29 @@ export class ObsidianMarkdownRenderer {
     public async domToImage(element: HTMLElement, p:any={}): Promise<string> {
         return await domtoimage.toPng(element, p)
     }
+	waitForSelector(
+		container: HTMLElement,
+		selector: string,
+		timeout = 1000
+	): Promise<void> {
+		return new Promise((resolve, reject) => {
+			if (container.querySelector(selector)) return resolve();
 
-    private async loadComponents(view: Component) {
-        type InternalComponent = Component & {
-            _children: Component[];
-            onload: () => void | Promise<void>;
-        }
+			const observer = new MutationObserver(() => {
+				if (container.querySelector(selector)) {
+					observer.disconnect();
+					resolve();
+				}
+			});
 
-        const internalView = view as InternalComponent;
+			observer.observe(container, { childList: true, subtree: true });
 
-        // recursively call onload() on all children, depth-first
-        const loadChildren = async (
-            component: Component,
-            visited: Set<Component> = new Set()
-        ): Promise<void> => {
-            if (visited.has(component)) {
-                return;  // Skip if already visited
-            }
+			setTimeout(() => {
+				observer.disconnect();
+				// reject(new Error(`Timeout waiting for selector: ${selector}`));
+				resolve();
+			}, timeout);
+		});
+	}
 
-            visited.add(component);
-
-            const internalComponent = component as InternalComponent;
-
-            if (internalComponent._children?.length) {
-                for (const child of internalComponent._children) {
-                    await loadChildren(child, visited);
-                }
-            }
-            try {
-                // relies on the Sheet plugin (advanced-table-xt) not to be minified
-                if (component?.constructor?.name === 'SheetElement') {
-                    await component.onload();
-                }
-            } catch (error) {
-                console.error(`Error calling onload()`, error);
-            }
-        };
-        await loadChildren(internalView);
-    }
 }

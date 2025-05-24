@@ -803,15 +803,19 @@ proofreed
   color: green;
   text-align: center;
   animation: fadeInOut 2s ease-in-out infinite;
+  padding: 10px;
+  border-radius: 4px;
   /* background-color: white; */
 }
 
 @keyframes fadeInOut {
   0%, 100% {
     opacity: 0;
+	background-color: transparent;
   }
   50% {
     opacity: 1;
+	background-color: #ccc;
   }
 }
 
@@ -835,4 +839,8 @@ proofreed
 }
 .wewrite-article::-webkit-scrollbar-corner{
 	background: transparent;
+}
+
+.wewrite-render-preview {
+	display:  none;
 }

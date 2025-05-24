@@ -58,7 +58,7 @@ export class WechatRender {
 				} catch (error) {
 					reject(error);
 				}
-			}, 300);
+			}, 100);
 		});
 	}
 	private constructor(plugin: WeWritePlugin, previewRender: PreviewRender) {
@@ -144,11 +144,31 @@ export class WechatRender {
 		container: HTMLElement,
 		view: Component
 	) {
+		//render the markdown content, 
+		container.empty();
+		container.show();
+
+		//check if add the 2classes, can  load other plugins, else we need to add load compponents.
+		const  renderContainer = container.createDiv({cls:'markdown-preview-view'})
+		const sizer = renderContainer.createDiv({cls:'markdown-preview-sizer'})
+		const {app} = this.plugin
+		 
+		// const renderer = new CustomMarkdownView(app, sizer, path, view);
+		// // this.plugin.registerMarkdownRendererChild(renderer);
+		// await renderer.onload();
 		await ObsidianMarkdownRenderer.getInstance(this.plugin.app).render(
 			path,
-			container,
+			sizer,
 			view
 		);
-		return this.delayParse(path);
+
+		
+		
+		
+		const  rendered = await this.delayParse(path);
+		//clean up the rendered markdown content
+		container.empty();
+		container.hide();
+		return rendered;
 	}
 }

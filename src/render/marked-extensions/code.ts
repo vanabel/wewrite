@@ -137,6 +137,7 @@ export class CodeRenderer extends WeWriteMarkedExtension {
 		this.mermaidIndex++;
 
 		const renderer = ObsidianMarkdownRenderer.getInstance(this.plugin.app);
+		
 		const root = renderer.queryElement(index, '.mermaid')
 		if (!root) {
 			return

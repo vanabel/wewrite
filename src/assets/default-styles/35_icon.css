@@ -3,16 +3,19 @@
 .obsidian-icon {
 	font-size: inherit;
 	display: inline-block;
-	width: 2em !important;
+	width: 1.8rem;
 	text-align: center;
-	/* margin-right: -0.5em !important; */
 }
 
-p .obsidian-icon {
-	width: 1.75em !important;
-}
+/* p .obsidian-icon {
+	width: 1.75em
+} */
 
 .obsidian-icon.react-icon>svg {
 	vertical-align: middle;
 	margin-bottom: 3px;
+}
+
+.obsidian-icon.react-icon{
+	width: 1.8rem;;
 }
