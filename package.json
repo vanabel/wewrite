@@ -20,11 +20,11 @@
 		"@types/css": "^0.0.38",
 		"@types/dom-to-image": "^2.6.7",
 		"@types/jsdom": "^21.1.7",
-		"@types/node": "^20.11.19",
+		"@types/node": "^22.15.21",
 		"@types/postcss-custom-properties": "^12.0.0",
 		"@types/pouchdb-core": "^7.0.15",
-		"@typescript-eslint/eslint-plugin": "^8.15.0",
-		"@typescript-eslint/parser": "^8.15.0",
+		"@typescript-eslint/eslint-plugin": "^8.32.1",
+		"@typescript-eslint/parser": "^8.32.1",
 		"builtin-modules": "3.3.0",
 		"esbuild": "0.17.3",
 		"esbuild-css-modules-plugin": "^3.1.2",
@@ -55,8 +55,5 @@
 		"postcss-custom-properties": "^14.0.4",
 		"pouchdb": "^9.0.0",
 		"pouchdb-find": "^9.0.0"
-	},
-	"resolutions": {
-		"@types/node": "16.18.36"
 	}
 }
