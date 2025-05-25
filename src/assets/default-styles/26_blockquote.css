@@ -1,13 +1,14 @@
 :root {
 	--blockquote-color: rgba(0, 0, 0, 0.5);
 	--blockquote-border-color:  var(--blockquote-color);
-	--blockquote-border-width: 0;
+	--blockquote-border-width: 0px;
 	--blockquote-border-style: solid;	
 	--blockquote-border-radius: 4px;
 	--blockquote-padding: 20px;
 	--blockquote-margin: 0px;
 	--blockquote-font-size: 1em;
 	--blockquote-background-color: rgba(0, 0, 0, 0.05);
+	--blockquote-inner-background-color: var(--blockquote-background-color);
 	--blockquote-font-family: var(--article-font-family);
 	--blockquote-font-style: italic;
 }
@@ -29,3 +30,22 @@
 	font-style: var(--blockquote-font-style);
 }
 
+.blockquote-inner {
+  background: transparent;
+  padding: 0px;
+  transform: skew(0.0deg, 0.0deg); /* 抵消外层倾斜，让内容不歪 */
+}
+
+/* .icon-pin {
+  position: absolute;
+  top: -12px;
+  right: -12px;
+  width: 24px;
+  height: 24px;
+  background-image: var(--icon-book);
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  pointer-events: none;
+  visibility: visible
+} */

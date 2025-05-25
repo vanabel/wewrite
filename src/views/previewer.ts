@@ -368,6 +368,9 @@ export class PreviewPanel extends ItemView implements PreviewRender {
 		}
 
 		await this.parseActiveMarkdown();
+		if (this.articleDiv === null || this.articleDiv.firstChild === null) {
+			return;
+		}
 		await ThemeManager.getInstance(this.plugin).applyTheme(
 			this.articleDiv.firstChild as HTMLElement
 		);

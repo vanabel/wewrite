@@ -1,6 +1,6 @@
 /** process custom theme content */
 import matter from "gray-matter";
-import { Notice, TFile, TFolder, requestUrl } from "obsidian";
+import { CachedMetadata, Notice, TFile, TFolder, requestUrl } from "obsidian";
 import postcss from "postcss";
 // import { combinedCss } from "src/assets/css/template-css";
 import { $t } from "src/lang/i18n";
@@ -131,6 +131,35 @@ export class ThemeManager {
 
 		return cleanedCSS.trim();
 	}
+	private async extractCSSblocks(path: string) {
+		const result: string[] = []
+		const file = this.plugin.app.vault.getFileByPath(path);
+		if (!file) {
+			return ''
+		}
+		const cache: CachedMetadata | null = this.plugin.app.metadataCache.getFileCache(file);
+		if (!cache?.sections) return ''
+		const content = await this.plugin.app.vault.read(file);
+
+		for (const section of cache.sections) {
+			if (section.type === "code" ) {
+				const rawBlock = content.substring(
+					section.position.start.offset,
+					section.position.end.offset
+				);
+				if  (!/^```css/i.test(rawBlock)) continue;
+				// const cleaned = rawBlock.replace(/^```css\s*/, "").replace(/```$/, "").trim();
+				const first = rawBlock.indexOf('\n');
+				const last = rawBlock.lastIndexOf('\n');
+				const cleaned = rawBlock.substring(first + 1, last).trim();
+				result.push(cleaned);
+			}
+		}
+		// console.log('result=>', result);
+		
+		return result.join('\n')
+
+	}
 	public async getThemeContent(path: string) {
 		const file = this.plugin.app.vault.getFileByPath(path);
 		if (!file) {
@@ -139,13 +168,15 @@ export class ThemeManager {
 		}
 		const fileContent = await this.plugin.app.vault.cachedRead(file);
 
-		const reg_css_block = /```[cC][Ss]{2}\s*([\s\S]*?)\s*```/g;
+		const reg_css_block = /```[cC][Ss]{2}\s*([\s\S]+?)\s*```/gs;
+		// const reg_css_block = /```css\s*([\s\S]*?)```/g
 
 		const cssBlocks: string[] = [];
 		let match
 		while ((match = reg_css_block.exec(fileContent)) !== null) {
 			cssBlocks.push(this.cleanCSS(match[1].trim()));
 		}
+		console.log('cssBlocks=>', cssBlocks);
 
 		return cssBlocks.join('\n');
 
@@ -155,7 +186,8 @@ export class ThemeManager {
 		if (this.plugin.settings.custom_theme === undefined || !this.plugin.settings.custom_theme) {
 
 		} else {
-			custom_css = await this.getThemeContent(this.plugin.settings.custom_theme)
+			// custom_css = await this.getThemeContent(this.plugin.settings.custom_theme)
+			custom_css = await this.extractCSSblocks(this.plugin.settings.custom_theme)
 		}
 
 		return custom_css

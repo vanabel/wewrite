@@ -358,35 +358,35 @@ export default class WeWritePlugin extends Plugin {
 									}
 								});
 						});
-						subMenu.addItem((subItem) => {
-							subItem
-								.setTitle($t("main.proof"))
-								.setIcon("user-round-pen")
-								.onClick(async () => {
-									// const content = await this.app.vault.read(
-									// 	file
-									// );
-									const content = editor.getValue();
-									const proofed = await this.proofContent(
-										content
-									);
+						// subMenu.addItem((subItem) => {
+						// 	subItem
+						// 		.setTitle($t("main.proof"))
+						// 		.setIcon("user-round-pen")
+						// 		.onClick(async () => {
+						// 			// const content = await this.app.vault.read(
+						// 			// 	file
+						// 			// );
+						// 			const content = editor.getValue();
+						// 			const proofed = await this.proofContent(
+						// 				content
+						// 			);
 
-									if (proofed) {
-										proofreadText(
-											editor,
-											this.app.workspace.getActiveViewOfType(
-												MarkdownView
-											)!,
-											proofed
-										);
-										// this.proofService =
-										// 	showProofSuggestions(
-										// 		editor,
-										// 		proofed
-										// 	);
-									}
-								});
-						});
+						// 			if (proofed) {
+						// 				proofreadText(
+						// 					editor,
+						// 					this.app.workspace.getActiveViewOfType(
+						// 						MarkdownView
+						// 					)!,
+						// 					proofed
+						// 				);
+						// 				// this.proofService =
+						// 				// 	showProofSuggestions(
+						// 				// 		editor,
+						// 				// 		proofed
+						// 				// 	);
+						// 			}
+						// 		});
+						// });
 					}
 				});
 			})

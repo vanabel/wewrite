@@ -13,6 +13,7 @@
 	--paragraph-text-align: var(--article-text-align);
 	--paragraph-text-indent: var(--article-text-indent);
 	--paragraph-font-style: var(--article-font-style);
+	--paragraph-margin: var(--article-margin);
 }
 
 .wewrite > p {
@@ -26,4 +27,5 @@
 	text-align: var(--paragraph-text-align);
 	text-indent: var(--paragraph-text-indent);
 	font-style: var(--paragraph-font-style);
+	margin: var(--paragraph-margin);
 }

@@ -13,6 +13,7 @@
   --wewrite-bg: transparent;
   --wewrite-bg-alt: var(--wewrite-primary);
   --wewrite-text: #333333;
+  --wewrite-text-color: var(--wewrite-text);
   --wewrite-text-alt: #ffffff;
   --wewrite-border:#999999;
   

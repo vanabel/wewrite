@@ -7,6 +7,13 @@
 	--image-caption-triangle: hidden;
 	--image-caption-triangle-width: 0rem;
 	--image-caption-margin-top: -1rem;
+	--image-caption-text-color: var(--wewrite-text-color);
+	--image-cation-font-size: 0.8rem;
+	--image-caption-font-weight: normal;
+	--image-caption-font-style: normal;
+	--image-caption-font-family: var(--article-font-family);
+	--image-caption-line-height: 1.5;
+	--image-caption-text-align: center;
 }
 
 .wewrite img:not(.wewrite-profile-card img) {
@@ -90,10 +97,15 @@
 }
 
 .wewrite .wewrite-image-caption {
-	font-size: 0.9rem;
-	color: var(--image-border-color, #555);
+	font-size: var(--image-cation-font-size);
+	color: var(--image-caption-text-color);
+	font-weight: var(--image-caption-font-weight);
+	font-style: var(--image-caption-font-style);
+	font-family: var(--image-caption-font-family);
+	line-height: var(--image-caption-line-height);
+	text-align: var(--image-caption-text-align);
 	position: relative;
 	width: 100%;
-	text-align: center;
+	text-align: var(--image-caption-text-align);
 	top: var(--image-caption-margin-top, -2rem);
 }

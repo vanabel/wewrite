@@ -229,6 +229,7 @@
     "video-size-exceeds-10m": "视频大小超过10MB限制",
     "voice-size-exceeds-2m": "语音大小超过2MB限制",
     "select-an-wechat-mp-account-first": "请先选择一个微信公众号账号。",
-    "send-article-to-draft-box-successfully": "文章成功发送到草稿箱。"
+    "send-article-to-draft-box-successfully": "文章成功发送到草稿箱。",
+    "uploading-material-type": "上传素材类型：{0}"
   }
 }

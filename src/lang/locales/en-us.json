@@ -229,6 +229,7 @@
     "video-size-exceeds-10m": "Video size exceeds 10MB limit",
     "voice-size-exceeds-2m": "Voice size exceeds 2MB limit",
     "select-an-wechat-mp-account-first": "Select a WeChat MP account first.",
-    "send-article-to-draft-box-successfully": "Article sent to draft box successfully."
+    "send-article-to-draft-box-successfully": "Article sent to draft box successfully.",
+    "uploading-material-type": "uploading material {0}"
   }
 }

@@ -420,7 +420,7 @@ export class WechatClient {
 		// 4. 使用 requestUrl 发送请求
 		
 		try {
-			this.plugin.showSpinner('uploading material '+type)
+			this.plugin.showSpinner($t('wechat-api.uploading-material-type', [type?type:'unknown']))
 			const response = await requestUrl({
 				url: url,
 				method: "POST",

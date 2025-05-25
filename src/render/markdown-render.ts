@@ -49,10 +49,10 @@ export class ObsidianMarkdownRenderer {
         this.mdv = new MarkdownRenderChild(this.markdownBody)
         this.path = path
         const markdown = await this.app.vault.adapter.read(path)
-        await MarkdownRenderer.render(this.app, markdown, this.markdownBody, path, 
-			this.app.workspace.getActiveViewOfType(MarkdownView)!
-            || this.app.workspace.activeLeaf?.view
-            || this.mdv //new MarkdownRenderChild(this.el)
+        await MarkdownRenderer.render(this.app, markdown, this.markdownBody, path, this.mdv
+			// this.app.workspace.getActiveViewOfType(MarkdownView)!
+            // || this.app.workspace.activeLeaf?.view
+            // || this.mdv //new MarkdownRenderChild(this.el)
         )
 
         this.container.appendChild(this.previewEl)
