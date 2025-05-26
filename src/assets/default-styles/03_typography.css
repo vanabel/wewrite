@@ -8,7 +8,7 @@
 	--article-font-weight: 400;
 	--article-word-break: break-word;
 	--article-letter-space: 0px;
-	--article-text-font-size: 16px;
+	--article-text-font-size: 15px;
 	--article-text-color: var(--wewrite-text);
 	--article-line-height: var(--wewrite-line-height);
 	--article-text-align: left;
@@ -16,7 +16,7 @@
 	--article-font-style: normal;
 }
 
-.wewrite body {
+.wewrite {
 	font-family: var(--article-font-family);
 	font-weight: var(--article-font-weight);
 	word-break: var(--article-word-break);

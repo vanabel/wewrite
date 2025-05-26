@@ -2,23 +2,23 @@
   --footnote-color:  #a0a0a0;
   --footnote-hover-color: #666;
   --footnote-font-size: 12px;
-  --hr-color: var(--border, #eaeaea);
+  --hr-color: #ccc;
   --hr-height: 1px;
   --hr-margin: 1em 0;
 }
 
 .wewrite hr {
-	border-top: var(--hr-height, 1px) solid var(--hr-color, #eaeaea);
+	border-bottom: var(--hr-height, 1px) solid var(--hr-color, #eaeaea);
 	border-bottom: none;
 	border-left: none;
 	border-right: none;
-	margin-top: 2px;
-	margin-bottom: 2px;
+	margin-top: 20px;
+	margin-bottom: 20px;
 }
 
 .wewrite .foot-links hr {
-	margin-top: 2em;
-	margin-bottom: 0.5em;
+	margin-top: 2rem;
+	margin-bottom: 0.5rem;
 }
 
 .wewrite .foot-links {

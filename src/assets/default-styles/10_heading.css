@@ -10,7 +10,7 @@
 	--heading-letter-spacing: var(--article-letter-space);
 	--heading-text-align: var(--article-text-align);
 	--heading-font-style: normal;
-	--heading-margin: 1rem;
+	--heading-margin: 1rem 0;
 	--heading-text-decoration-style: none;
 	--heading-text-decoration-thickness: 0;
 	--heading-text-decoration-color: transparent; 

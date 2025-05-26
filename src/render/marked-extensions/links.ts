@@ -22,7 +22,7 @@ export class Links extends WeWriteMarkedExtension {
         const links = this.allLinks.map((href, i) => {
             return `<li>${href}&nbsp;↩</li>`;
         });
-        return `${html}<seciton class="foot-links"><hr><ol>${links.join('')}</ol></section>`;
+        return `${html}<seciton class="foot-links"><br><hr class="foot-links-separator"><ol>${links.join('')}</ol></section>`;
     }
 
     markedExtension(): MarkedExtension {

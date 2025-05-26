@@ -4,17 +4,15 @@
 
 :root {
 	/* page  layout */
-	--article-max-width: 760px;
+	--article-max-width: none;
 	--article-min-width: 200px;
-	--article-padding: 1em 1em 1em 1em;
+	--article-padding: 0px;
 	--article-margin: 0px;
 	--article-background-color: var(--wewrite-bg);
 	--article-background-image: none;
 	--article-background-repeat: repeat;
 	--article-background-size: auto;
 	--article-background-position: left top;
-
-
 	
 }
 
