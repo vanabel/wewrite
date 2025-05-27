@@ -43,7 +43,8 @@ function getEmbedType(link: string) {
 	if (reg_pdf_crop.test(ext)) {
 		return "pdf-crop";
 	}
-	if (link.startsWith("https://mmbiz.qpic.cn/sz_mmbiz_jpg") ) {
+	// https://mmbiz.qpic.cn
+	if (link.startsWith("https://mmbiz.qpic.cn/")|| link.startsWith("http://mmbiz.qpic.cn/")) {
 		return "image";
 	}
 	switch (ext.toLocaleLowerCase()) {
@@ -171,6 +172,9 @@ export class Embed extends WeWriteMarkedExtension {
 		return parts.join("/");
 	}
 	getImagePath(path: string) {
+		if (path.startsWith("http")) {
+			return path;
+		}
 		const file = this.searchFile(path);
 
 		if (file == null) {
@@ -219,10 +223,11 @@ export class Embed extends WeWriteMarkedExtension {
 			}
 			return { path, width, height };
 		}
-		if (this.isImage(link)) {
-			return { path: link, width: null, height: null };
-		}
-		return null;
+		// if (this.isImage(link)) {
+		// 	return { path: link, width: null, height: null };
+		// }
+		// return null;
+		return { path: link, width: null, height: null };
 	}
 
 	getHeaderLevel(line: string) {
@@ -407,27 +412,35 @@ export class Embed extends WeWriteMarkedExtension {
 					level: "inline",
 					start: (src: string) => {
 						let index = src.indexOf("![[");
+						
+						// if (index === -1) {
+						// 	const match = regexImage.exec(src);
+						// 	if (match) {
+						// 		console.log("start: match image", match);
+						// 		return match.index;
+						// 	}else{
+						// 		console.log("start: no match embed or image:");
+						// 	}
+						// }else{
+						// 	console.log("start: match embed", index);
+						// }
 
-						if (index === -1) {
-							const match = regexImage.exec(src);
-							if (match) {
-								return match.index;
-							}
-						}
 						return index;
 					},
 					tokenizer: (src: string) => {
 						const matches = src.match(EmbedRegex);
 						if (matches == null) {
-							const match = regexImage.exec(src);
-							if (match) {
-								return {
-									type: "Embed",
-									raw: match[0],
-									text: match[1],
-									href: match[2],
-								};
-							}
+							// const match = regexImage.exec(src);
+							// if (match) {
+							// 	console.log("tokenizer: match image", match);
+								
+							// 	return {
+							// 		type: "Embed",
+							// 		raw: match[0],
+							// 		text: match[1],
+							// 		href: match[2],
+							// 	};
+							// }
 							return;
 						}
 						const token: Token = {
@@ -441,7 +454,8 @@ export class Embed extends WeWriteMarkedExtension {
 					},
 					renderer: (token: Tokens.Generic) => {
 						const embedType = getEmbedType(token.href);
-
+						console.log("render embed type:", token, embedType);
+						
 						if (embedType == "image" || embedType == "webp") {
 							// images
 							let item = this.parseImageLink(token.href);
