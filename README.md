@@ -9,8 +9,11 @@ WeWrite 是 Obsidian (https://obsidian.md) 的一款插件。
 它旨在将笔记渲染并发布到微信公众号平台，同时集成 AI 写作辅助功能，使 Obsidian 成为微信公众号内容的强大写作工具。不依赖外部的图床或第三方平台。
 
 ## 教程（不定期发布，欢迎关注）
-[WeWrite教程：发布文章到微信公众号](https://mp.weixin.qq.com/s/9NOy9xYXq498jxJTIV3-Bw)
-[写作的利器-WeWrite@obsidian](https://mp.weixin.qq.com/s/iQ-M0042CT2mTevhx3nlfg)
+
+- [WeWrite教程：发布文章到微信公众号](https://mp.weixin.qq.com/s/9NOy9xYXq498jxJTIV3-Bw)
+
+- [写作的利器-WeWrite@obsidian](https://mp.weixin.qq.com/s/iQ-M0042CT2mTevhx3nlfg)
+
 
 ## 功能
 
