@@ -883,15 +883,15 @@ export default class WeWritePlugin extends Plugin {
 		this.createSpinner();
 
 		// -- proofread
-		this.registerEditorExtension([proofreadStateField, proofreadPlugin]);
+		// this.registerEditorExtension([proofreadStateField, proofreadPlugin]);
 
-		this.addCommand({
-			id: "proofread-text",
-			name: "校对文本",
-			editorCallback: async (editor: Editor, view: MarkdownView) => {
-				await proofreadText(editor, view);
-			},
-		});
+		// this.addCommand({
+		// 	id: "proofread-text",
+		// 	name: "校对文本",
+		// 	editorCallback: async (editor: Editor, view: MarkdownView) => {
+		// 		await proofreadText(editor, view);
+		// 	},
+		// });
 		this.messageService.registerListener('show-spinner', (msg: string) => {
 			this.showSpinner(msg);
 		})
