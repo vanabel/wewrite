@@ -246,11 +246,10 @@ left side view
 .wewrite-previewer-container .render-container {
 	border: 1px solid #ccc;
 	border-radius: 6px;
-	background-color: #fff;
+	background-color: var(--background-primary);
 	padding: 5px;
 	-webkit-user-select: text;
 	user-select: text;
-
 }
 
 .wewrite-draft-header {
