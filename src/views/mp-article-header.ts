@@ -184,7 +184,7 @@ export class MPArticleHeader {
 			.setDesc($t("views.article-header.comments-description"))
 			.addToggle((toggle) => {
 				this._needOpenComment = toggle;
-				toggle.setValue(false);
+				toggle.setValue(true);
 				toggle.onChange((value) => {
 					if (this.activeLocalDraft !== undefined) {
 						this.activeLocalDraft.need_open_comment = value ? 1 : 0;
@@ -433,7 +433,7 @@ export class MPArticleHeader {
 			this._author.setValue(this.activeLocalDraft.author || "");
 			this._digest.value = this.activeLocalDraft.digest || "";
 			this._needOpenComment.setValue(
-				(this.activeLocalDraft.need_open_comment || 0) > 0
+				(this.activeLocalDraft.need_open_comment || 1) > 0
 			);
 			this._onlyFansCanComment.setValue(
 				(this.activeLocalDraft.only_fans_can_comment || 0) > 0
