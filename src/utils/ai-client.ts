@@ -7,6 +7,7 @@ import { DeepSeekResult } from "../types/types";
 import { OllamaClient } from "./ollama-client";
 import { OpenAIClient } from "./openAI-client";
 import { QwenImageClient } from "./qwen-image-client";
+import { PollinationsClient } from "./pollinations-client";
 
 export class AiClient {
 	private static instance: AiClient;
@@ -15,6 +16,7 @@ export class AiClient {
 	private openaiClient: OpenAIClient;
 	private ollamaClient: OllamaClient;
 	private imageClient: QwenImageClient;
+	private pollinationsClient: PollinationsClient;
 
 	private constructor(plugin: WeWritePlugin) {
 		this.plugin = plugin;
@@ -22,6 +24,7 @@ export class AiClient {
 		this.openaiClient = OpenAIClient.getInstance(plugin);
 		this.ollamaClient = OllamaClient.getInstance(plugin);
 		this.imageClient = QwenImageClient.getInstance(plugin);
+		this.pollinationsClient = PollinationsClient.getInstance();
 	}
 
 	public static getInstance(plugin: WeWritePlugin): AiClient {
@@ -75,6 +78,19 @@ export class AiClient {
 		size: string = "1440*613"
 	): Promise<string> {
 		return await this.imageClient.generateCoverImageFromText(prompt, negative_prompt, size);
+	}
+
+	/**
+	 * Generate a banner image using Pollinations.ai based on keywords
+	 * @param keywords - Keywords to generate image from
+	 * @param size - Image size in format "width*height"
+	 * @returns Promise<string> - URL of the generated image
+	 */
+	public async generateBannerImageFromKeywords(
+		keywords: string,
+		size: string = "1440*613"
+	): Promise<string> {
+		return await this.pollinationsClient.generateBannerImage(keywords, size);
 	}
 
 

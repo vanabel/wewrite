@@ -57,6 +57,18 @@
       "size": "Size",
       "title": "Image generation"
     },
+    "keyword-banner": {
+      "title": "Generate Banner from Keywords",
+      "keywords": "Keywords",
+      "keywords-desc": "Enter keywords separated by commas",
+      "keywords-placeholder": "e.g., differential structure theory, singular spaces, symplectic geometry",
+      "translate": "Translate to English",
+      "translate-desc": "Translate Chinese keywords to English for better image generation",
+      "generate": "Generate Banner",
+      "generating": "Generating banner image...",
+      "no-keywords": "Please enter keywords",
+      "generation-failed": "Failed to generate banner image"
+    },
     "ok": "OK",
     "proof": {
       "accept": "Accept",
@@ -177,6 +189,13 @@
       "only-fans-can-comment": "Only fans can comment",
       "only-fans-can-comment-description": "Everyone can comment by default.",
       "open-comments": "Open comments",
+      "banner-path": "Banner Path",
+      "banner-path-description": "Path to the banner image",
+      "generate-banner-from-keywords": "Generate banner from keywords",
+      "keywords": "Keywords",
+      "keywords-description": "Keywords for the article",
+      "no-keywords": "Please set keywords first",
+      "banner-generated": "Banner generated successfully",
       "testing-button": "Testing button",
       "title": "Draft header"
     },

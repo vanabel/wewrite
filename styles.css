@@ -843,3 +843,41 @@ proofreed
 .wewrite-render-preview {
 	display:  none;
 }
+
+/* Keyword Banner Modal Styles */
+.keyword-banner-modal-content {
+    padding: 20px;
+    max-width: 500px;
+}
+
+.keyword-banner-modal-content h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.keyword-banner-modal-content .setting-item {
+    margin-bottom: 15px;
+}
+
+.keyword-banner-modal-content .setting-item-control {
+    width: 100%;
+}
+
+.keyword-banner-modal-content textarea {
+    width: 100%;
+    min-height: 80px;
+    resize: vertical;
+}
+
+.keyword-banner-modal-content .setting-item-info {
+    margin-bottom: 8px;
+}
+
+.keyword-banner-modal-content .setting-item-control button {
+    margin-right: 8px;
+}
+
+.keyword-banner-modal-content .setting-item-control button:last-child {
+    margin-right: 0;
+}

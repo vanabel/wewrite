@@ -179,6 +179,38 @@ export class MPArticleHeader {
 
 		this.coverFrame = this.createCoverFrame(details);
 
+		// Banner path setting
+		new Setting(details)
+			.setName($t("views.article-header.banner-path") || "Banner Path")
+			.setDesc($t("views.article-header.banner-path-description") || "Path to the banner image")
+			.addText((text) => {
+				text.setPlaceholder("./assets/banner.png")
+					.setValue(this.getBannerPathFromFrontmatter())
+					.onChange(async (value) => {
+						this.setBannerPathInFrontmatter(value);
+					});
+			})
+			.addExtraButton((button) => {
+				button
+					.setIcon("sparkles")
+					.setTooltip($t("views.article-header.generate-banner-from-keywords") || "Generate banner from keywords")
+					.onClick(async () => {
+						this.openKeywordBannerModal();
+					});
+			});
+
+		// Keywords setting
+		new Setting(details)
+			.setName($t("views.article-header.keywords") || "Keywords")
+			.setDesc($t("views.article-header.keywords-description") || "Keywords for the article")
+			.addTextArea((text) => {
+				text.setPlaceholder("微分结构论、奇异空间、辛几何")
+					.setValue(this.getKeywordsFromFrontmatter())
+					.onChange(async (value) => {
+						this.setKeywordsInFrontmatter(value);
+					});
+			});
+
 		new Setting(details)
 			.setName($t("views.article-header.open-comments"))
 			.setDesc($t("views.article-header.comments-description"))
@@ -207,6 +239,63 @@ export class MPArticleHeader {
 					}
 				});
 			});
+	}
+
+	// Add new frontmatter fields support
+	private getBannerPathFromFrontmatter(): string {
+		const activeFile = this.plugin.app.workspace.getActiveFile();
+		if (activeFile) {
+			const cache = this.plugin.app.metadataCache.getCache(activeFile.path);
+			return cache?.frontmatter?.banner_path || '';
+		}
+		return '';
+	}
+
+	private async setBannerPathInFrontmatter(value: string) {
+		const activeFile = this.plugin.app.workspace.getActiveFile();
+		if (activeFile) {
+			this.plugin.app.fileManager.processFrontMatter(activeFile, (frontmatter) => {
+				frontmatter.banner_path = value;
+			});
+		}
+	}
+
+	private getKeywordsFromFrontmatter(): string {
+		const activeFile = this.plugin.app.workspace.getActiveFile();
+		if (activeFile) {
+			const cache = this.plugin.app.metadataCache.getCache(activeFile.path);
+			return cache?.frontmatter?.keywords || '';
+		}
+		return '';
+	}
+
+	private async setKeywordsInFrontmatter(value: string) {
+		const activeFile = this.plugin.app.workspace.getActiveFile();
+		if (activeFile) {
+			this.plugin.app.fileManager.processFrontMatter(activeFile, (frontmatter) => {
+				frontmatter.keywords = value;
+			});
+		}
+	}
+
+	private openKeywordBannerModal() {
+		const keywords = this.getKeywordsFromFrontmatter();
+		if (!keywords.trim()) {
+			new Notice($t("views.article-header.no-keywords") || "Please set keywords first");
+			return;
+		}
+
+		// Import and create the modal dynamically to avoid circular dependencies
+		import("../modals/keyword-banner-modal").then(({ KeywordBannerModal }) => {
+			const modal = new KeywordBannerModal(this.plugin, (url: string) => {
+				// Save the generated image and update banner_path
+				this.plugin.resourceManager.saveImageFromUrl(url);
+				this.setBannerPathInFrontmatter(url);
+				new Notice($t("views.article-header.banner-generated") || "Banner generated successfully");
+			});
+			modal.keywords = keywords;
+			modal.open();
+		});
 	}
 	async generateDigest() {
 		if (!this.plugin.aiClient) {

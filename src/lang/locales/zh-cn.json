@@ -57,6 +57,18 @@
       "size": "尺寸",
       "title": "图片生成"
     },
+    "keyword-banner": {
+      "title": "根据关键词生成横幅",
+      "keywords": "关键词",
+      "keywords-desc": "输入用逗号分隔的关键词",
+      "keywords-placeholder": "例如：微分结构论、奇异空间、辛几何",
+      "translate": "翻译为英文",
+      "translate-desc": "将中文关键词翻译为英文以获得更好的图片生成效果",
+      "generate": "生成横幅",
+      "generating": "正在生成横幅图片...",
+      "no-keywords": "请输入关键词",
+      "generation-failed": "横幅图片生成失败"
+    },
     "ok": "确定",
     "proof": {
       "accept": "接受",
@@ -177,6 +189,13 @@
       "only-fans-can-comment": "仅粉丝可评论",
       "only-fans-can-comment-description": "默认所有人都可评论",
       "open-comments": "开启评论",
+      "banner-path": "横幅图片路径",
+      "banner-path-description": "横幅图片的路径",
+      "generate-banner-from-keywords": "根据关键词生成横幅",
+      "keywords": "关键词",
+      "keywords-description": "文章的关键词",
+      "no-keywords": "请先设置关键词",
+      "banner-generated": "横幅生成成功",
       "testing-button": "测试按钮",
       "title": "文章属性"
     },
